@@ -1,0 +1,65 @@
+/* ==========================================================================
+   THEME — Reference
+   Calm and dense on purpose. For books people open to find one thing and then
+   close again: specifications, cheat sheets, dictionaries, pattern libraries.
+
+   Same contract as cookbook.css and manual.css: studio.css's anatomy is reused
+   so the page still fits, and only the tokens and the voice change. Reference
+   pages want fewer decorative rules and more text, which is an argument for
+   restraint here rather than for a tighter layout.
+
+   The colour roles:
+     ink      #18181B  the entry itself
+     amber    #B45309  the warning, the gotcha, the thing that bites
+     blue     #1D4ED8  the reference, the link, the definition target
+     green    #047857  the correct or safe form
+     red      #B91C1C  the deprecated or dangerous form
+     slate    #52525B  everything else
+   ========================================================================== */
+
+@import url('./studio.css');
+
+.sheet.bb{
+  --surface:#FCFCFD;
+  --card:#FFFFFF;
+  --ink:#18181B;
+  --muted:#52525B;
+  --line:#E4E4E7;
+  --accent:#0F766E;
+  --accent-strong:#115E59;
+  --signal:#047857;
+  --danger:#B91C1C;
+  --warn:#B45309;
+
+  background:var(--surface);
+  color:var(--ink);
+  font-family:"Inter",system-ui,sans-serif;
+}
+
+/* A serif body is the reference-book voice: it is meant for stopping and
+   starting, not for reading straight through. */
+.sheet.bb .explain{
+  font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
+}
+.sheet.bb .title{ font-weight:650; }
+
+.sheet.bb .pill{
+  background:#F4F4F5;
+  color:#3F3F46;
+  border-color:#E4E4E7;
+}
+
+/* The hairline is the reference book's one ornament: it makes an entry look
+   like an entry rather than a page of prose. */
+.sheet.bb .rule{ background:var(--line); }
+
+.sheet.bb .ask{
+  background:#FAFAFA;
+  border-color:#E4E4E7;
+}
+.sheet.bb .ask .lbl{ color:#52525B; }
+
+.sheet.bb[data-archetype="reference"] .title{ font-style:normal; letter-spacing:-0.005em; }
+.sheet.bb[data-archetype="reference"] .ask{ background:#FFFBEB; border-color:#FDE68A; }
+.sheet.bb[data-archetype="reference"] .ask .lbl{ color:#B45309; }
+.sheet.bb[data-archetype="recipe"] .title{ font-style:normal; }

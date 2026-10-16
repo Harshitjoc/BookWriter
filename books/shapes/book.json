@@ -1,0 +1,53 @@
+{
+  "title": "Shapes",
+  "subtitle": "Every page shape, on one canvas.",
+  "author": "The paper engine",
+
+  "series": "Shapes",
+  "brand": "hassancs91.github.io/paper-engine",
+  "editionLabel": "Edition 1.0",
+  "unit": "pages",
+
+  "numbered": true,
+  "contents": true,
+  "index": true,
+
+  "theme": "cookbook",
+
+  "cover": {
+    "kicker": "A paper-engine book",
+    "note": "One page per shape, on purpose."
+  },
+  "copyright": {
+    "year": 2026,
+    "rights": "Ac 2026 The paper engine. All rights reserved.",
+    "lines": [
+      "Cookbook theme, B5. One concept per page."
+    ]
+  },
+
+  "parts": [
+    {
+      "name": "Craft",
+      "eyebrow": "Hands, heat, soil",
+      "why": "The shapes that make and mend: numbered steps, and one that is a lookup.",
+      "blocks": ["Resting meat", "The bloom", "Companion planting", "Packing cubes"]
+    },
+    {
+      "name": "Practice",
+      "eyebrow": "Getting better on purpose",
+      "why": "Two pages that are a task with a stated goal and a check.",
+      "blocks": ["Golden hour", "Progressive overload"]
+    },
+    {
+      "name": "Money",
+      "eyebrow": "The boring part",
+      "why": "A page that is almost entirely steps, because that is what it needs to be.",
+      "blocks": ["The emergency fund"]
+    }
+  ],
+
+  "editions": {
+    "free": ["Resting meat", "Companion planting", "Golden hour", "The emergency fund"]
+  }
+}

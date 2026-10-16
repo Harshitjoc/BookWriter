@@ -1,0 +1,53 @@
+{
+  "title": "The Showcase",
+  "subtitle": "Ten pages, ten subjects, one engine.",
+  "author": "Built with the paper engine",
+
+  "series": "The showcase",
+  "brand": "yoursite.com",
+  "editionLabel": "Edition 1.0",
+  "unit": "blocks",
+
+  "numbered": true,
+  "contents": true,
+  "index": true,
+
+  "cover": {
+    "kicker": "A paper-engine book",
+    "note": "Cooking to chess to code. Same page shape every time."
+  },
+  "copyright": {
+    "year": 2026,
+    "rights": "The example pages and photographs in this book are public domain (CC0). Take them.",
+    "lines": [
+      "Set in Space Grotesk, Inter and JetBrains Mono, self-hosted and licensed under the SIL Open Font License.",
+      "Photographs generated with engine/tools/gen-image.mjs. Diagrams written as inline SVG.",
+      "Built with the paper engine: github.com/hassancs91/paper-engine"
+    ]
+  },
+
+  "parts": [
+    {
+      "name": "Things you make",
+      "eyebrow": "Hands, heat, soil",
+      "why": "Four pages where the thing being taught is physical, so the band carries a photograph.",
+      "blocks": ["Resting meat", "The bloom", "Companion planting", "Packing cubes"]
+    },
+    {
+      "name": "Things you practise",
+      "eyebrow": "Repeat, adjust, repeat",
+      "why": "Skills that only move when you change what you ask of yourself.",
+      "blocks": ["Golden hour", "Progressive overload", "Spaced repetition", "The fork"]
+    },
+    {
+      "name": "Things you protect",
+      "eyebrow": "Before it breaks",
+      "why": "Two pages about the buffer you build now so a bad day stays a bad day.",
+      "blocks": ["The emergency fund", "Circuit breaker"]
+    }
+  ],
+
+  "editions": {
+    "free": ["Resting meat", "The bloom", "Progressive overload", "Circuit breaker"]
+  }
+}

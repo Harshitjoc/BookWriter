@@ -1,0 +1,65 @@
+{
+  "title": "Life Is Not Fair",
+  "subtitle": "Understanding the Uncomfortable Truths of Success and Failure",
+  "author": "(add your name)",
+  "series": "Life Is Not Fair",
+  "brand": "yoursite.com",
+  "editionLabel": "Edition 1.0",
+  "unit": "pages",
+  "numbered": true,
+  "contents": true,
+  "index": true,
+  "theme": "studio",
+  "size": "b5",
+  "cover": {
+    "kicker": "A paper-engine book",
+    "note": "This book teaches you to distinguish between what you deserve, what you control, and what life actually gives you, and to stop expecting life to be fair."
+  },
+  "copyright": {
+    "year": 2026,
+    "rights": "All rights reserved.",
+    "lines": []
+  },
+  "parts": [
+    {
+      "name": "Introduction to Unfairness",
+      "eyebrow": "Life's Unpredictability",
+      "why": "Understanding life's unpredictability is crucial for personal growth",
+      "blocks": [
+        "The Myth of Fairness",
+        "Unfair Events in Life",
+        "The Role of Luck and Circumstances"
+      ]
+    },
+    {
+      "name": "The Limits of Control",
+      "eyebrow": "What You Can and Cannot Control",
+      "why": "Recognizing the limits of control is essential for personal freedom",
+      "blocks": [
+        "Factors Outside Your Control",
+        "The Difference Between Effort and Entitlement",
+        "Letting Go of Expectations"
+      ]
+    },
+    {
+      "name": "Building a Meaningful Life",
+      "eyebrow": "Living with Unfairness",
+      "why": "Learning to live with unfairness is key to building a meaningful life",
+      "blocks": [
+        "Accepting Reality Without Surrendering",
+        "Finding Strength and Resilience",
+        "Creating a Life of Purpose"
+      ]
+    },
+    {
+      "name": "Conclusion",
+      "eyebrow": "Embracing the Unfairness of Life",
+      "why": "Embracing the unfairness of life is necessary for personal growth and freedom",
+      "blocks": [
+        "The Power of Acceptance",
+        "Living a Life of Freedom"
+      ]
+    }
+  ],
+  "editions": {}
+}

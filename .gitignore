@@ -1,0 +1,26 @@
+# Node deps for the Playwright tools.
+node_modules/
+
+# Local secrets (only needed for `gen-image.mjs --provider gemini`). Never commit.
+.env
+
+# Editor settings
+.vscode/
+.idea/
+
+# Scratch dumps, never part of the build.
+.scratch/
+
+# Regenerable output. The assembled book.html IS committed (so you can read a
+# book on GitHub without building it); the heavy renders are not.
+*.pdf
+
+# shot.mjs writes page1.png, page2.png ... into the book's own folder by default.
+# Scoped to books/ on purpose: a bare `page*.png` would also swallow documentation
+# images like docs/images/page-anatomy.png, silently, and break the README on GitHub.
+books/**/page*.png
+/page*.png
+
+# The optional UI cockpit (engine/ui). It runs from source through Vite and writes
+# no build output into the repo, so only the usual node_modules is ignored.
+engine/ui/dist/

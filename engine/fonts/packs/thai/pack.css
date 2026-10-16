@@ -1,0 +1,43 @@
+/* Thai — Noto Sans Thai.
+
+   This pack rides UNDER the family names the themes already use ("Inter" for
+   body, "Space Grotesk" for headings) with a unicode-range for this script, the
+   same way Google Fonts splits Inter into latin and latin-ext. A theme needs no
+   change, and Latin text still uses the bundled Latin faces.
+
+   The woff2 files are not committed (they are large). Fetch them with:
+     node engine/tools/fetch-fonts.mjs thai
+   Until then a page falls back to the system font for this script. */
+
+@font-face{
+  font-family:'Inter';
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+  src:url('thai-400.woff2') format('woff2');
+  unicode-range:U+0E00-0E7F,U+200C-200D;
+}
+@font-face{
+  font-family:'Inter';
+  font-style:normal;
+  font-weight:700;
+  font-display:swap;
+  src:url('thai-700.woff2') format('woff2');
+  unicode-range:U+0E00-0E7F,U+200C-200D;
+}
+@font-face{
+  font-family:'Space Grotesk';
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+  src:url('thai-400.woff2') format('woff2');
+  unicode-range:U+0E00-0E7F,U+200C-200D;
+}
+@font-face{
+  font-family:'Space Grotesk';
+  font-style:normal;
+  font-weight:700;
+  font-display:swap;
+  src:url('thai-700.woff2') format('woff2');
+  unicode-range:U+0E00-0E7F,U+200C-200D;
+}

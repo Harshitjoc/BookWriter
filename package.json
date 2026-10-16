@@ -1,0 +1,31 @@
+{
+  "name": "paper-engine",
+  "version": "1.0.0",
+  "description": "Write one page at a time. Get a real book. A strict B5 page engine for AI-authored books.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "node engine/tools/build-book.mjs",
+    "check": "node engine/tools/check.mjs",
+    "shot": "node engine/tools/shot.mjs",
+    "export": "node engine/tools/export.mjs",
+    "image": "node engine/tools/gen-image.mjs",
+    "ui": "node engine/ui/server.mjs",
+    "test": "node engine/ui/test/run.mjs",
+    "regress": "node engine/tools/regress.mjs"
+  },
+  "devDependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "monaco-editor": "^0.57.0",
+    "playwright": "^1.48.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "vite": "^8.3.2"
+  },
+  "dependencies": {
+    "mammoth": "^1.13.0",
+    "pdfjs-dist": "^6.4.299",
+    "youtube-transcript": "^1.3.1"
+  }
+}

@@ -1,0 +1,695 @@
+<!doctype html>
+<!--
+  THE SHOWCASE — ten pages from ten different subjects, built by one engine.
+
+  Cooking, coffee, gardening, travel, photography, fitness, money, language,
+  chess, and code. Same page shape every time, same colour roles every time.
+  That is the whole argument: the engine does not care what your book is about.
+
+  Five pages carry a generated PHOTOGRAPH, because the thing being taught is
+  physical. Five carry an SVG DIAGRAM, because the thing being taught is a
+  mechanism. Both bands are the same height, so the page below is identical
+  either way.
+
+  This is the file you read to learn the markup. To start your own book, copy
+  books/starter/ instead.
+-->
+<html lang="en" data-size="b5">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Showcase</title>
+  <link rel="stylesheet" href="../../engine/sheet.css">
+  <link rel="stylesheet" href="../../engine/sizes/b5.css">
+  <link rel="stylesheet" href="../../engine/themes/studio.css">
+  <style>
+    /* ====================================================================
+       GENERATED PAGES — cover, copyright, contents, part dividers, index.
+       Written by engine/tools/build-book.mjs. Scoped .sheet.gp so it can never
+       touch a book page (.sheet.bb).
+       ==================================================================== */
+    .sheet.gp{
+      --ink:#1A1A2E; --muted:#5B6472; --line:#E7E9EF;
+      --accent:#6366F1; --accent-strong:#4F46E5;
+      padding:0; background:#FAFAFC; color:var(--ink);
+      font-family:"Inter",system-ui,sans-serif;
+    }
+    .gp .in{ position:absolute; inset:0; display:flex; flex-direction:column; padding:13mm 15mm; }
+    .gp .in > *{ flex-shrink:0; }
+    /* flex:none, not a basis: .in is a column and .gp-top is a row, and a basis
+       would be read as height in one and width in the other. */
+    .gp-tab{ width:56px; height:7px; flex:none; border-radius:99px; background:var(--accent); }
+    .gp-top{ display:flex; justify-content:space-between; align-items:center; gap:14px; }
+    .gp-pill{
+      font-size:12px; font-weight:500; color:#4B5563; background:#F1F2F6;
+      border:1px solid var(--line); padding:5px 13px; border-radius:99px; white-space:nowrap;
+    }
+    .gp-rule{ height:1px; flex:0 0 1px; background:var(--line); border:0; margin:15px 0; }
+    .gp-foot{
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:12.5px; color:var(--muted); margin-top:auto; padding-top:13px;
+      border-top:1px solid var(--line);
+    }
+
+    /* ---- cover ---- */
+    .gp.cover .cv-kicker{
+      font-size:13px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+      color:var(--accent-strong); margin-top:20px;
+    }
+    .gp.cover .cv-mid{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+    .gp.cover .cv-title{
+      font-family:"Space Grotesk",sans-serif; font-size:64px; font-weight:700;
+      line-height:1.02; letter-spacing:-.03em; margin:0; color:var(--ink);
+    }
+    .gp.cover .cv-sub{ font-size:22px; line-height:1.4; color:var(--muted); margin:18px 0 0; max-width:22em; }
+    .gp.cover .cv-meta{ display:flex; justify-content:space-between; align-items:baseline; }
+    .gp.cover .cv-author{ font-family:"Space Grotesk",sans-serif; font-size:19px; font-weight:600; color:var(--ink); }
+    .gp.cover .cv-count{ font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums; }
+    .gp.cover .cv-note{ font-size:13.5px; color:var(--muted); margin:12px 0 0; }
+
+    /* ---- copyright ---- */
+    .gp.colophon .cl-mid{ flex:1; display:flex; flex-direction:column; justify-content:flex-end; }
+    .gp.colophon .cl-title{ font-family:"Space Grotesk",sans-serif; font-size:27px; font-weight:600; letter-spacing:-.02em; margin:0; }
+    .gp.colophon .cl-sub{ font-size:16px; color:var(--muted); margin:5px 0 0; }
+    .gp.colophon .cl-body p{ font-size:13.5px; line-height:1.6; color:var(--muted); margin:0 0 8px; }
+
+    /* ---- part divider ---- */
+    .gp.divider .dv-mid{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+    .gp.divider .dv-eyebrow{
+      font-size:12.5px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+      color:var(--accent-strong); margin:0;
+    }
+    .gp.divider .dv-num{
+      font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:78px;
+      line-height:.92; letter-spacing:-.03em; color:var(--ink); margin:4px 0 0;
+    }
+    .gp.divider .dv-name{
+      font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:40px;
+      line-height:1.05; letter-spacing:-.02em; color:var(--ink); margin:12px 0 0;
+    }
+    .gp.divider .dv-why{ font-size:17px; line-height:1.5; color:var(--muted); margin:12px 0 0; max-width:30em; }
+    .gp.divider .dv-list-label{
+      font-size:11.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+      color:var(--muted); margin:0 0 12px;
+    }
+    .gp.divider .dv-list{
+      list-style:none; margin:0; padding:0;
+      display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px 30px;
+    }
+    .gp.divider .dv-list li{ display:flex; align-items:baseline; gap:10px; }
+    .gp.divider .dv-list .n{
+      font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:13px;
+      color:var(--accent); font-variant-numeric:tabular-nums; min-width:1.6em;
+    }
+    .gp.divider .dv-list .nm{ font-size:15px; color:var(--ink); }
+
+    /* ---- contents + index ---- */
+    .gp .lp-title{ font-family:"Space Grotesk",sans-serif; font-size:30px; font-weight:600; letter-spacing:-.02em; margin:11px 0 0; }
+    .gp.toc .toc-part{ margin-top:14px; }
+    .gp.toc .toc-part:first-child{ margin-top:2px; }
+    .gp.toc .toc-ph{ display:flex; align-items:baseline; gap:10px; line-height:1.4; }
+    .gp.toc .toc-ph .pn{ flex:1; font-family:"Space Grotesk",sans-serif; font-size:14.5px; font-weight:600; color:var(--ink); }
+    .gp.toc .toc-row{ display:flex; align-items:baseline; gap:12px; margin-top:6px; padding-left:3px; line-height:1.4; }
+    .gp.toc .toc-row .nm{ flex:1; font-size:13.5px; color:var(--ink); }
+    .gp .pg{ font-variant-numeric:tabular-nums; font-size:13px; color:var(--muted); }
+    .gp.index .idx{ margin-top:4px; column-count:3; column-gap:22px; }
+    .gp.index .idx-row{
+      display:flex; align-items:baseline; gap:10px; break-inside:avoid;
+      padding:2px 1px; border-bottom:1px solid #EFF1F5;
+    }
+    .gp.index .idx-row .nm{ flex:1; font-size:12px; color:var(--ink); }
+    .gp.index .idx-row .pg{ font-size:12px; }
+
+    /* ====================================================================
+       ONE PAGE COUNTER for the whole book. Every sheet advances it; only the
+       book pages print it, so a printed number is the real page in the PDF.
+       Overrides the theme's page-only counter (inline wins over linked).
+       ==================================================================== */
+    .deck{ counter-reset:pageno; }
+    .sheet.gp, .sheet.bb{ counter-increment:pageno; }
+    .bb .foot .pg::before{ content:counter(pageno); }
+  </style>
+</head>
+<body>
+  <main class="deck">
+
+    <!-- ================================================== 1 · COOKING (photo) -->
+        <section class="sheet gp cover">
+      <div class="in">
+        <div class="gp-tab"></div>
+        <div class="cv-kicker">A paper-engine book</div>
+        <div class="cv-mid">
+          <h1 class="cv-title">The Showcase</h1>
+          <p class="cv-sub">Ten pages, ten subjects, one engine.</p>
+        </div>
+        <div class="cv-bottom">
+          <hr class="gp-rule">
+          <div class="cv-meta">
+            <span class="cv-author">Built with the paper engine</span>
+            <span class="cv-count">10 blocks</span>
+          </div>
+          <p class="cv-note">Cooking to chess to code. Same page shape every time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet gp colophon">
+      <div class="in">
+        <div class="gp-tab"></div>
+        <div class="cl-mid">
+          <h2 class="cl-title">The Showcase</h2>
+          <p class="cl-sub">Ten pages, ten subjects, one engine.</p>
+          <hr class="gp-rule">
+          <div class="cl-body">
+            <p>Set in Space Grotesk, Inter and JetBrains Mono, self-hosted and licensed under the SIL Open Font License.</p>
+          <p>Photographs generated with engine/tools/gen-image.mjs. Diagrams written as inline SVG.</p>
+          <p>Built with the paper engine: github.com/hassancs91/paper-engine</p>
+            <p>The example pages and photographs in this book are public domain (CC0). Take them.</p>
+            <p>Edition 1.0 · yoursite.com</p>
+          </div>
+        </div>
+        <div class="gp-foot"><span>yoursite.com</span><span>Edition 1.0</span></div>
+      </div>
+    </section>
+
+    <section class="sheet gp toc">
+      <div class="in">
+        <div class="gp-top">
+          <div class="gp-tab"></div>
+          <span class="gp-pill">Contents</span>
+        </div>
+        <h1 class="lp-title">Contents</h1>
+        <hr class="gp-rule">
+        <div class="toc-list">
+          <div class="toc-part">
+            <div class="toc-ph"><span class="pn">Part 1 · Things you make</span><span class="pg">4</span></div>
+            <div class="toc-row"><span class="nm">Resting meat</span><span class="pg">5</span></div>
+            <div class="toc-row"><span class="nm">The bloom</span><span class="pg">6</span></div>
+            <div class="toc-row"><span class="nm">Companion planting</span><span class="pg">7</span></div>
+            <div class="toc-row"><span class="nm">Packing cubes</span><span class="pg">8</span></div>
+          </div>
+          <div class="toc-part">
+            <div class="toc-ph"><span class="pn">Part 2 · Things you practise</span><span class="pg">9</span></div>
+            <div class="toc-row"><span class="nm">Golden hour</span><span class="pg">10</span></div>
+            <div class="toc-row"><span class="nm">Progressive overload</span><span class="pg">11</span></div>
+            <div class="toc-row"><span class="nm">Spaced repetition</span><span class="pg">12</span></div>
+            <div class="toc-row"><span class="nm">The fork</span><span class="pg">13</span></div>
+          </div>
+          <div class="toc-part">
+            <div class="toc-ph"><span class="pn">Part 3 · Things you protect</span><span class="pg">14</span></div>
+            <div class="toc-row"><span class="nm">The emergency fund</span><span class="pg">15</span></div>
+            <div class="toc-row"><span class="nm">Circuit breaker</span><span class="pg">16</span></div>
+          </div>
+        </div>
+        <div class="gp-foot"><span>yoursite.com</span><span>The Showcase</span></div>
+      </div>
+    </section>
+
+    <section class="sheet gp divider">
+      <div class="in">
+        <div class="gp-top">
+          <div class="gp-tab"></div>
+          <span class="gp-pill">Part 1 of 3</span>
+        </div>
+        <div class="dv-mid">
+          <div class="dv-eyebrow">Hands, heat, soil</div>
+          <div class="dv-num">1</div>
+          <h2 class="dv-name">Things you make</h2>
+          <p class="dv-why">Four pages where the thing being taught is physical, so the band carries a photograph.</p>
+          <hr class="gp-rule">
+          <div class="dv-list-label">In this part</div>
+          <ol class="dv-list">
+            <li><span class="n">01</span><span class="nm">Resting meat</span></li>
+            <li><span class="n">02</span><span class="nm">The bloom</span></li>
+            <li><span class="n">03</span><span class="nm">Companion planting</span></li>
+            <li><span class="n">04</span><span class="nm">Packing cubes</span></li>
+          </ol>
+        </div>
+        <div class="gp-foot"><span>yoursite.com</span><span>Edition 1.0</span></div>
+      </div>
+    </section>
+
+<section class="sheet bb">
+      <h2 class="sr">Resting meat: heat drives the juices to the centre of the meat, so cutting it straight off the pan spills them onto the board. A few minutes off the heat lets them settle back through the whole piece.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The showcase</b> · No. 01</div>
+        <span class="pill">Cooking</span>
+      </div>
+      <h1 class="title">Resting meat</h1>
+      <div class="sub">Why you wait before you cut</div>
+      <hr class="rule">
+      <figure class="photo">
+        <img src="images/resting-meat.jpg" alt="A cooked steak resting on a wooden board, juices gathering underneath, a knife beside it.">
+      </figure>
+      <hr class="rule">
+      <div class="explain">
+        <p>Let's say you pull a steak off the pan and cut it right away. The juice runs out over the board, and <span class="bad">what's left on your plate is dry</span>.</p>
+        <p>Heat pushes the juice toward the middle of the meat. Give it a few minutes off the heat and <span class="hl">it settles back through the whole piece</span>. Same steak, <span class="good">nothing lost to the board</span>.</p>
+        <p class="close">The waiting is part of the cooking.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">TRY THIS TONIGHT</span>
+        <p>Take it off the heat, put it on a warm plate, cover it loosely. Five minutes for a steak, fifteen for a roast. Then cut.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Things you make</span></div>
+    </section>
+
+    <!-- ================================================== 2 · COFFEE (photo) -->
+
+<section class="sheet bb">
+      <h2 class="sr">The bloom: fresh coffee grounds are full of carbon dioxide that pushes water away. A small first pour and a thirty second wait lets the gas escape so the rest of the water can actually reach the coffee.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The showcase</b> · No. 02</div>
+        <span class="pill">Coffee</span>
+      </div>
+      <h1 class="title">The bloom</h1>
+      <div class="sub">The first pour, and why it is small</div>
+      <hr class="rule">
+      <figure class="photo">
+        <img src="images/coffee-bloom.jpg" alt="Hot water poured over fresh coffee grounds in a plain white dripper, the grounds swelling into a domed crust of fine bubbles.">
+      </figure>
+      <hr class="rule">
+      <div class="explain">
+        <p>Let's say your coffee keeps coming out thin and sour, and you've already tried grinding finer. Fresh grounds are <span class="hl">full of gas</span>, and gas pushes water away, so most of your pour runs past the coffee.</p>
+        <p>Wet them with a splash first, twice the weight of the coffee, and wait. The bed puffs into a dome and the bubbles stop. Now <span class="good">the water can get in</span>.</p>
+        <p class="close">Thirty seconds, and the rest of the pour finally works.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">TRY THIS TOMORROW</span>
+        <p>Pour twice the coffee's weight in water, just enough to wet everything. Wait thirty seconds. Then pour the rest.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Things you make</span></div>
+    </section>
+
+    <!-- ================================================== 3 · GARDENING (photo) -->
+
+<section class="sheet bb">
+      <h2 class="sr">Companion planting: some plants protect each other. Basil at the base of a tomato and marigolds nearby pull pests away from the crop you actually want.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The showcase</b> · No. 03</div>
+        <span class="pill">Gardening</span>
+      </div>
+      <h1 class="title">Companion planting</h1>
+      <div class="sub">Who you put next to what</div>
+      <hr class="rule">
+      <figure class="photo">
+        <img src="images/companion-planting.jpg" alt="A young tomato plant with basil growing close around its base and marigolds nearby in dark garden soil.">
+      </figure>
+      <hr class="rule">
+      <div class="explain">
+        <p>Let's say something keeps eating your tomatoes and you'd rather not spray. <span class="bad">A bed with one crop in it is an easy meal</span>.</p>
+        <p>Put basil around the base and marigolds at the end of the row. <span class="hl">The smell confuses what's hunting</span>, and the marigolds pull pests toward the flowers. <span class="good">You keep the tomatoes.</span></p>
+        <p class="close">Some plants are just easier to grow next to each other.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">THIS WEEKEND</span>
+        <p>Plant basil at the base of each tomato and marigolds at both ends of the bed. Keep the basil close, about a hand's width out.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Things you make</span></div>
+    </section>
+
+    <!-- ================================================== 4 · TRAVEL (photo) -->
+
+<section class="sheet bb">
+      <h2 class="sr">Packing cubes: sorting clothes into labelled fabric boxes before they go in the case means you never dig through the whole bag to find one thing.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The showcase</b> · No. 04</div>
+        <span class="pill">Travel</span>
+      </div>
+      <h1 class="title">Packing cubes</h1>
+      <div class="sub">Sort once, at home</div>
+      <hr class="rule">
+      <figure class="photo">
+        <img src="images/packing-cubes.jpg" alt="An open carry-on suitcase seen from above, filled with four neat fabric packing cubes in muted colours.">
+      </figure>
+      <hr class="rule">
+      <div class="explain">
+        <p>Let's say you're moving hotels every second night. By day three the case is a pile, and finding one clean shirt means <span class="bad">taking everything out and putting it back</span>.</p>
+        <p>Cubes fix the sorting, not the space. One for shirts, one for layers, one for socks, one for the dirty stuff. <span class="hl">You decide where things live once, at home</span>.</p>
+        <p class="close">You stop unpacking. You just lift out a cube.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">NEXT TRIP</span>
+        <p>One cube per kind of thing, not per outfit. Keep one empty at the start and let it become the laundry cube.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Things you make</span></div>
+    </section>
+
+    <!-- ================================================== 5 · PHOTOGRAPHY (photo) -->
+
+    <section class="sheet gp divider">
+      <div class="in">
+        <div class="gp-top">
+          <div class="gp-tab"></div>
+          <span class="gp-pill">Part 2 of 3</span>
+        </div>
+        <div class="dv-mid">
+          <div class="dv-eyebrow">Repeat, adjust, repeat</div>
+          <div class="dv-num">2</div>
+          <h2 class="dv-name">Things you practise</h2>
+          <p class="dv-why">Skills that only move when you change what you ask of yourself.</p>
+          <hr class="gp-rule">
+          <div class="dv-list-label">In this part</div>
+          <ol class="dv-list">
+            <li><span class="n">01</span><span class="nm">Golden hour</span></li>
+            <li><span class="n">02</span><span class="nm">Progressive overload</span></li>
+            <li><span class="n">03</span><span class="nm">Spaced repetition</span></li>
+            <li><span class="n">04</span><span class="nm">The fork</span></li>
+          </ol>
+        </div>
+        <div class="gp-foot"><span>yoursite.com</span><span>Edition 1.0</span></div>
+      </div>
+    </section>
+
+<section class="sheet bb">
+      <h2 class="sr">Golden hour: light late in the day comes in low and sideways, which creates long shadows and shape. Midday light comes straight down and flattens everything.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The showcase</b> · No. 05</div>
+        <span class="pill">Photography</span>
+      </div>
+      <h1 class="title">Golden hour</h1>
+      <div class="sub">The hour that does the work for you</div>
+      <hr class="rule">
+      <figure class="photo">
+        <img src="images/golden-hour.jpg" alt="A single tree on rolling grassland in low late sunlight, long shadows stretching across the field.">
+      </figure>
+      <hr class="rule">
+      <div class="explain">
+        <p>Let's say your photos look flat and you've blamed the camera. <span class="bad">Midday sun comes straight down</span>, so it fills every shadow, and shadows are what make things look solid.</p>
+        <p>Late light comes in low and sideways. It <span class="hl">rakes across whatever you point at</span>, so you get long shadows and texture. <span class="good">Depth you didn't have to add.</span></p>
+        <p class="close">Same phone, same spot. Different hour.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">TRY THIS WEEK</span>
+        <p>Shoot the hour after sunrise or the hour before sunset, and put the sun to one side of your subject rather than behind you.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Things you practise</span></div>
+    </section>
+
+    <!-- ================================================== 6 · FITNESS (diagram) -->
+
+<section class="sheet bb">
+      <h2 class="sr">Progressive overload: your body adapts to exactly what you ask of it, so lifting the same weight every week keeps you the same. Adding a small amount each week is what makes you stronger.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The showcase</b> · No. 06</div>
+        <span class="pill">Fitness</span>
+      </div>
+      <h1 class="title">Progressive overload</h1>
+      <div class="sub">A little more than last week</div>
+      <hr class="rule">
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 592 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: four weekly bars each slightly taller than the last, with a rising teal line along their tops, against a flat red dashed line showing what happens if the weight never changes.">
+          <defs>
+            <marker id="ar6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+          </defs>
+          <line x1="30" y1="146" x2="570" y2="146" stroke="#E7E9EF" stroke-width="1.5"/>
+          <rect x="70" y="108" width="76" height="38" rx="6" fill="#EEF0FE" stroke="#D5D8FA" stroke-width="1"/>
+          <rect x="196" y="96" width="76" height="50" rx="6" fill="#EEF0FE" stroke="#D5D8FA" stroke-width="1"/>
+          <rect x="322" y="84" width="76" height="62" rx="6" fill="#E6E9FD" stroke="#D5D8FA" stroke-width="1"/>
+          <rect x="448" y="72" width="76" height="74" rx="6" fill="#DDE1FC" stroke="#C7CCF8" stroke-width="1"/>
+          <line x1="70" y1="108" x2="524" y2="108" stroke="#DC2626" stroke-width="1.6" stroke-dasharray="5 5"/>
+          <text x="586" y="104" text-anchor="end" style="font-family:'Inter',sans-serif;font-size:11.5px;fill:#DC2626">never add, stay here</text>
+          <path d="M108 108 L234 96 L360 84 L490 72" fill="none" stroke="#0D9488" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar6)"/>
+          <text x="300" y="46" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:13px;font-weight:600;fill:#0D9488">a little more each week</text>
+          <text x="108" y="164" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12px;fill:#5B6472">Week 1</text>
+          <text x="234" y="164" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12px;fill:#5B6472">Week 2</text>
+          <text x="360" y="164" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12px;fill:#5B6472">Week 3</text>
+          <text x="486" y="164" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12px;fill:#5B6472">Week 4</text>
+          <text x="296" y="190" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12.5px;fill:#5B6472">ask for a little more · your body adapts · repeat</text>
+        </svg>
+      </div>
+      <hr class="rule">
+      <div class="explain">
+        <p>Let's say you've been going to the gym for months, you never miss a session, and you look exactly the same. <span class="bad">You've been lifting the same weight the whole time.</span></p>
+        <p>Your body only builds what it keeps being asked for. Ask for the same thing every week and it has no reason to change. <span class="hl">Ask for slightly more</span>, one extra rep or the smallest plate on the bar, and <span class="good">it has to adapt</span>.</p>
+        <p class="close">Small, boring, every week. That is the whole method.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">THIS WEEK</span>
+        <p>Write down what you lifted. Next session add one rep, or the smallest weight you own. If you can't, keep it and try again next week.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Things you practise</span></div>
+    </section>
+
+    <!-- ================================================== 7 · MONEY (diagram) -->
+
+<section class="sheet bb">
+      <h2 class="sr">Spaced repetition: reviewing a word just before you would forget it, with a wider gap each time, moves it into long term memory. Without review it fades within days.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The showcase</b> · No. 07</div>
+        <span class="pill">Language</span>
+      </div>
+      <h1 class="title">Spaced repetition</h1>
+      <div class="sub">Reviewing right before you forget</div>
+      <hr class="rule">
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 592 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: four review points on a timeline at day one, day three, day seven and day twenty-one, with the gap widening each time, above a red dashed curve showing the word fading away without review.">
+          <defs>
+            <marker id="ar8" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            <filter id="cs8" x="-20%" y="-25%" width="140%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#1A1A2E" flood-opacity="0.07"/></filter>
+          </defs>
+          <line x1="40" y1="92" x2="452" y2="92" stroke="#94A3B8" stroke-width="1.75"/>
+          <text x="70" y="52" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11.5px;fill:#5B6472">Day 1</text>
+          <text x="140" y="52" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11.5px;fill:#5B6472">Day 3</text>
+          <text x="262" y="52" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11.5px;fill:#5B6472">Day 7</text>
+          <text x="440" y="52" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11.5px;fill:#5B6472">Day 21</text>
+          <text x="105" y="74" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:10.5px;fill:#94A3B8">2 days</text>
+          <text x="201" y="74" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:10.5px;fill:#94A3B8">4 days</text>
+          <text x="351" y="74" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:10.5px;fill:#94A3B8">2 weeks</text>
+          <circle cx="70" cy="92" r="11" fill="#6366F1"/><text x="70" y="92" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">1</text>
+          <circle cx="140" cy="92" r="11" fill="#6366F1"/><text x="140" y="92" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">2</text>
+          <circle cx="262" cy="92" r="11" fill="#6366F1"/><text x="262" y="92" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">3</text>
+          <circle cx="440" cy="92" r="11" fill="#6366F1"/><text x="440" y="92" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">4</text>
+          <line x1="452" y1="92" x2="486" y2="92" stroke="#94A3B8" stroke-width="1.75" marker-end="url(#ar8)"/>
+          <rect x="492" y="66" width="98" height="52" rx="13" fill="#ECFBF7" stroke="#CDEFE8" stroke-width="1" filter="url(#cs8)"/>
+          <text x="541" y="88" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#0D9488">It sticks</text>
+          <text x="541" y="105" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:10.5px;fill:#5B6472">no cramming</text>
+          <path d="M70 112 C 160 152, 280 166, 452 170" fill="none" stroke="#DC2626" stroke-width="1.6" stroke-dasharray="5 5"/>
+          <text x="261" y="192" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11.5px;fill:#DC2626">without review, it fades in days</text>
+        </svg>
+      </div>
+      <hr class="rule">
+      <div class="explain">
+        <p>Let's say you sit down and learn twenty new words. You feel great about it. <span class="bad">A week later you can remember four</span>, and the other sixteen cost you an evening.</p>
+        <p>A word gets stronger when you pull it back <span class="hl">just as it's about to slip</span>. Too soon and you learn nothing, because it was still there. Too late and it's gone. So the gaps start small and get wider: tomorrow, a few days, a week, three weeks.</p>
+        <p class="close">You don't need more hours. You need better timing.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">TRY THIS</span>
+        <p>Take five new words. See them tomorrow, in three days, in a week, in three weeks. Anything you miss goes back to the start of the ladder.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Things you practise</span></div>
+    </section>
+
+    <!-- ================================================== 9 · CHESS (diagram) -->
+
+<section class="sheet bb">
+      <h2 class="sr">The fork: one piece attacks two pieces at the same time. Because a check must be answered first, the opponent can only save one of them.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The showcase</b> · No. 08</div>
+        <span class="pill">Chess</span>
+      </div>
+      <h1 class="title">The fork</h1>
+      <div class="sub">One move, two targets</div>
+      <hr class="rule">
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 592 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: a knight on a small board attacks the king and the rook at the same time; the king has to move first, so the rook is lost next move.">
+          <defs>
+            <marker id="ar9" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            <filter id="cs9" x="-20%" y="-25%" width="140%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#1A1A2E" flood-opacity="0.07"/></filter>
+          </defs>
+          <rect x="40" y="20" width="160" height="160" rx="4" fill="#FFFFFF" stroke="#E7E9EF" stroke-width="1"/>
+          <rect x="80" y="20" width="40" height="40" fill="#F1F2F6"/><rect x="160" y="20" width="40" height="40" fill="#F1F2F6"/>
+          <rect x="40" y="60" width="40" height="40" fill="#F1F2F6"/><rect x="120" y="60" width="40" height="40" fill="#F1F2F6"/>
+          <rect x="80" y="100" width="40" height="40" fill="#F1F2F6"/><rect x="160" y="100" width="40" height="40" fill="#F1F2F6"/>
+          <rect x="40" y="140" width="40" height="40" fill="#F1F2F6"/><rect x="120" y="140" width="40" height="40" fill="#F1F2F6"/>
+          <circle cx="140" cy="120" r="16" fill="#EEF0FE" stroke="#6366F1" stroke-width="1.75"/>
+          <text x="140" y="120" text-anchor="middle" dominant-baseline="central" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;fill:#4F46E5">N</text>
+          <circle cx="100" cy="40" r="16" fill="#FDF6E8" stroke="#D8B978" stroke-width="1.75"/>
+          <text x="100" y="40" text-anchor="middle" dominant-baseline="central" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;fill:#B45309">K</text>
+          <circle cx="60" cy="80" r="16" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.75"/>
+          <text x="60" y="80" text-anchor="middle" dominant-baseline="central" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;fill:#1A1A2E">R</text>
+          <line x1="132" y1="105" x2="109" y2="57" stroke="#DC2626" stroke-width="1.75" marker-end="url(#ar9)"/>
+          <line x1="125" y1="112" x2="76" y2="88" stroke="#DC2626" stroke-width="1.75" marker-end="url(#ar9)"/>
+          <rect x="272" y="36" width="298" height="56" rx="13" fill="#FDF6E8" stroke="#EFE0BE" stroke-width="1" filter="url(#cs9)"/>
+          <text x="292" y="62" style="font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:600;fill:#1A1A2E">The king has to move</text>
+          <text x="292" y="80" style="font-family:'Inter',sans-serif;font-size:11.5px;fill:#5B6472">a check gets answered before anything else</text>
+          <rect x="272" y="108" width="298" height="56" rx="13" fill="#ECFBF7" stroke="#CDEFE8" stroke-width="1" filter="url(#cs9)"/>
+          <text x="292" y="134" style="font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:600;fill:#0D9488">Then you take the rook</text>
+          <text x="292" y="152" style="font-family:'Inter',sans-serif;font-size:11.5px;fill:#5B6472">nobody had a spare move to defend it</text>
+          <text x="296" y="194" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12.5px;fill:#5B6472">one piece, two targets · they only get to save one</text>
+        </svg>
+      </div>
+      <hr class="rule">
+      <div class="explain">
+        <p>Let's say you lose a piece most games and you never see it coming. It usually isn't a deep trap. It's <span class="hl">one piece attacking two of yours at once</span>.</p>
+        <p>The knight is the worst for this, because it jumps and nothing blocks it. Once it hits your king and something valuable on the same move, <span class="bad">the check has to be answered first</span>, and whatever else it was hitting is <span class="good">gone next move</span>.</p>
+        <p class="close">You don't have to be clever. You just have to see it first.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">NEXT GAME</span>
+        <p>Before every move, look for one square where a knight would hit two things. Do it for your knights, then theirs.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Things you practise</span></div>
+    </section>
+
+    <!-- ================================================== 10 · CODE (diagram) -->
+
+    <section class="sheet gp divider">
+      <div class="in">
+        <div class="gp-top">
+          <div class="gp-tab"></div>
+          <span class="gp-pill">Part 3 of 3</span>
+        </div>
+        <div class="dv-mid">
+          <div class="dv-eyebrow">Before it breaks</div>
+          <div class="dv-num">3</div>
+          <h2 class="dv-name">Things you protect</h2>
+          <p class="dv-why">Two pages about the buffer you build now so a bad day stays a bad day.</p>
+          <hr class="gp-rule">
+          <div class="dv-list-label">In this part</div>
+          <ol class="dv-list">
+            <li><span class="n">01</span><span class="nm">The emergency fund</span></li>
+            <li><span class="n">02</span><span class="nm">Circuit breaker</span></li>
+          </ol>
+        </div>
+        <div class="gp-foot"><span>yoursite.com</span><span>Edition 1.0</span></div>
+      </div>
+    </section>
+
+<section class="sheet bb">
+      <h2 class="sr">The emergency fund: money set aside every month in a separate account absorbs an unexpected bill, so the bill gets paid without new debt.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The showcase</b> · No. 09</div>
+        <span class="pill">Money</span>
+      </div>
+      <h1 class="title">The emergency fund</h1>
+      <div class="sub">The money you hope to waste</div>
+      <hr class="rule">
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 592 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: a little money every month builds a fund of three months of costs; when an unexpected bill lands it hits the fund, and the bill is paid with no new debt.">
+          <defs>
+            <marker id="ar7" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            <filter id="cs7" x="-20%" y="-25%" width="140%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#1A1A2E" flood-opacity="0.07"/></filter>
+          </defs>
+          <rect x="211" y="8" width="170" height="46" rx="12" fill="#FFFFFF" stroke="#E7E9EF" stroke-width="1" filter="url(#cs7)"/>
+          <text x="296" y="27" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:600;fill:#1A1A2E">A little, every month</text>
+          <text x="296" y="43" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11px;fill:#5B6472">boring, automatic, ignored</text>
+          <line x1="296" y1="54" x2="296" y2="86" stroke="#94A3B8" stroke-width="1.75" marker-end="url(#ar7)"/>
+          <rect x="1" y="90" width="170" height="62" rx="13" fill="#FEF1F1" stroke="#F8D6D6" stroke-width="1" filter="url(#cs7)"/>
+          <text x="86" y="116" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#DC2626">The bill you</text>
+          <text x="86" y="134" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#DC2626">didn't plan for</text>
+          <rect x="211" y="90" width="170" height="62" rx="13" fill="#FDF6E8" stroke="#EFE0BE" stroke-width="1" filter="url(#cs7)"/>
+          <text x="296" y="116" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#1A1A2E">The fund</text>
+          <text x="296" y="134" text-anchor="middle" style="font-family:'JetBrains Mono',monospace;font-size:11px;fill:#B45309">3 months of costs</text>
+          <rect x="421" y="90" width="170" height="62" rx="13" fill="#ECFBF7" stroke="#CDEFE8" stroke-width="1" filter="url(#cs7)"/>
+          <text x="506" y="116" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#0D9488">You just pay it</text>
+          <text x="506" y="134" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11px;fill:#5B6472">no card, no loan</text>
+          <line x1="171" y1="121" x2="211" y2="121" stroke="#DC2626" stroke-width="1.75" marker-end="url(#ar7)"/>
+          <line x1="381" y1="121" x2="421" y2="121" stroke="#94A3B8" stroke-width="1.75" marker-end="url(#ar7)"/>
+          <text x="296" y="190" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12.5px;fill:#5B6472">the fund sits there doing nothing · that is the job</text>
+        </svg>
+      </div>
+      <hr class="rule">
+      <div class="explain">
+        <p>Let's say the car dies on a Tuesday and it's eight hundred to fix. It goes on a card, and now <span class="bad">you're paying for that Tuesday for the next year</span>.</p>
+        <p>The fix isn't earning more. It's <span class="hl">a boring pile of cash you never touch</span>, three months of what it costs you to live, in its own account. When the bad Tuesday comes, <span class="good">it's just an errand</span>.</p>
+        <p class="close">It isn't an investment. It's what stops one bad week becoming a bad year.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">DO THIS ONCE</span>
+        <p>Add up one month of what you actually spend. Open a separate account, set a small automatic transfer, and don't link it to a card.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Things you protect</span></div>
+    </section>
+
+    <!-- ================================================== 8 · LANGUAGE (diagram) -->
+
+<section class="sheet bb">
+      <h2 class="sr">Circuit breaker: after a service fails a few times in a row, the breaker stops calling it and returns a fallback immediately, so one broken dependency cannot make the whole app hang.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The showcase</b> · No. 10</div>
+        <span class="pill">Code</span>
+      </div>
+      <h1 class="title">Circuit breaker</h1>
+      <div class="sub">Stop calling the thing that's down</div>
+      <hr class="rule">
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 592 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: your app calls a service through a circuit breaker; when the service is down the breaker opens and returns a fallback answer straight away instead of waiting.">
+          <defs>
+            <marker id="ar10" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            <filter id="cs10" x="-20%" y="-25%" width="140%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#1A1A2E" flood-opacity="0.07"/></filter>
+          </defs>
+          <rect x="1" y="74" width="150" height="62" rx="13" fill="#FFFFFF" stroke="#E7E9EF" stroke-width="1" filter="url(#cs10)"/>
+          <text x="76" y="100" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#1A1A2E">Your app</text>
+          <text x="76" y="118" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11px;fill:#5B6472">asks for something</text>
+          <rect x="211" y="74" width="170" height="62" rx="13" fill="#EEF0FE" stroke="#D5D8FA" stroke-width="1" filter="url(#cs10)"/>
+          <text x="296" y="100" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#4F46E5">The breaker</text>
+          <text x="296" y="118" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11px;fill:#6366F1">counts the failures</text>
+          <rect x="441" y="14" width="150" height="58" rx="13" fill="#FEF1F1" stroke="#F8D6D6" stroke-width="1" filter="url(#cs10)"/>
+          <text x="516" y="38" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#DC2626">The service</text>
+          <text x="516" y="56" text-anchor="middle" style="font-family:'JetBrains Mono',monospace;font-size:11px;fill:#DC2626">down</text>
+          <rect x="441" y="130" width="150" height="58" rx="13" fill="#ECFBF7" stroke="#CDEFE8" stroke-width="1" filter="url(#cs10)"/>
+          <text x="516" y="154" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#0D9488">A fallback</text>
+          <text x="516" y="172" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11px;fill:#5B6472">right now, no waiting</text>
+          <line x1="151" y1="105" x2="211" y2="105" stroke="#94A3B8" stroke-width="1.75" marker-end="url(#ar10)"/>
+          <path d="M381 92 L441 52" fill="none" stroke="#DC2626" stroke-width="1.75" stroke-dasharray="5 4" marker-end="url(#ar10)"/>
+          <path d="M381 118 L441 152" fill="none" stroke="#0D9488" stroke-width="1.75" marker-end="url(#ar10)"/>
+          <circle cx="181" cy="105" r="11" fill="#6366F1"/><text x="181" y="105" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">1</text>
+          <circle cx="404" cy="66" r="11" fill="#6366F1"/><text x="404" y="66" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">2</text>
+          <circle cx="404" cy="141" r="11" fill="#6366F1"/><text x="404" y="141" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">3</text>
+          <text x="296" y="196" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12.5px;fill:#5B6472">1 it asks · 2 it keeps failing · 3 stop asking, answer anyway</text>
+        </svg>
+      </div>
+      <hr class="rule">
+      <div class="explain">
+        <p>Let's say your app asks another service for something, maybe a payment check. One morning it's down, and <span class="bad">your whole app goes slow</span>, including the parts that don't use it.</p>
+        <p>Every request sits there waiting to time out. A breaker counts the failures, and after a few in a row it <span class="hl">stops calling and answers straight away</span> with whatever you chose to say instead. Now and then it tries one real call.</p>
+        <p class="close">One thing broke. Not everything.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">TELL THE AI</span>
+        <p>Put a circuit breaker around my calls to this service. Open it after a few failures, return a fallback right away, and retry one call now and then.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Things you protect</span></div>
+    </section>
+
+    <section class="sheet gp index">
+      <div class="in">
+        <div class="gp-top">
+          <div class="gp-tab"></div>
+          <span class="gp-pill">Index</span>
+        </div>
+        <h1 class="lp-title">Index</h1>
+        <hr class="gp-rule">
+        <div class="idx">
+            <div class="idx-row"><span class="nm">Circuit breaker</span><span class="pg">16</span></div>
+            <div class="idx-row"><span class="nm">Companion planting</span><span class="pg">7</span></div>
+            <div class="idx-row"><span class="nm">Golden hour</span><span class="pg">10</span></div>
+            <div class="idx-row"><span class="nm">Packing cubes</span><span class="pg">8</span></div>
+            <div class="idx-row"><span class="nm">Progressive overload</span><span class="pg">11</span></div>
+            <div class="idx-row"><span class="nm">Resting meat</span><span class="pg">5</span></div>
+            <div class="idx-row"><span class="nm">Spaced repetition</span><span class="pg">12</span></div>
+            <div class="idx-row"><span class="nm">The bloom</span><span class="pg">6</span></div>
+            <div class="idx-row"><span class="nm">The emergency fund</span><span class="pg">15</span></div>
+            <div class="idx-row"><span class="nm">The fork</span><span class="pg">13</span></div>
+          </div>
+        <div class="gp-foot"><span>yoursite.com</span><span>The Showcase</span></div>
+      </div>
+    </section>
+
+
+  </main>
+  <script src="../../engine/sheet-tools.js"></script>
+</body>
+</html>

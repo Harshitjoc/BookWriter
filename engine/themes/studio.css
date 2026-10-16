@@ -1,0 +1,159 @@
+/* ==========================================================================
+   THEME — Modern AI Studio
+   One concept per page: an accent tab, an eyebrow, a category pill, a big
+   title, a one-line subtitle, a diagram band, a short explainer, an action
+   box, and a footer. Rendered full-bleed on the strict canvas so it prints
+   and exports 1:1 with the screen.
+
+   Everything is scoped under `.sheet.bb`, so this theme can never leak into
+   another one. A page is:
+
+     <section class="sheet bb"> ... </section>
+
+   The colour roles are the point of the look, and they hold on every page of
+   every book: indigo is the mechanism being taught, teal is the good outcome,
+   red is the threat or the mistake, amber is the thing worth protecting,
+   neutral is you or your app. Learn them once on page 1 and you can read a
+   diagram before you read the paragraph on page 40. Use them as roles, never
+   as decoration.
+
+   Want your own look? Copy this file, change the tokens at the top of
+   `.sheet.bb`, and keep the class names. The skill and the builder do not
+   care what colour anything is.
+   ========================================================================== */
+
+@import url('../fonts/fonts.css'); /* self-hosted — see engine/fonts/ */
+
+/* Modern AI Studio tokens — declared on the page so they override the engine's
+   warm worksheet palette for book pages only. */
+.deck{ counter-reset:bbpage; }   /* page numbering for book pages (see .foot .pg) */
+
+.sheet.bb{
+  --surface:#FAFAFC; --card:#FFFFFF; --ink:#1A1A2E; --muted:#5B6472; --line:#E7E9EF;
+  --accent:#6366F1; --accent-strong:#4F46E5;
+  --signal:#0D9488; --danger:#DC2626; --warn:#B45309;
+
+  background:var(--surface);
+  color:var(--ink);
+  font-family:"Inter",system-ui,sans-serif;
+  line-height:1.6;
+  display:flex;            /* full-bleed: content fills the whole sheet, footer pins to the bottom */
+  flex-direction:column;
+  padding:9mm var(--page-pad);   /* top/bottom tighter than the 14mm side margin: frees vertical room */
+  counter-increment:bbpage;
+}
+
+/* ---- header ---- */
+.bb .tab{ width:56px; height:7px; flex:0 0 7px; border-radius:99px; background:var(--accent); }  /* flex-basis pinned: an over-full column must overflow (caught by check.mjs), never silently crush the tab */
+.bb .top{ display:flex; justify-content:space-between; align-items:center; gap:14px; margin-top:18px; }
+.bb .eyebrow{ font-size:14px; color:var(--muted); }
+.bb .eyebrow b{ color:var(--accent); font-weight:600; }
+.bb .pill{
+  font-size:13px; font-weight:500; color:#4B5563; background:#F1F2F6;
+  border:1px solid var(--line); padding:6px 15px; border-radius:99px; white-space:nowrap;
+}
+
+/* ---- title block ---- */
+.bb .title{
+  font-family:"Space Grotesk",sans-serif; font-size:50px; font-weight:600;
+  letter-spacing:-.02em; color:var(--ink); margin:16px 0 0; line-height:1.04;
+}
+.bb .sub{ font-size:20px; color:var(--muted); margin-top:5px; }
+.bb .rule{ height:1px; flex:0 0 1px; background:var(--line); border:0; margin:18px 0; }
+.bb .kicker{ font-size:14px; color:var(--muted); margin-bottom:10px; }
+
+/* ---- diagram: a modest fixed-size band (the text + Tell-the-AI box take the rest) ---- */
+.bb .diagram{ flex:0 0 auto; display:flex; align-items:center; justify-content:center; margin-top:4px; }
+.bb .diagram svg{ width:100%; height:auto; max-height:200px; display:block; }  /* preserveAspectRatio keeps it crisp; never overlaps */
+
+/* A PHOTO band instead of a diagram, for pages where a picture teaches better
+   than a drawing (a dish, a plant, a posture, a finished print). Same fixed
+   band, so the page below it is laid out identically either way. Diagrams stay
+   SVG: a picture of a diagram is a picture of blurry mislabelled text. */
+.bb .photo{ flex:0 0 auto; margin:4px 0 0; }   /* margin:0 sides — a bare <figure> has a 40px browser margin */
+.bb .photo img{
+  display:block; width:100%; height:200px; object-fit:cover;
+  border-radius:14px; border:1px solid var(--line);
+}
+.bb .photo figcaption{ margin-top:7px; font-size:13.5px; color:var(--muted); text-align:center; }
+.sheet.bb.snug .photo{ margin-top:2px; }
+
+/* ---- explainer card ---- */
+.bb .explain{
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:20px 26px; font-size:17px; color:var(--ink);
+  box-shadow:0 1px 2px rgba(26,26,46,.04);
+}
+.bb .explain p{ margin:0; color:var(--ink); }
+.bb .explain p + p{ margin-top:.85em; }              /* breathe between paragraphs */
+.bb .explain strong{ font-weight:600; color:var(--ink); }   /* key phrase, same ink */
+.bb .explain .hl{ font-weight:600; color:var(--accent-strong); }  /* the core idea / the fix, in indigo */
+.bb .explain .bad{ font-weight:600; color:var(--danger); }        /* the problem / pain, in red */
+.bb .explain .good{ font-weight:600; color:var(--signal); }       /* the good outcome, in teal */
+.bb .explain p.close{ margin-top:14px; font-weight:600; color:var(--ink); }
+
+/* inline link to a real product/resource named in the copy — keep the ink color so it doesn't read as a
+   role-emphasis span; the accent underline is what marks it as a link. */
+.bb a{ color:inherit; text-decoration:underline; text-decoration-color:var(--accent); text-decoration-thickness:1.5px; text-underline-offset:2.5px; }
+.bb a:hover{ color:var(--accent-strong); }
+
+/* recognition cue (optional, for situational blocks): "you'll know you need it when…" */
+.bb .cue{ font-size:14.5px; color:var(--muted); margin-top:14px; }
+.bb .cue b{ color:var(--ink); font-weight:600; }
+
+/* "Tell the AI" box — the copy-paste prompt. The book's thesis made literal, so it can go on every block. */
+.bb .ask{ margin-top:12px; background:#F4F5FE; border:1px solid #DDE0FB; border-radius:12px; padding:11px 16px; }
+.bb .ask .lbl{ display:block; font-size:11.5px; font-weight:700; letter-spacing:.5px; color:var(--accent-strong); margin-bottom:4px; }
+.bb .ask p{ margin:0; font-size:15px; line-height:1.5; color:var(--ink); }
+
+/* ---- footer (brand left, series right) ---- */
+/* snug: for pages authored a few px over the hard fit (pre tab flex-pin). Reclaims ~15px of
+   real spacing so the pinned tab + content fit without touching prose or diagram geometry.
+   Slack lands above the pinned footer, so under-full snug pages look unchanged. */
+.sheet.bb.snug .rule{ margin:14px 0; }
+.sheet.bb.snug .top{ margin-top:15px; }
+.sheet.bb.snug .diagram{ margin-top:2px; }
+.sheet.bb.snug .ask{ margin-top:10px; }
+
+.bb .foot{
+  display:flex; align-items:center; font-size:13px; color:var(--muted);
+  margin-top:auto; padding-top:16px; border-top:1px solid var(--line);
+}
+.bb .foot span{ color:var(--muted); }
+.bb .foot .brand{ flex:1 1 0; text-align:left; }
+.bb .foot .series{ flex:1 1 0; text-align:right; }
+.bb .foot .pg{ flex:0 0 auto; text-align:center; font-variant-numeric:tabular-nums; letter-spacing:.3px; }
+.bb .foot .pg::before{ content:counter(bbpage); }
+
+.bb .sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+
+/* ---- lists and tables -------------------------------------------------------
+   Added for the procedure, recipe, exercise and reference page shapes. A <ul> in
+   .explain is not free-form markup: draft-block.mjs only permits it when the
+   chosen archetype asks for it, and validates it against that choice. So this
+   block is reachable, and it has to be readable.
+
+   These are presentation only. No rule here changes a size, a font or the page
+   box, and a page that has no list or table renders exactly as it did before
+   this block existed — which is why the committed books' hash is unaffected. */
+.bb .explain ol,
+.bb .explain ul{ margin:.55em 0; padding-left:1.35em; }
+.bb .explain li{ margin:.28em 0; padding-left:.15em; }
+.bb .explain li::marker{ color:var(--accent); font-weight:600; }
+/* The steps of a procedure are the page. The last one is the outcome. */
+.bb .explain ol > li:last-child{ font-weight:600; }
+.bb .explain > ol > li:last-child .hl,
+.bb .explain > ol > li:last-child{ color:var(--ink); }
+
+.bb .explain table.ref{ width:100%; border-collapse:collapse; margin:.6em 0; font-size:14.5px; }
+.bb .explain table.ref caption{
+  caption-side:top; text-align:left; font-size:13px; color:var(--muted);
+  margin-bottom:5px;
+}
+.bb .explain table.ref th,
+.bb .explain table.ref td{ text-align:left; padding:5px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+.bb .explain table.ref th{ font-weight:600; color:var(--ink); white-space:nowrap; }
+.bb .explain table.ref td code,
+.bb .explain table.ref th code{
+  font-family:"JetBrains Mono",ui-monospace,Consolas,monospace; font-size:13px; color:var(--accent-strong);
+}

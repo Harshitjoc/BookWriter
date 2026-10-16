@@ -1,0 +1,69 @@
+/* ==========================================================================
+   THEME — Manual
+   Plain, procedural, legible under bad light. For books people follow rather
+   than read: manuals, handbooks, runbooks, "how do I set this up".
+
+   Same contract as cookbook.css: studio.css's anatomy is reused untouched and
+   only the tokens and the voice change. A manual that looked beautiful and was
+   slightly harder to read would be a bad manual.
+
+   The colour roles, restated for this audience:
+     blue    #1D4ED8  the mechanism, the command, the thing you change
+     green   #047857  it worked, here is the confirmation
+     red     #B91C1C  this breaks, stop
+     amber   #B45309  the thing worth protecting
+     slate   #334155  the reader, and the calm
+   ========================================================================== */
+
+@import url('./studio.css');
+
+.sheet.bb{
+  --surface:#FFFFFF;   /* white: a manual is not a mood piece */
+  --card:#F8FAFC;
+  --ink:#0F172A;
+  --muted:#64748B;
+  --line:#E2E8F0;
+  --accent:#1D4ED8;
+  --accent-strong:#1E3A8A;
+  --signal:#047857;
+  --danger:#B91C1C;
+  --warn:#B45309;
+
+  background:var(--surface);
+  color:var(--ink);
+  font-family:"Inter",system-ui,sans-serif;
+  line-height:1.6;
+}
+
+/* Monospace for the eyebrow, because in a manual the eyebrow is the part you
+   scan to find which step you are on. */
+.sheet.bb .eyebrow{
+  font-family:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+.sheet.bb .eyebrow b{ color:var(--accent); }
+
+.sheet.bb .pill{
+  background:#EFF6FF;
+  color:#1E3A8A;
+  border-color:#BFDBFE;
+  font-family:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+
+/* Steps want a hard edge to the eye, so the rule is a left bar instead of a
+   hairline. Height is unchanged, so nothing that fitted before stops fitting. */
+.sheet.bb .rule{
+  background:var(--line);
+}
+.sheet.bb[data-archetype="procedure"] .rule{
+  background:linear-gradient(to right,var(--accent) 0 24px,var(--line) 24px);
+}
+
+.sheet.bb .ask{
+  background:#F1F5F9;
+  border-color:#CBD5E1;
+}
+.sheet.bb .ask .lbl{ color:#1E3A8A; }
+
+.sheet.bb[data-archetype="procedure"] .title{ font-weight:700; }
+.sheet.bb[data-archetype="exercise"] .ask{ background:#ECFDF5; border-color:#A7F3D0; }
+.sheet.bb[data-archetype="exercise"] .ask .lbl{ color:#047857; }

@@ -1,0 +1,40 @@
+{
+  "title": "My First Book",
+  "subtitle": "One idea per page, and every page is the same shape.",
+  "author": "Your Name",
+
+  "series": "My first book",
+  "brand": "yoursite.com",
+  "editionLabel": "Edition 1.0",
+  "unit": "blocks",
+
+  "numbered": true,
+  "contents": true,
+  "index": true,
+
+  "cover": {
+    "kicker": "A paper-engine book",
+    "note": "Written one block at a time."
+  },
+  "copyright": {
+    "year": 2026,
+    "rights": "© 2026 Your Name. All rights reserved.",
+    "lines": [
+      "Set in Space Grotesk, Inter and JetBrains Mono.",
+      "Built with the paper engine: github.com/hassancs91/paper-engine"
+    ]
+  },
+
+  "parts": [
+    {
+      "name": "Your first part",
+      "eyebrow": "Where to start",
+      "why": "One line telling the reader why these pages belong together.",
+      "blocks": ["SSRF"]
+    }
+  ],
+
+  "editions": {
+    "free": ["SSRF"]
+  }
+}

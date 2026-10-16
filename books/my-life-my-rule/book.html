@@ -1,0 +1,279 @@
+<!doctype html>
+<!--
+  THE INTERIOR — your book's source file. You (and the /block skill) edit THIS.
+
+  One <section class="sheet bb"> per concept, in reading order. Everything else
+  (cover, copyright, contents, part dividers, index, page numbers) is generated
+  into book.html by:
+
+    node engine/tools/build-book.mjs books/starter
+
+  Never hand-edit book.html. It is overwritten on every build.
+
+  What is below is one finished page to copy and replace. Delete it once you
+  have pages of your own.
+-->
+<html lang="en" data-size="b5">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My First Book</title>
+  <link rel="stylesheet" href="../../engine/sheet.css">
+  <link rel="stylesheet" href="../../engine/sizes/b5.css">
+  <link rel="stylesheet" href="../../engine/themes/studio.css">
+  <style>
+    /* ====================================================================
+       GENERATED PAGES — cover, copyright, contents, part dividers, index.
+       Written by engine/tools/build-book.mjs. Scoped .sheet.gp so it can never
+       touch a book page (.sheet.bb).
+       ==================================================================== */
+    .sheet.gp{
+      --ink:#1A1A2E; --muted:#5B6472; --line:#E7E9EF;
+      --accent:#6366F1; --accent-strong:#4F46E5;
+      padding:0; background:#FAFAFC; color:var(--ink);
+      font-family:"Inter",system-ui,sans-serif;
+    }
+    .gp .in{ position:absolute; inset:0; display:flex; flex-direction:column; padding:13mm 15mm; }
+    .gp .in > *{ flex-shrink:0; }
+    /* flex:none, not a basis: .in is a column and .gp-top is a row, and a basis
+       would be read as height in one and width in the other. */
+    .gp-tab{ width:56px; height:7px; flex:none; border-radius:99px; background:var(--accent); }
+    .gp-top{ display:flex; justify-content:space-between; align-items:center; gap:14px; }
+    .gp-pill{
+      font-size:12px; font-weight:500; color:#4B5563; background:#F1F2F6;
+      border:1px solid var(--line); padding:5px 13px; border-radius:99px; white-space:nowrap;
+    }
+    .gp-rule{ height:1px; flex:0 0 1px; background:var(--line); border:0; margin:15px 0; }
+    .gp-foot{
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:12.5px; color:var(--muted); margin-top:auto; padding-top:13px;
+      border-top:1px solid var(--line);
+    }
+
+    /* ---- cover ---- */
+    .gp.cover .cv-kicker{
+      font-size:13px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+      color:var(--accent-strong); margin-top:20px;
+    }
+    .gp.cover .cv-mid{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+    .gp.cover .cv-title{
+      font-family:"Space Grotesk",sans-serif; font-size:64px; font-weight:700;
+      line-height:1.02; letter-spacing:-.03em; margin:0; color:var(--ink);
+    }
+    .gp.cover .cv-sub{ font-size:22px; line-height:1.4; color:var(--muted); margin:18px 0 0; max-width:22em; }
+    .gp.cover .cv-meta{ display:flex; justify-content:space-between; align-items:baseline; }
+    .gp.cover .cv-author{ font-family:"Space Grotesk",sans-serif; font-size:19px; font-weight:600; color:var(--ink); }
+    .gp.cover .cv-count{ font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums; }
+    .gp.cover .cv-note{ font-size:13.5px; color:var(--muted); margin:12px 0 0; }
+
+    /* ---- copyright ---- */
+    .gp.colophon .cl-mid{ flex:1; display:flex; flex-direction:column; justify-content:flex-end; }
+    .gp.colophon .cl-title{ font-family:"Space Grotesk",sans-serif; font-size:27px; font-weight:600; letter-spacing:-.02em; margin:0; }
+    .gp.colophon .cl-sub{ font-size:16px; color:var(--muted); margin:5px 0 0; }
+    .gp.colophon .cl-body p{ font-size:13.5px; line-height:1.6; color:var(--muted); margin:0 0 8px; }
+
+    /* ---- part divider ---- */
+    .gp.divider .dv-mid{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+    .gp.divider .dv-eyebrow{
+      font-size:12.5px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+      color:var(--accent-strong); margin:0;
+    }
+    .gp.divider .dv-num{
+      font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:78px;
+      line-height:.92; letter-spacing:-.03em; color:var(--ink); margin:4px 0 0;
+    }
+    .gp.divider .dv-name{
+      font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:40px;
+      line-height:1.05; letter-spacing:-.02em; color:var(--ink); margin:12px 0 0;
+    }
+    .gp.divider .dv-why{ font-size:17px; line-height:1.5; color:var(--muted); margin:12px 0 0; max-width:30em; }
+    .gp.divider .dv-list-label{
+      font-size:11.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+      color:var(--muted); margin:0 0 12px;
+    }
+    .gp.divider .dv-list{
+      list-style:none; margin:0; padding:0;
+      display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px 30px;
+    }
+    .gp.divider .dv-list li{ display:flex; align-items:baseline; gap:10px; }
+    .gp.divider .dv-list .n{
+      font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:13px;
+      color:var(--accent); font-variant-numeric:tabular-nums; min-width:1.6em;
+    }
+    .gp.divider .dv-list .nm{ font-size:15px; color:var(--ink); }
+
+    /* ---- contents + index ---- */
+    .gp .lp-title{ font-family:"Space Grotesk",sans-serif; font-size:30px; font-weight:600; letter-spacing:-.02em; margin:11px 0 0; }
+    .gp.toc .toc-part{ margin-top:14px; }
+    .gp.toc .toc-part:first-child{ margin-top:2px; }
+    .gp.toc .toc-ph{ display:flex; align-items:baseline; gap:10px; line-height:1.4; }
+    .gp.toc .toc-ph .pn{ flex:1; font-family:"Space Grotesk",sans-serif; font-size:14.5px; font-weight:600; color:var(--ink); }
+    .gp.toc .toc-row{ display:flex; align-items:baseline; gap:12px; margin-top:6px; padding-left:3px; line-height:1.4; }
+    .gp.toc .toc-row .nm{ flex:1; font-size:13.5px; color:var(--ink); }
+    .gp .pg{ font-variant-numeric:tabular-nums; font-size:13px; color:var(--muted); }
+    .gp.index .idx{ margin-top:4px; column-count:3; column-gap:22px; }
+    .gp.index .idx-row{
+      display:flex; align-items:baseline; gap:10px; break-inside:avoid;
+      padding:2px 1px; border-bottom:1px solid #EFF1F5;
+    }
+    .gp.index .idx-row .nm{ flex:1; font-size:12px; color:var(--ink); }
+    .gp.index .idx-row .pg{ font-size:12px; }
+
+    /* ====================================================================
+       ONE PAGE COUNTER for the whole book. Every sheet advances it; only the
+       book pages print it, so a printed number is the real page in the PDF.
+       Overrides the theme's page-only counter (inline wins over linked).
+       ==================================================================== */
+    .deck{ counter-reset:pageno; }
+    .sheet.gp, .sheet.bb{ counter-increment:pageno; }
+    .bb .foot .pg::before{ content:counter(pageno); }
+  </style>
+</head>
+<body>
+  <main class="deck">
+
+        <section class="sheet gp cover">
+      <div class="in">
+        <div class="gp-tab"></div>
+        <div class="cv-kicker">A paper-engine book</div>
+        <div class="cv-mid">
+          <h1 class="cv-title">My First Book</h1>
+          <p class="cv-sub">One idea per page, and every page is the same shape.</p>
+        </div>
+        <div class="cv-bottom">
+          <hr class="gp-rule">
+          <div class="cv-meta">
+            <span class="cv-author">Your Name</span>
+            <span class="cv-count">1 block</span>
+          </div>
+          <p class="cv-note">Written one block at a time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet gp colophon">
+      <div class="in">
+        <div class="gp-tab"></div>
+        <div class="cl-mid">
+          <h2 class="cl-title">My First Book</h2>
+          <p class="cl-sub">One idea per page, and every page is the same shape.</p>
+          <hr class="gp-rule">
+          <div class="cl-body">
+            <p>Set in Space Grotesk, Inter and JetBrains Mono.</p>
+          <p>Built with the paper engine: github.com/hassancs91/paper-engine</p>
+            <p>© 2026 Your Name. All rights reserved.</p>
+            <p>Edition 1.0 · yoursite.com</p>
+          </div>
+        </div>
+        <div class="gp-foot"><span>yoursite.com</span><span>Edition 1.0</span></div>
+      </div>
+    </section>
+
+    <section class="sheet gp toc">
+      <div class="in">
+        <div class="gp-top">
+          <div class="gp-tab"></div>
+          <span class="gp-pill">Contents</span>
+        </div>
+        <h1 class="lp-title">Contents</h1>
+        <hr class="gp-rule">
+        <div class="toc-list">
+          <div class="toc-part">
+            <div class="toc-ph"><span class="pn">Part 1 · Your first part</span><span class="pg">4</span></div>
+            <div class="toc-row"><span class="nm">SSRF</span><span class="pg">5</span></div>
+          </div>
+        </div>
+        <div class="gp-foot"><span>yoursite.com</span><span>My First Book</span></div>
+      </div>
+    </section>
+
+    <section class="sheet gp divider">
+      <div class="in">
+        <div class="gp-top">
+          <div class="gp-tab"></div>
+          <span class="gp-pill">Part 1 of 1</span>
+        </div>
+        <div class="dv-mid">
+          <div class="dv-eyebrow">Where to start</div>
+          <div class="dv-num">1</div>
+          <h2 class="dv-name">Your first part</h2>
+          <p class="dv-why">One line telling the reader why these pages belong together.</p>
+          <hr class="gp-rule">
+          <div class="dv-list-label">In this part</div>
+          <ol class="dv-list">
+            <li><span class="n">01</span><span class="nm">SSRF</span></li>
+          </ol>
+        </div>
+        <div class="gp-foot"><span>yoursite.com</span><span>Edition 1.0</span></div>
+      </div>
+    </section>
+
+<section class="sheet bb">
+      <h2 class="sr">SSRF explainer page: an attacker pastes a URL that points back at your app's own machine; the app fetches it from inside its trusted network and the secret keys leak back out to the attacker.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>My first book</b> · No. 01</div>
+        <span class="pill">Security</span>
+      </div>
+      <h1 class="title">SSRF</h1>
+      <div class="sub">Server-side request forgery</div>
+      <hr class="rule">
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 592 232" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: an attacker outside your machine sends a URL to your app, which fetches an internal address holding secret keys, and the keys leak back out to the attacker.">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            <filter id="cs" x="-20%" y="-25%" width="140%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#1A1A2E" flood-opacity="0.07"/></filter>
+          </defs>
+          <rect x="196" y="56" width="395" height="104" rx="14" fill="none" stroke="#CBD2DC" stroke-width="1" stroke-dasharray="5 5"/>
+          <text x="216" y="74" style="font-family:'Inter',sans-serif;font-size:11px;fill:#5B6472">Your machine</text>
+          <rect x="1" y="80" width="140" height="60" rx="13" fill="#FEF1F1" stroke="#F8D6D6" stroke-width="1" filter="url(#cs)"/>
+          <text x="71" y="105" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#DC2626">Attacker</text>
+          <text x="71" y="123" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11px;fill:#5B6472">pastes a URL</text>
+          <rect x="220" y="80" width="152" height="60" rx="13" fill="#FFFFFF" stroke="#E7E9EF" stroke-width="1" filter="url(#cs)"/>
+          <text x="296" y="105" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#1A1A2E">Your app</text>
+          <text x="296" y="123" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11px;fill:#5B6472">fetches the link</text>
+          <rect x="420" y="80" width="152" height="60" rx="13" fill="#FFFFFF" stroke="#E7E9EF" stroke-width="1" filter="url(#cs)"/>
+          <text x="496" y="105" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#1A1A2E">Secret keys</text>
+          <text x="496" y="123" text-anchor="middle" style="font-family:'JetBrains Mono',monospace;font-size:11px;fill:#B45309">169.254.169.254</text>
+          <line x1="141" y1="110" x2="220" y2="110" stroke="#94A3B8" stroke-width="1.75" marker-end="url(#ar)"/>
+          <line x1="372" y1="110" x2="420" y2="110" stroke="#94A3B8" stroke-width="1.75" marker-end="url(#ar)"/>
+          <path d="M496 140 L496 188 L71 188 L71 140" fill="none" stroke="#DC2626" stroke-width="1.75" marker-end="url(#ar)"/>
+          <circle cx="180" cy="110" r="11" fill="#6366F1"/><text x="180" y="110" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">1</text>
+          <circle cx="396" cy="110" r="11" fill="#6366F1"/><text x="396" y="110" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">2</text>
+          <circle cx="283" cy="188" r="11" fill="#6366F1"/><text x="283" y="188" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">3</text>
+          <text x="296" y="216" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12.5px;fill:#5B6472">1 attacker sends a URL · 2 your app fetches it · 3 secret keys leak back out</text>
+        </svg>
+      </div>
+      <hr class="rule">
+      <div class="explain">
+        <p>Say you asked the AI to add link previews. Someone pastes a URL and your app grabs that page for a thumbnail. Usually that's a normal link. But an attacker pastes a sneaky one that <span class="bad">points back at your app's own machine</span>.</p>
+        <p>That machine can reach private things no outsider can, like the hidden file with your <strong>keys and passwords</strong>. The attacker can't open it, but your app can. So they trick it into handing it over.</p>
+        <p class="close">Your own app, turned against you.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">TELL THE AI</span>
+        <p>I fetch user-supplied URLs. Add an SSRF guard that blocks private IPs and unsafe schemes, re-checked when the address resolves.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Your first part</span></div>
+    </section>
+
+    <section class="sheet gp index">
+      <div class="in">
+        <div class="gp-top">
+          <div class="gp-tab"></div>
+          <span class="gp-pill">Index</span>
+        </div>
+        <h1 class="lp-title">Index</h1>
+        <hr class="gp-rule">
+        <div class="idx">
+            <div class="idx-row"><span class="nm">SSRF</span><span class="pg">5</span></div>
+          </div>
+        <div class="gp-foot"><span>yoursite.com</span><span>My First Book</span></div>
+      </div>
+    </section>
+
+
+  </main>
+  <script src="../../engine/sheet-tools.js"></script>
+</body>
+</html>

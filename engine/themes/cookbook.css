@@ -1,0 +1,69 @@
+/* ==========================================================================
+   THEME — Cookbook
+   Warm, appetite-led, generous. For books about food, but also for anything
+   about making things by hand where the reader is going to cook from it.
+
+   It reuses studio.css's anatomy unchanged and changes the tokens. That is on
+   purpose: layout is the engine's job and it is already proven by check.mjs at
+   every trim. A theme that changed the geometry would be a different engine
+   wearing a theme's name, and every page in the book would need re-checking.
+   What changes here is how the page FEELS: a warm paper, a serif voice for the
+   title, a terracotta mechanism.
+
+   The colour roles survive, because a page you can read before you read it is
+   worth more than a mood:
+     terracotta #C2410C  the mechanism, the heat, the work
+     basil     #15803D  the good outcome, the thing that worked
+     chilli    #B91C1C  the mistake, the thing that burns
+     turmeric  #A16207  the thing worth protecting
+     ink       #2B2118  the reader, and the page's own voice
+   ========================================================================== */
+
+@import url('./studio.css');
+
+.sheet.bb{
+  --surface:#FDF8F1;   /* warm paper, not white */
+  --card:#FFFFFF;
+  --ink:#2B2118;
+  --muted:#7A6A5B;
+  --line:#EADFD0;
+  --accent:#C2410C;    /* terracotta: the mechanism */
+  --accent-strong:#9A3412;
+  --signal:#15803D;    /* basil: it worked */
+  --danger:#B91C1C;    /* chilli: you burned it */
+  --warn:#A16207;      /* turmeric: what you were protecting */
+
+  background:var(--surface);
+  color:var(--ink);
+  font-family:"Inter",system-ui,sans-serif;
+}
+
+/* A serif title is the whole personality of the thing. Sizes are left exactly
+   as studio sets them: a theme changes the voice, not the fit. */
+.sheet.bb .title{
+  font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
+  font-weight:600;
+  letter-spacing:-0.01em;
+}
+
+.sheet.bb .pill{ background:#F6E7D7; color:#9A3412; border-color:#EBD3BB; }
+.sheet.bb .rule{ background:var(--line); }
+.sheet.bb .explain .hl{ color:var(--accent-strong); }
+
+/* The action box reads as "do this now" rather than "tell the AI". */
+.sheet.bb .ask{
+  background:#F6E7D7;
+  border-color:#EBD3BB;
+}
+.sheet.bb .ask .lbl{ color:#9A3412; }
+
+/* ---- archetype hooks -------------------------------------------------------
+   Optional. A book that does not use these attributes is unaffected, which is
+   why studio.css does not need to know they exist. */
+.sheet.bb[data-archetype="recipe"] .title{ font-style:italic; }
+.sheet.bb[data-archetype="recipe"] .pill{ background:#EFE3CF; }
+.sheet.bb[data-archetype="recipe"] .explain p:first-child::before{ content:"Method. "; font-weight:600; color:var(--accent-strong); }
+
+.sheet.bb[data-archetype="exercise"] .title{ font-style:normal; }
+.sheet.bb[data-archetype="exercise"] .ask{ background:#E8F1E8; border-color:#CFE0CF; }
+.sheet.bb[data-archetype="exercise"] .ask .lbl{ color:#15803D; }

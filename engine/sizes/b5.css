@@ -1,0 +1,10 @@
+/* Page size: B5 (ISO, 176 x 250 mm) — the book trim this engine was built for.
+   Link AFTER engine/sheet.css and set <html lang="en" data-size="b5">.
+
+   The CSS keyword `B5` is ISO B5 per spec (not JIS B5, which is 182 x 257 mm).
+   @page is restated here because a print stylesheet takes the LAST @page size
+   it sees: linking a size file after sheet.css is what makes the switch real.
+
+   Adding another trim is one file like this one plus data-size on the page. */
+html[data-size="b5"]{ --page-w:176mm; --page-h:250mm; --page-pad:14mm; }
+@media print{ @page{ size:B5; margin:0; } }

@@ -2,12 +2,37 @@
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  background: var(--bg);
+  background: radial-gradient(1200px 600px at 50% 0%, #161823 0%, var(--bg) 55%);
   color: var(--ink);
-  font: 13px/1.6 var(--sans);
+  font: 13px/1.65 var(--sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 .dim { color: var(--muted); }
 code { font: 11.5px var(--mono); color: #a5b4fc; }
-button, select, input, textarea { font: inherit; color: inherit; }
+button, select, input, textarea {
+  font: inherit; color: inherit;
+}
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, .tab:focus-visible, .step:focus-visible {
+  outline: 2px solid rgba(99,102,241,0.6);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99,102,241,0.4) rgba(0,0,0,0.2);
+}
+*::-webkit-scrollbar {
+  width: 10px; height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.2);
+  border-radius: 6px;
+}
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(99,102,241,0.5) 0%, rgba(99,102,241,0.3) 100%);
+  border-radius: 6px; border: 1px solid rgba(99,102,241,0.4);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(99,102,241,0.7) 0%, rgba(99,102,241,0.5) 100%);
+}

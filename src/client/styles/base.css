@@ -1,0 +1,13 @@
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 13px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.dim { color: var(--muted); }
+code { font: 11.5px var(--mono); color: #a5b4fc; }
+button, select, input, textarea { font: inherit; color: inherit; }

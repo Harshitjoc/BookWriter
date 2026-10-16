@@ -1,7 +1,7 @@
 # Page Template
 
 > **Do not emit this standalone document per page.** In a book the look is linked from
-> `../../engine/themes/studio.css`, and each page is one `<section class="sheet bb">…</section>`
+> `../../src/engine/themes/studio.css`, and each page is one `<section class="sheet bb">…</section>`
 > written into the book's interior file. Copy `references/example-page.html` instead.
 >
 > The standalone template below is kept as the **design-token reference**: the palette, the
@@ -12,7 +12,7 @@ The page is a standalone HTML document in the Modern AI Studio theme. Copy the w
 ## Tokens (Modern AI Studio)
 
 Indigo is the accent; the rest are neutrals plus three semantic accents. Change them at the top
-of `.sheet.bb` in `engine/themes/studio.css` and every page in every book follows.
+of `.sheet.bb` in `src/engine/themes/studio.css` and every page in every book follows.
 
 - `--surface` `#FAFAFC` page paper, `--card` `#FFFFFF` cards
 - `--ink` `#1A1A2E` primary text, `--muted` `#5B6472` secondary, `--line` `#E7E9EF` borders

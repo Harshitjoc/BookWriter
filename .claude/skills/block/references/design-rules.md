@@ -149,7 +149,7 @@ Read this at Step 3 (build) alongside `diagram-system.md`. Every entry traces to
 
 ## Page geometry: tighter bottom margin + page numbers (from page 05 feedback — "better for all pages")
 
-These live in `engine/themes/studio.css`, so they apply to **every** book page automatically.
+These live in `src/engine/themes/studio.css`, so they apply to **every** book page automatically.
 
 - **Vertical margins are 9mm (top AND bottom); the sides stay 14mm** (`.sheet.bb{ padding:9mm var(--page-pad) }`).
   Pages are vertically constrained, not horizontally, so tighten top/bottom and keep the side/binding margin

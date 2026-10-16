@@ -5,14 +5,14 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "build": "node engine/tools/build-book.mjs",
-    "check": "node engine/tools/check.mjs",
-    "shot": "node engine/tools/shot.mjs",
-    "export": "node engine/tools/export.mjs",
-    "image": "node engine/tools/gen-image.mjs",
-    "ui": "node engine/ui/server.mjs",
-    "test": "node engine/ui/test/run.mjs",
-    "regress": "node engine/tools/regress.mjs"
+    "build": "node src/engine/tools/build-book.mjs",
+    "check": "node src/engine/tools/check.mjs",
+    "shot": "node src/engine/tools/shot.mjs",
+    "export": "node src/engine/tools/export.mjs",
+    "image": "node src/engine/tools/gen-image.mjs",
+    "ui": "node src/server/index.mjs",
+    "test": "node tests/run.mjs",
+    "regress": "node src/engine/tools/regress.mjs"
   },
   "devDependencies": {
     "@monaco-editor/react": "^4.7.0",

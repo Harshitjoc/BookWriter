@@ -12,19 +12,19 @@ B5 is the default, not the only option. A book can be trimmed to `a5`, `a4`,
 `six-by-nine` or `b5-landscape`, dressed in one of four themes, and have its pages follow
 a named shape — `standard`, `procedure`, `recipe`, `exercise`, `reference`. Three fields in
 `book.json`, no template to copy. All of it is defined in one file,
-[`engine/defaults.json`](engine/defaults.json).
+[`src/engine/defaults.json`](src/engine/defaults.json).
 
 No account, no hosted service, nothing to sign up for. The canvas is the guarantee: what
 you see is what comes out of the printer. The whole engine runs locally from a command
 line, and there is an optional browser cockpit (`npm run ui`) if you would rather point and
-click — see [`engine/ui/`](engine/ui/). Either way you are authoring against the same
+click — see [`src/client/`](src/client/). Either way you are authoring against the same
 canvas, because it is the engine, not the interface, that draws the pages.
 
-**New here? Read [the guide](GUIDE.md).** It goes from an empty folder to a printable
+**New here? Read [the guide](docs/GUIDE.md).** It goes from an empty folder to a printable
 book in one sitting.
 
 **Already have a book and want to know what the engine does with it? Read
-[How a book actually gets made](HOW-IT-WORKS.md).** It walks the whole pipeline step by
+[How a book actually gets made](docs/HOW-IT-WORKS.md).** It walks the whole pipeline step by
 step — the five files and which one is generated, why your interior is a *pool* of pages
 rather than a sequence, how `book.json` picks the pages and in what order, where the page
 numbers come from, and why the PDF matches the screen. It traces a real book from six files
@@ -111,7 +111,7 @@ draws the diagram as SVG, and checks that it fits. Rebuild, and it is in the boo
 No agent? Copy a `<section class="sheet bb">` out of the showcase and write it by hand.
 Nothing here needs an AI. It is just faster with one.
 
-[The guide](GUIDE.md) walks through all of this properly, including `book.json` field by
+[The guide](docs/GUIDE.md) walks through all of this properly, including `book.json` field by
 field, the markup of a page, and what to do when something breaks.
 
 ## Or point and click instead
@@ -137,8 +137,8 @@ Two more tabs in the same window:
 
 It is not a different engine. Every button runs the same `npm run` script you would have
 typed, the preview is the actual `book.html` served off disk, and nothing in
-`engine/tools/` knows the UI exists. If you delete `engine/ui/`, you lose the window, not
-the book. Details in [`engine/ui/`](engine/ui/).
+`src/engine/tools/` knows the UI exists. If you delete `src/client/`, you lose the window, not
+the book. Details in [`src/client/`](src/client/).
 
 ## From source, one command
 
@@ -163,8 +163,8 @@ stream lets you see what it intents before a word is written.
 ## Drafting a page
 
 ```bash
-node engine/tools/llm.mjs --list        # what is available, and what it costs
-node engine/tools/draft-block.mjs books/my-book --topic "How a CDN works"
+node src/engine/tools/llm.mjs --list        # what is available, and what it costs
+node src/engine/tools/draft-block.mjs books/my-book --topic "How a CDN works"
 ```
 
 Ten providers. `ollama` and `lmstudio` run on your machine, are free, and need no key:
@@ -197,9 +197,9 @@ npm test
 
 Runs six suites: the provider layer, formats and themes, the page contract and drafter,
 the HTTP surface, a real-browser suite, and a regression gate that rebuilds every
-committed book and compares `sha256(book.html)` against `engine/tools/baseline.json`. If a
+committed book and compares `sha256(book.html)` against `src/engine/tools/baseline.json`. If a
 hash moves, you changed the books that already exist — review it, then
-`node engine/tools/regress.mjs --update`.
+`node src/engine/tools/regress.mjs --update`.
 
 ---
 
@@ -231,7 +231,7 @@ What each step actually does:
 If a page overflows, cut words. Never shrink the drawing to make room: that clips the
 bottom of it and calls the problem solved.
 
-[How a book actually gets made](HOW-IT-WORKS.md) walks all five steps against a real book,
+[How a book actually gets made](docs/HOW-IT-WORKS.md) walks all five steps against a real book,
 including why the page count is `1 + 1 + 1 + (one divider per part) + (your blocks) + 1`.
 
 ---
@@ -257,8 +257,8 @@ packed actually looks like. You cannot draw those, and a diagram of them is wors
 nothing.
 
 ```bash
-node engine/tools/gen-image.mjs --check
-node engine/tools/gen-image.mjs "<prompt>" books/my-book/images/thing.jpg --aspect 16:9
+node src/engine/tools/gen-image.mjs --check
+node src/engine/tools/gen-image.mjs "<prompt>" books/my-book/images/thing.jpg --aspect 16:9
 ```
 
 The default provider is **agy**, the Antigravity CLI signed into your Google account. It
@@ -300,18 +300,28 @@ page in the free edition you give away.
 ## What is where
 
 ```
-GUIDE.md                start here
-HOW-IT-WORKS.md         the pipeline, step by step, traced through a real book
-engine/
-  AUTHORING.md          the one rule, and how the canvas works
-  defaults.json         every size, theme and archetype, in one place
-  sheet.css             the rigid page frame. read this one.
-  sizes/                the trims: b5, b5-landscape, a5, a4, six-by-nine
-  themes/               the looks: studio, cookbook, manual, reference
-  fonts/                self-hosted, so builds are offline and identical every time
-  tools/                build-book, check, shot, export, gen-image, llm, draft-block,
+index.html              the cockpit's entry point
+vite.config.js          the Vite config the server merges in
+package.json            scripts and dependencies
+docs/
+  GUIDE.md              start here
+  HOW-IT-WORKS.md       the pipeline, step by step, traced through a real book
+src/
+  engine/
+    AUTHORING.md        the one rule, and how the canvas works
+    defaults.json       every size, theme and archetype, in one place
+    sheet.css           the rigid page frame. read this one.
+    sizes/              the trims: b5, b5-landscape, a5, a4, six-by-nine
+    themes/             the looks: studio, cookbook, manual, reference
+    fonts/              self-hosted, so builds are offline and identical every time
+    tools/              build-book, check, shot, export, gen-image, llm, draft-block,
                         source-intake, plan-from-source, make-book, make-paper
-  ui/                   optional browser cockpit for all of the above
+  server/
+    index.mjs           the HTTP + Vite-middleware server behind the cockpit
+  client/               the cockpit: components, panels, styles
+  shared/
+    byok.js             the bring-your-own-key layer, shared by client and server
+tests/                  every suite: node tests/run.mjs
 books/
   showcase/             the ten pages above
   shapes/               every page shape and the cookbook theme, in one small book
@@ -325,7 +335,7 @@ books/
 - **Never add an `@media print` rule that changes a size, a font, or an image.** That is
   the one thing that makes a PDF stop matching the screen.
 - **Books live two folders deep**, `books/<slug>/`, because every page links
-  `../../engine/…`.
+  `../../src/engine/…`.
 - **One concept per page.** If it needs two pages, it is two concepts.
 
 ---

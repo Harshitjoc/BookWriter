@@ -4,22 +4,22 @@
 
   A book lives at books/<slug>/<slug>.html and is ONE file holding many
   <section class="sheet bb"> pages, one concept per page. The look comes from
-  ../../engine/themes/studio.css, never an inline <style>. The diagram is
+  ../../src/engine/themes/studio.css, never an inline <style>. The diagram is
   inline SVG inside a <div class="diagram"> wrapper (a photo page uses
   <figure class="photo"> instead).
 
   Copy ONE .bb section per concept, then run:
-    node engine/tools/check.mjs books/<slug>/<slug>.html    until every page is 0 mm
-    node engine/tools/shot.mjs  books/<slug>/<slug>.html    then LOOK at the PNGs
+    node src/engine/tools/check.mjs books/<slug>/<slug>.html    until every page is 0 mm
+    node src/engine/tools/shot.mjs  books/<slug>/<slug>.html    then LOOK at the PNGs
 -->
 <html lang="en" data-size="b5">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SSRF — My First Book</title>
-  <link rel="stylesheet" href="../../engine/sheet.css">
-  <link rel="stylesheet" href="../../engine/sizes/b5.css">
-  <link rel="stylesheet" href="../../engine/themes/studio.css">
+  <link rel="stylesheet" href="../../src/engine/sheet.css">
+  <link rel="stylesheet" href="../../src/engine/sizes/b5.css">
+  <link rel="stylesheet" href="../../src/engine/themes/studio.css">
 </head>
 <body>
   <main class="deck">
@@ -74,6 +74,6 @@
     </section>
 
   </main>
-  <script src="../../engine/sheet-tools.js"></script>
+  <script src="../../src/engine/sheet-tools.js"></script>
 </body>
 </html>

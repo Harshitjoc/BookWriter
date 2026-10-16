@@ -1,0 +1,11 @@
+/* Page size: ISO A5 (148 x 210 mm) — a paperback and a notebook.
+
+   Identical contract to engine/sizes/b5.css: link it AFTER engine/sheet.css and
+   set <html lang="en" data-size="a5"> in the interior. @page is restated because
+   a print stylesheet takes the LAST @page size it sees.
+
+   A5 is a third narrower than B5, so a page written for B5 will usually
+   overflow here. check.mjs measures the real sheet, so it will tell you by how
+   many millimetres — and the fix is to cut words, never to shrink the viewBox. */
+html[data-size="a5"]{ --page-w:148mm; --page-h:210mm; --page-pad:11mm; }
+@media print{ @page{ size:A5; margin:0; } }

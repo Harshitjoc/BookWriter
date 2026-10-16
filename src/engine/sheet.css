@@ -1,0 +1,111 @@
+/* ==========================================================================
+   THE STRICT SHEET FRAMEWORK
+   --------------------------------------------------------------------------
+   ONE rule makes print match screen: every page is a rigid, fixed-size box,
+   and the SAME css drives screen and print. There is NO @media print font
+   swap, width swap, or image resize. Print only hides the on-screen chrome
+   and gives each sheet its own physical page.
+
+   That is the whole trick. Break it and your PDF stops matching your screen.
+
+   Page model:
+     <html lang="en" data-size="b5">
+       <link rel="stylesheet" href="../../engine/sheet.css">        <- this file
+       <link rel="stylesheet" href="../../engine/sizes/b5.css">     <- the trim
+       <link rel="stylesheet" href="../../engine/themes/studio.css"><- the look
+       <body>
+         <main class="deck">
+           <section class="sheet bb"> one page </section>
+           <section class="sheet bb"> another page </section>
+         </main>
+
+   Geometry comes from three tokens, so a new trim size is one small file in
+   engine/sizes/ and nothing else changes:
+     --page-w   page width
+     --page-h   page height
+     --page-pad the safe margin, which lives INSIDE the box
+
+   Defaults below are B5 (ISO, 176 x 250 mm), the book trim this engine was
+   built for. engine/sizes/b5.css restates them explicitly so a page that
+   declares data-size="b5" is self-documenting.
+   ========================================================================== */
+
+:root{
+  /* ---- PAGE GEOMETRY (defaults = B5; engine/sizes/*.css may override) ---- */
+  --page-w:176mm;    /* page width  */
+  --page-h:250mm;    /* page height */
+  --page-pad:14mm;   /* safe print margin, lives INSIDE the box */
+
+  /* ---- SCREEN CHROME (never printed) ---- */
+  --desk:#20222b;    /* the "desk" the pages sit on, on screen */
+
+  /* ---- FALLBACK INK (every theme overrides these) ---- */
+  --paper:#ffffff;
+  --ink:#1a1a2e;
+  --pop:#dc2626;     /* the overflow warning colour */
+}
+
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0;
+  background:var(--desk);
+  color:var(--ink);
+  font-family:system-ui,sans-serif;
+  font-size:17px;
+  line-height:1.55;
+}
+
+/* ---------- the deck: lays the sheets out on the desk (screen only) ---------- */
+.deck{
+  display:flex; flex-direction:column; align-items:center;
+  gap:24px; padding:24px 14px 60px;
+}
+
+/* ==========================================================================
+   THE STRICT PAGE
+   The box is fixed and it CLIPS. If content is too tall it does not reflow
+   onto another page, it overflows the box, and sheet-tools.js flags it on
+   screen while you are still editing. engine/tools/check.mjs is the same
+   check as a command, and it is the one that has to read 0 mm before you
+   call a page done.
+   ========================================================================== */
+.sheet{
+  position:relative;
+  width:var(--page-w);
+  height:var(--page-h);
+  padding:var(--page-pad);   /* the safe print margin lives INSIDE the box */
+  background:var(--paper);
+  color:var(--ink);
+  overflow:hidden;           /* nothing can silently spill onto a 2nd sheet */
+  box-shadow:0 14px 40px rgba(0,0,0,.35);   /* screen only; removed in print */
+}
+
+/* overflow flag (screen only) */
+.sheet.is-overflowing{ outline:3px solid var(--pop); outline-offset:-3px; }
+.of-badge{
+  position:absolute; top:8px; right:8px; z-index:9;
+  background:var(--pop); color:#fff;
+  font:800 12px/1 system-ui,sans-serif; letter-spacing:.3px;
+  padding:6px 10px; border-radius:5px;
+  box-shadow:0 3px 8px rgba(0,0,0,.3);
+}
+
+/* ==========================================================================
+   PRINT  -  the only differences from screen: drop the desk and the chrome,
+   and give each sheet its own physical page. Layout, fonts, sizes: UNCHANGED.
+   Never add a rule here that changes a size, a font, or an image. That is
+   exactly what makes a PDF stop matching the screen.
+   ========================================================================== */
+@media print{
+  @page{ size:B5; margin:0; }
+  html,body{ background:#fff; }
+  .of-badge{ display:none !important; }
+  .deck{ display:block; padding:0; gap:0; }
+  .sheet{
+    box-shadow:none; outline:none; margin:0;
+    break-after:page; page-break-after:always;   /* one sheet -> one printed page */
+  }
+  .sheet:last-child{ break-after:auto; page-break-after:avoid; }  /* no trailing blank page */
+  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}

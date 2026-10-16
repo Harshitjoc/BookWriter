@@ -21,6 +21,6 @@ node_modules/
 books/**/page*.png
 /page*.png
 
-# The optional UI cockpit (engine/ui). It runs from source through Vite and writes
-# no build output into the repo, so only the usual node_modules is ignored.
-engine/ui/dist/
+# A production build of the cockpit (if you ever run `vite build`). The cockpit
+# normally runs from source through Vite in middleware mode and writes no output.
+dist/

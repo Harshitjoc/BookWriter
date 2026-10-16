@@ -6,7 +6,7 @@
   (cover, copyright, contents, part dividers, index, page numbers) is generated
   into book.html by:
 
-    node engine/tools/build-book.mjs books/starter
+    node src/engine/tools/build-book.mjs books/my-life-my-rule
 
   Never hand-edit book.html. It is overwritten on every build.
 
@@ -18,13 +18,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My First Book</title>
-  <link rel="stylesheet" href="../../engine/sheet.css">
-  <link rel="stylesheet" href="../../engine/sizes/b5.css">
-  <link rel="stylesheet" href="../../engine/themes/studio.css">
+  <link rel="stylesheet" href="../../src/engine/sheet.css">
+  <link rel="stylesheet" href="../../src/engine/sizes/b5.css">
+  <link rel="stylesheet" href="../../src/engine/themes/studio.css">
   <style>
     /* ====================================================================
        GENERATED PAGES — cover, copyright, contents, part dividers, index.
-       Written by engine/tools/build-book.mjs. Scoped .sheet.gp so it can never
+       Written by src/engine/tools/build-book.mjs. Scoped .sheet.gp so it can never
        touch a book page (.sheet.bb).
        ==================================================================== */
     .sheet.gp{
@@ -274,6 +274,6 @@
 
 
   </main>
-  <script src="../../engine/sheet-tools.js"></script>
+  <script src="../../src/engine/sheet-tools.js"></script>
 </body>
 </html>

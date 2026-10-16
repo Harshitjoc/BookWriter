@@ -21,7 +21,7 @@
     "rights": "The example pages and photographs in this book are public domain (CC0). Take them.",
     "lines": [
       "Set in Space Grotesk, Inter and JetBrains Mono, self-hosted and licensed under the SIL Open Font License.",
-      "Photographs generated with engine/tools/gen-image.mjs. Diagrams written as inline SVG.",
+      "Photographs generated with src/engine/tools/gen-image.mjs. Diagrams written as inline SVG.",
       "Built with the paper engine: github.com/hassancs91/paper-engine"
     ]
   },

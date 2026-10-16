@@ -23,7 +23,7 @@ SOFTWARE.
 --------------------------------------------------------------------------------
 THIRD-PARTY ASSETS
 
-Fonts in engine/fonts/ are redistributed under the SIL Open Font License 1.1
+Fonts in src/engine/fonts/ are redistributed under the SIL Open Font License 1.1
 (https://openfontlicense.org). The OFL permits bundling and redistribution,
 including in commercial work. The fonts are not covered by the MIT license
 above and remain the property of their authors:

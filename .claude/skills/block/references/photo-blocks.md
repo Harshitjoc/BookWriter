@@ -23,8 +23,8 @@ written as SVG, which is text, prints sharp at any size, and costs nothing.
 ## Making one
 
 ```bash
-node engine/tools/gen-image.mjs --check
-node engine/tools/gen-image.mjs --prompt-file books/<slug>/images/<name>.txt \
+node src/engine/tools/gen-image.mjs --check
+node src/engine/tools/gen-image.mjs --prompt-file books/<slug>/images/<name>.txt \
       books/<slug>/images/<name>.jpg --aspect 16:9
 ```
 
@@ -92,8 +92,8 @@ what you claimed.
 ## Then look at it
 
 ```bash
-node engine/tools/check.mjs books/<slug>/book.html   # broken image? wrong path?
-node engine/tools/shot.mjs  books/<slug>/book.html   # then open the PNG
+node src/engine/tools/check.mjs books/<slug>/book.html   # broken image? wrong path?
+node src/engine/tools/shot.mjs  books/<slug>/book.html   # then open the PNG
 ```
 
 The check can only tell you the file loaded. It cannot tell you the crop went through

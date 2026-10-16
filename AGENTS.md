@@ -8,15 +8,15 @@ CSS driving screen and print.
 **The loop, after every change:**
 
 ```bash
-node engine/tools/build-book.mjs books/<slug>
-node engine/tools/check.mjs      books/<slug>/book.html   # must read 0 mm everywhere
-node engine/tools/shot.mjs       books/<slug>/book.html   # then LOOK at the PNGs
+node src/engine/tools/build-book.mjs books/<slug>
+node src/engine/tools/check.mjs      books/<slug>/book.html   # must read 0 mm everywhere
+node src/engine/tools/shot.mjs       books/<slug>/book.html   # then LOOK at the PNGs
 ```
 
 **Rules you must not break:**
 
 1. `book.html` is generated. Edit `books/<slug>/<slug>.html` and `book.json` instead.
-2. Books live exactly two folders deep (`books/<slug>/`); pages link `../../engine/…`.
+2. Books live exactly two folders deep (`books/<slug>/`); pages link `../../src/engine/…`.
 3. Never add an `@media print` rule that changes a size, a font, or an image.
 4. A page must never overflow. If it does, cut words. Never shrink a diagram's `viewBox`
    to make it fit, because that clips the drawing instead of fixing it.

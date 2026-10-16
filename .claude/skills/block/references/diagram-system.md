@@ -127,13 +127,13 @@ Each shape is a starting point, not a cage. Flex it to the concept.
 ## 7. Diagrams as code (preferred for agents)
 
 Hand-writing the SVG above re-solves the same layout every time and is where the
-invisible-text and off-canvas bugs come from. `engine/tools/diagram.mjs` compiles
+invisible-text and off-canvas bugs come from. `src/engine/tools/diagram.mjs` compiles
 a small JSON spec into exactly that SVG: 592-wide viewBox, placed cards, arrows,
 badges, key line, and an explicit `fill` on every `<text>`. Same spec in, same
 bytes out.
 
 ```js
-import { compileDiagram } from '../../engine/tools/diagram.mjs';
+import { compileDiagram } from '../../src/engine/tools/diagram.mjs';
 
 compileDiagram({
   kind: 'row',
@@ -154,9 +154,9 @@ block types in section 5 — pick the one that matches the concept.
 From the command line:
 
 ```bash
-node engine/tools/gen-diagram.mjs --list               # the shapes and their use
-node engine/tools/gen-diagram.mjs --example attack     # a starter spec
-node engine/tools/gen-diagram.mjs spec.json --out diagram.svg
+node src/engine/tools/gen-diagram.mjs --list               # the shapes and their use
+node src/engine/tools/gen-diagram.mjs --example attack     # a starter spec
+node src/engine/tools/gen-diagram.mjs spec.json --out diagram.svg
 ```
 
 `gen-diagram.mjs` runs the page's own `checkDiagram()` on the result and refuses

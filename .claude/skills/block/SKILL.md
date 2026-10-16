@@ -12,7 +12,7 @@ concept to somebody who does not already understand it, and then tells them one 
 go and do.
 
 The page is one `<section class="sheet bb">` inside the book's interior file at
-`books/<slug>/<slug>.html`. The look comes from `engine/themes/studio.css`. You write the
+`books/<slug>/<slug>.html`. The look comes from `src/engine/themes/studio.css`. You write the
 content, and nothing else: no layout CSS, no inline `<style>`, no `@media print`.
 
 Every page has the same seven parts, in this order:
@@ -121,7 +121,7 @@ gone wrong on real pages, and it wins over the general guidance when they disagr
 1. Copy one `.bb` section from `references/example-page.html` into
    `books/<slug>/<slug>.html`, in the right place.
 2. Write the band. Diagram: `viewBox="0 0 592 <H>"`, H around 200. Photo: generate it
-   with `engine/tools/gen-image.mjs`, save it to `books/<slug>/images/`, and save the
+   with `src/engine/tools/gen-image.mjs`, save it to `books/<slug>/images/`, and save the
    prompt beside it as `<name>.txt`.
 3. Write the explainer with the role colours as emphasis spans: `.bad` red for the pain,
    `.hl` indigo for the idea, `.good` teal for the outcome, `strong` for a key phrase.
@@ -133,9 +133,9 @@ gone wrong on real pages, and it wins over the general guidance when they disagr
 ## Step 4 — verify, and actually look
 
 ```bash
-node engine/tools/build-book.mjs books/<slug>     # assemble
-node engine/tools/check.mjs books/<slug>/book.html  # MUST be 0 mm on every page
-node engine/tools/shot.mjs  books/<slug>/book.html  # then READ the PNGs
+node src/engine/tools/build-book.mjs books/<slug>     # assemble
+node src/engine/tools/check.mjs books/<slug>/book.html  # MUST be 0 mm on every page
+node src/engine/tools/shot.mjs  books/<slug>/book.html  # then READ the PNGs
 ```
 
 `check.mjs` proves the page fits. It cannot see overlap, a clipped label, a squashed

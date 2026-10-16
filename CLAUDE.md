@@ -1,8 +1,8 @@
 # CLAUDE.md
 
 This repo builds **books**: one concept per page, on a strict B5 canvas (176 x 250 mm),
-where the same CSS drives screen and print. Read `engine/AUTHORING.md` for how the canvas
-works and `engine/tools/README.md` for the commands.
+where the same CSS drives screen and print. Read `src/engine/AUTHORING.md` for how the canvas
+works and `src/engine/tools/README.md` for the commands.
 
 When asked to write or lay out a page, use the **`block` skill** in
 `.claude/skills/block/`. It owns the voice, the diagram system, and the design rules.
@@ -13,7 +13,7 @@ When asked to write or lay out a page, use the **`block` skill** in
   `books/<slug>/<slug>.html`, plus `books/<slug>/book.json`. Every build overwrites
   `book.html`.
 - **Books live exactly 2 folders deep**: `books/<slug>/`, because every page links
-  `../../engine/…`. A wrong depth renders an unstyled page that can still pass a naive
+  `../../src/engine/…`. A wrong depth renders an unstyled page that can still pass a naive
   check, which is why `check.mjs` tests for it.
 - **The same CSS drives screen and print.** Never add an `@media print` rule that changes
   a size, a font, or an image. That single thing is what makes an exported PDF stop
@@ -34,9 +34,9 @@ When asked to write or lay out a page, use the **`block` skill** in
 ## The loop, after every edit
 
 ```bash
-node engine/tools/build-book.mjs books/<slug>            # assemble book.html
-node engine/tools/check.mjs      books/<slug>/book.html  # MUST be 0 mm, no broken images
-node engine/tools/shot.mjs       books/<slug>/book.html  # then READ the PNGs
+node src/engine/tools/build-book.mjs books/<slug>            # assemble book.html
+node src/engine/tools/check.mjs      books/<slug>/book.html  # MUST be 0 mm, no broken images
+node src/engine/tools/shot.mjs       books/<slug>/book.html  # then READ the PNGs
 ```
 
 `check.mjs` only proves a page FITS. It cannot see overlap, a clipped SVG label, a photo
@@ -57,7 +57,7 @@ surgery.
 
 ## Images
 
-`engine/tools/gen-image.mjs` defaults to the **agy** provider (Antigravity CLI, signed
+`src/engine/tools/gen-image.mjs` defaults to the **agy** provider (Antigravity CLI, signed
 into a Google account, no API key, no per-image charge). `--provider gemini` is the
 metered fallback and needs `GEMINI_API_KEY` in `.env`.
 
@@ -67,7 +67,7 @@ repeat the book's shared style sentence. Save every prompt next to its image as
 
 ## Notes
 
-- Fonts are self-hosted in `engine/fonts/`, so builds and PDF exports are deterministic
+- Fonts are self-hosted in `src/engine/fonts/`, so builds and PDF exports are deterministic
   and work offline. Do not switch to a font CDN.
 - `*.pdf` and `page*.png` are gitignored and regenerable.
 - `.env` is optional. The engine builds books with no keys at all.

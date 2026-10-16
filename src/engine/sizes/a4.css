@@ -1,0 +1,11 @@
+/* Page size: A4 (210 x 297 mm) — workbooks, manuals, anything that gets a desk
+   and a binder rather than a bookcase.
+
+   Same contract as engine/sizes/b5.css: link AFTER engine/sheet.css, and set
+   <html lang="en" data-size="a4">.
+
+   A4 holds far more than B5, which is the point for a reference book: fewer
+   pages for the same material, and room for wide diagrams and tables that would
+   be cramped at B5. */
+html[data-size="a4"]{ --page-w:210mm; --page-h:297mm; --page-pad:18mm; }
+@media print{ @page{ size:A4; margin:0; } }

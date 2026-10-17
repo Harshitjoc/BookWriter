@@ -282,8 +282,8 @@ export default function App() {
         <div className="brand">
           <span className="mark" />
           <div>
-            <strong>paper engine</strong>
-            <span className="dim"> one concept per page · B5</span>
+            <strong>Paper Engine</strong>
+            <span className="dim"> One concept per page · B5</span>
           </div>
         </div>
 

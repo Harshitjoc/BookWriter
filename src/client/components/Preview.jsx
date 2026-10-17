@@ -10,10 +10,8 @@ import { useEffect, useRef, useState } from 'react';
    App, check it is actually read by App.) */
 export default function Preview({ book, edition, refreshKey, built }) {
   const [nonce, setNonce] = useState(0);
-  /* 0.6 must stay on the slider's grid: min 0.3 + step 0.05. The old default of
-     0.62 is not a reachable step, so the browser silently snapped it to 0.6 and
-     React's state disagreed with the DOM from the first paint. */
-  const [zoom, setZoom] = useState(0.6);
+  /* Default at 100% for full view; slider still allows zooming (min 0.3, step 0.05). */
+  const [zoom, setZoom] = useState(1.0);
   const [trim, setTrim] = useState(null);
   const frame = useRef(null);
 

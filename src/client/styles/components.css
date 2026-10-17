@@ -63,8 +63,8 @@
   border-bottom: 1px solid var(--line); background: var(--panel); flex: 0 0 auto;
   font-size: 12px;
 }
-.preview-frame { flex: 1 1 auto; min-height: 0; overflow: auto; background: radial-gradient(1200px 600px at 50% 0%, #0b0c13 0%, #07070d 100%); }
-.preview-frame iframe { width: 100%; height: 100%; border: none; display: block; }
+.preview-frame { flex: 1 1 auto; min-height: 0; overflow: auto; background: radial-gradient(1200px 600px at 50% 0%, #0b0c13 0%, #07070d 100%); display: flex; justify-content: center; align-items: flex-start; }
+.preview-frame iframe { height: 100%; border: none; display: block; flex: 0 0 auto; }
 .preview-wait { padding: 20px; color: var(--muted); }
 .zoom { accent-color: var(--accent); }
 .zoom-val { color: var(--muted); font: 11px var(--mono); }

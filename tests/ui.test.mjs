@@ -521,6 +521,28 @@ await withServer(async (base) => {
       await page.waitForTimeout(250);
       ok('the tools panel comes back too', await page.locator('.col-out').isVisible());
 
+      group('the project you were on survives a refresh');
+      {
+        const picker = page.locator('.top-mid select').first();
+        await picker.selectOption('starter');
+        await page.waitForTimeout(600);
+        await page.reload({ waitUntil: 'networkidle' });
+        await page.waitForSelector('.monaco-editor', { timeout: 30000 });
+        await page.waitForTimeout(400);
+        ok('the cockpit reopens the project you left it on',
+          (await picker.inputValue()) === 'starter', await picker.inputValue());
+
+        /* A remembered slug whose book was deleted or renamed must not strand
+           the cockpit on nothing: it falls back to a book that exists. */
+        await page.evaluate(() => localStorage.setItem('proofpress.slug', 'ghost-book'));
+        await page.reload({ waitUntil: 'networkidle' });
+        await page.waitForSelector('.monaco-editor', { timeout: 30000 });
+        await page.waitForTimeout(400);
+        const value = await picker.inputValue();
+        ok('a remembered project that is gone falls back to a real one',
+          value !== 'ghost-book' && value !== '', value);
+      }
+
       group('a project can be deleted, and only on purpose');
       const postJson = async (url, body) => {
         const r = await fetch(base + url, {
@@ -568,6 +590,8 @@ await withServer(async (base) => {
         (await bookSelect.locator('option[value="uitest-ui"]').count()) === 0);
       ok('and the cockpit says what it did',
         /deleted books\/uitest-ui/i.test((await page.locator('.notice').textContent()) || ''));
+      ok('the cockpit is left on a project that still exists',
+        (await bookSelect.inputValue()) !== '', await bookSelect.inputValue());
 
       /* Belt and braces: the scratch cleaner only knows about `uitest`, so make
          sure the two books these tests made are gone whatever happened above. */

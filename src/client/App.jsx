@@ -18,6 +18,7 @@ import PublishPanel from './panels/PublishPanel.jsx';
 import Splitter from './components/Splitter.jsx';
 import useLayout, { EDIT_MIN, EDIT_MAX, OUT_MIN, OUT_MAX, PREVIEW_MIN } from './lib/useLayout.js';
 import useMediaQuery from './lib/useMediaQuery.js';
+import { readSlug, saveSlug } from './lib/savedBook.js';
 
 /* The tracks a splitter and a rail take, in px. They are here rather than in the
  * stylesheet because the drag maths in App has to subtract them by hand. */
@@ -85,15 +86,20 @@ export default function App() {
   useEffect(() => () => { abortRun.current?.abort(); }, []);
 
   /* ------------------------------------------------------------------ boot */
-  const reloadBooks = useCallback(async (pick, drop) => {
+  const reloadBooks = useCallback(async (pick) => {
     const { books: list } = await api.getBooks();
     setBooks(list);
+    /* Prefer an explicit pick (a book just made), then the project we were
+       already on, then the remembered one — but never a slug the server no
+       longer has. A deleted or renamed book must not leave the cockpit pointed
+       at nothing, so every candidate is checked against the list first. */
     setSlug((cur) => {
-      if (pick) return pick;
-      /* After a delete the slug we held is gone. Falling back to `cur` would
-         leave the cockpit pointed at a book that no longer exists. */
-      if (drop && cur === drop) return list[0]?.slug || '';
-      return cur || list[0]?.slug || '';
+      const exists = (s) => !!s && list.some((b) => b.slug === s);
+      if (exists(pick)) return pick;
+      if (exists(cur)) return cur;
+      const saved = readSlug();
+      if (exists(saved)) return saved;
+      return list[0]?.slug || '';
     });
     return list;
   }, []);
@@ -102,6 +108,11 @@ export default function App() {
     reloadBooks().catch((e) => setNotice({ kind: 'bad', text: e.message }));
     api.getHealth().then(setHealth).catch(() => {});
   }, [reloadBooks]);
+
+  /* Remember which project you are on, so a refresh lands back here. */
+  useEffect(() => {
+    if (slug) saveSlug(slug);
+  }, [slug]);
 
   const refreshShots = useCallback(async (s) => {
     const target = s || slug;
@@ -278,7 +289,7 @@ export default function App() {
       const { removed } = await api.deleteBook(s, deleteWord.trim());
       setShowDelete(false);
       setDeleteWord('');
-      await reloadBooks(undefined, s);
+      await reloadBooks();
       setNotice({ kind: 'ok', text: `deleted books/${s} — ${removed} file(s), pages and PDFs included.` });
     } catch (e) {
       setNotice({ kind: 'bad', text: e.message });

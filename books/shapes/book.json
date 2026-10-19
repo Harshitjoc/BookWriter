@@ -1,10 +1,10 @@
 {
   "title": "Shapes",
   "subtitle": "Every page shape, on one canvas.",
-  "author": "The paper engine",
+  "author": "Proofpress",
 
   "series": "Shapes",
-  "brand": "hassancs91.github.io/paper-engine",
+  "brand": "github.com/Harshitjoc/BookWriter",
   "editionLabel": "Edition 1.0",
   "unit": "pages",
 
@@ -15,12 +15,12 @@
   "theme": "cookbook",
 
   "cover": {
-    "kicker": "A paper-engine book",
+    "kicker": "A Proofpress book",
     "note": "One page per shape, on purpose."
   },
   "copyright": {
     "year": 2026,
-    "rights": "Ac 2026 The paper engine. All rights reserved.",
+    "rights": "© 2026 Proofpress. All rights reserved.",
     "lines": [
       "Cookbook theme, B5. One concept per page."
     ]

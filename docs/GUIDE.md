@@ -63,8 +63,8 @@ prints. Nothing reflows, nothing shifts when you export.
 You need [Node](https://nodejs.org) 18 or newer. Nothing else, and no account anywhere.
 
 ```bash
-git clone https://github.com/hassancs91/paper-engine
-cd paper-engine
+git clone https://github.com/Harshitjoc/BookWriter.git
+cd BookWriter
 npm install
 npx playwright install chromium
 ```
@@ -144,7 +144,7 @@ This one file decides everything printed around your pages, and the order they c
   "contents": true,
   "index": true,
 
-  "cover":     { "kicker": "A paper-engine book", "note": "Written one block at a time." },
+  "cover":     { "kicker": "A Proofpress book", "note": "Written one block at a time." },
   "copyright": { "year": 2026, "rights": "© 2026 Your Name. All rights reserved.",
                  "lines": ["Set in Space Grotesk, Inter and JetBrains Mono."] },
 

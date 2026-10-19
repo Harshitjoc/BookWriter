@@ -1,4 +1,4 @@
-# paper engine
+# Proofpress
 
 **Write one page at a time. Get a real book.**
 
@@ -71,8 +71,8 @@ a page number can never go stale.
 You need [Node](https://nodejs.org) 18 or newer. That is all.
 
 ```bash
-git clone https://github.com/hassancs91/paper-engine
-cd paper-engine
+git clone https://github.com/Harshitjoc/BookWriter.git
+cd BookWriter
 npm install
 npx playwright install chromium      # the headless browser that measures and exports
 ```
@@ -345,10 +345,10 @@ books/
 I built this engine for my own books, and these are the ones it produced. They are also
 the honest answer to "does this actually work on a real book".
 
-- **[Vibe Engineering Blocks, the free edition](https://learnwithhasan.com/blocks/?utm_source=github&utm_medium=referral&utm_campaign=blocks&utm_content=paper-engine)**
+- **[Vibe Engineering Blocks, the free edition](https://learnwithhasan.com/blocks/?utm_source=github&utm_medium=referral&utm_campaign=blocks)**
   — 47 pages, free. One concept per page, exactly like the showcase. The fastest way to
   see what a finished book off this engine reads like.
-- **[Vibe Engineering Blocks, the full edition](https://learnwithhasan.com/books/vibe-engineering-blocks-full-edition/?utm_source=github&utm_medium=referral&utm_campaign=blocks&utm_content=paper-engine)**
+- **[Vibe Engineering Blocks, the full edition](https://learnwithhasan.com/books/vibe-engineering-blocks-full-edition/?utm_source=github&utm_medium=referral&utm_campaign=blocks)**
   — the paid one. Same engine, more pages.
 
 And there is a video walking through the whole thing:

@@ -1,6 +1,6 @@
 ---
 name: block
-description: Write and lay out one finished page (a "block") for a book built on the paper engine, on the strict B5 canvas. One concept per page, in the book's own voice, with an inline SVG diagram or a generated photograph, an explainer, and an action box. Use this WHENEVER someone asks for a book page, a block, a new page for the book, a printable explainer, or says "make a block on X", "lay out X as a page", "write the page about X", or hands over a topic for a book in books/. It outputs one <section class="sheet bb"> written into the book's interior file, then verifies it with check.mjs and shot.mjs. It does NOT write blog posts, social posts, or flowing prose chapters.
+description: Write and lay out one finished page (a "block") for a book built on Proofpress, on the strict B5 canvas. One concept per page, in the book's own voice, with an inline SVG diagram or a generated photograph, an explainer, and an action box. Use this WHENEVER someone asks for a book page, a block, a new page for the book, a printable explainer, or says "make a block on X", "lay out X as a page", "write the page about X", or hands over a topic for a book in books/. It outputs one <section class="sheet bb"> written into the book's interior file, then verifies it with check.mjs and shot.mjs. It does NOT write blog posts, social posts, or flowing prose chapters.
 ---
 
 # Block

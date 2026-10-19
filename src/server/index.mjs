@@ -418,7 +418,7 @@ function handleFromSource(req, res) {
     let sourcePath = String(args.source || '');
     if (args.fileBase64) {
       const ext = path.extname(String(args.fileName || 'source.pdf')) || '.bin';
-      const tmp = path.join(os.tmpdir(), `paper-engine-src-${Date.now()}${ext}`);
+      const tmp = path.join(os.tmpdir(), `proofpress-src-${Date.now()}${ext}`);
       fs.writeFileSync(tmp, Buffer.from(String(args.fileBase64), 'base64'));
       sourcePath = tmp;
     }
@@ -897,7 +897,7 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, HOST, () => {
   const books = (() => { try { return fs.readdirSync(BOOKS, { withFileTypes: true }).filter((e) => e.isDirectory()).length; } catch { return 0; } })();
   console.log('');
-  console.log('  paper engine UI');
+  console.log('  Proofpress UI');
   console.log(`  http://${HOST}:${PORT}`);
   console.log('');
   console.log(`  root    ${ROOT}`);

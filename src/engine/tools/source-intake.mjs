@@ -79,7 +79,7 @@ function htmlTitle(html) {
 
 /** Fetch a web page and pull the rough text out of it. */
 async function fromUrl(url) {
-  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 paper-engine intake' } });
+  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 proofpress intake' } });
   if (!res.ok) throw new Error(`page fetch returned ${res.status}`);
   const html = await res.text();
   return { text: stripHtml(html), title: htmlTitle(html) };

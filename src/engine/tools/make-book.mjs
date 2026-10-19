@@ -87,7 +87,7 @@ export async function makeBook({ slug, plan, theme = 'studio', size = 'b5', book
     ...(lang ? { lang } : {}),
     ...(direction ? { dir: direction } : {}),
     ...(fonts && fonts.length ? { fonts: Array.isArray(fonts) ? fonts : [...fonts] } : {}),
-    cover: { kicker: 'A paper-engine book', note: plan.thesis },
+    cover: { kicker: 'A Proofpress book', note: plan.thesis },
     copyright: { year: new Date().getFullYear(), rights: 'All rights reserved.', lines: [] },
     parts: plan.parts.map((p) => ({
       name: p.name,

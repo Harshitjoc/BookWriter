@@ -34,7 +34,7 @@ The document must follow this skeleton in order:
   two or three more body sections
   <section> <h2>N. Conclusion</h2> ... </section>
 
-  <footer class="paper-foot">a line noting this was drafted with the paper engine</footer>
+  <footer class="paper-foot">a line noting this was drafted with Proofpress</footer>
 
 Rules:
 - The <head> links  "../../../src/engine/paper.css". Never inline styles or @media print.

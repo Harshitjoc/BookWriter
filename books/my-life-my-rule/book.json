@@ -13,7 +13,7 @@
   "index": true,
 
   "cover": {
-    "kicker": "A paper-engine book",
+    "kicker": "A Proofpress book",
     "note": "Written one block at a time."
   },
   "copyright": {
@@ -21,7 +21,7 @@
     "rights": "© 2026 Your Name. All rights reserved.",
     "lines": [
       "Set in Space Grotesk, Inter and JetBrains Mono.",
-      "Built with the paper engine: github.com/hassancs91/paper-engine"
+      "Built with Proofpress: github.com/Harshitjoc/BookWriter"
     ]
   },
 

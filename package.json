@@ -1,7 +1,7 @@
 {
-  "name": "paper-engine",
+  "name": "proofpress",
   "version": "1.0.0",
-  "description": "Write one page at a time. Get a real book. A strict B5 page engine for AI-authored books.",
+  "description": "Write one page at a time. Get a real book. Proofpress is a strict B5 page engine for AI-authored books.",
   "type": "module",
   "license": "MIT",
   "scripts": {

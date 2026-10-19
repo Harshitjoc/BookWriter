@@ -1,7 +1,7 @@
 {
   "title": "The Showcase",
   "subtitle": "Ten pages, ten subjects, one engine.",
-  "author": "Built with the paper engine",
+  "author": "Built with Proofpress",
 
   "series": "The showcase",
   "brand": "yoursite.com",
@@ -13,7 +13,7 @@
   "index": true,
 
   "cover": {
-    "kicker": "A paper-engine book",
+    "kicker": "A Proofpress book",
     "note": "Cooking to chess to code. Same page shape every time."
   },
   "copyright": {
@@ -22,7 +22,7 @@
     "lines": [
       "Set in Space Grotesk, Inter and JetBrains Mono, self-hosted and licensed under the SIL Open Font License.",
       "Photographs generated with src/engine/tools/gen-image.mjs. Diagrams written as inline SVG.",
-      "Built with the paper engine: github.com/hassancs91/paper-engine"
+      "Built with Proofpress: github.com/Harshitjoc/BookWriter"
     ]
   },
 

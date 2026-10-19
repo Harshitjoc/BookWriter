@@ -6,12 +6,11 @@
    the whole draft path against a fake local provider over real HTTP.
    ========================================================================== */
 import http from 'node:http';
-import net from 'node:net';
 import {
   extractSection, validate, buildPrompt, draftBlock, reportValidation,
   resolveArchetype, pageRules, countSections, ARCHETYPES, checkDiagram,
 } from '../src/engine/tools/draft-block.mjs';
-import { ok, group, report, __dir, ROOT } from './harness.mjs';
+import { ok, group, report, ROOT } from './harness.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 

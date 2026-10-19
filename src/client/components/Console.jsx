@@ -7,7 +7,9 @@ export default function Console({ lines, onClear }) {
   const end = useRef(null);
 
   useEffect(() => {
-    end.current?.scrollIntoView({ block: 'end' });
+    /* block:'nearest' so a new line scrolls the console without yanking the
+       whole cockpit to it. */
+    end.current?.scrollIntoView({ block: 'nearest' });
   }, [lines]);
 
   return (
@@ -16,7 +18,9 @@ export default function Console({ lines, onClear }) {
         <span className="dim">stdout and stderr, live</span>
         <button className="mini" onClick={onClear}>clear</button>
       </div>
-      <div className="console-body">
+      {/* role="log" is the right shape for a console: appended lines, read in
+          order, announced politely rather than interrupting. */}
+      <div className="console-body" role="log" aria-label="tool output" aria-live="polite">
         {lines.length === 0 ? (
           <p className="dim console-empty">Nothing yet. Run a step above.</p>
         ) : (

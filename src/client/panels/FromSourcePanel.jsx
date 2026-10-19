@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as api from '../lib/api.js';
 import { loadKeys } from '../../shared/byok.js';
 
@@ -20,7 +20,7 @@ export default function FromSourcePanel({ onDone }) {
   const [theme, setTheme] = useState('studio');
   const [size, setSize] = useState('b5');
   const [lang, setLang] = useState('');
-  const [dir, setDir] = useState('');
+  const [dir] = useState('');
   const [fonts, setFonts] = useState([]);
   const [fontPacks, setFontPacks] = useState([]);
   const [providers, setProviders] = useState([]);
@@ -28,52 +28,74 @@ export default function FromSourcePanel({ onDone }) {
   const [model, setModel] = useState('');
   const [allowPaid, setAllowPaid] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [runId, setRunId] = useState('');
   const [log, setLog] = useState([]);
   const [plan, setPlan] = useState(null);
   const [done, setDone] = useState(null);
   const [error, setError] = useState('');
+  const abort = useRef(null);
+  const modelTouched = useRef(false);
 
   useEffect(() => {
+    let live = true;
     api.getProviders()
       .then(({ providers: list }) => {
+        if (!live) return;
         setProviders(list);
         const first = list.find((p) => p.cost === 'local' && p.ready) || list.find((p) => p.ready);
         if (first) { setProvider(first.id); setModel(first.model); }
       })
-      .catch((e) => setError(e.message));
-    api.getFontPacks().then(({ packs }) => setFontPacks(packs)).catch(() => {});
+      .catch((e) => { if (live) setError(e.message); });
+    api.getFontPacks().then(({ packs }) => { if (live) setFontPacks(packs); }).catch(() => {});
+    return () => { live = false; };
   }, []);
+
+  /* Switching tabs unmounts the panel; a run already in flight must stop
+     streaming into it. */
+  useEffect(() => () => { abort.current?.abort(); }, []);
 
   const FILE_TYPES = ['pdf', 'docx', 'txt', 'md', 'html', 'csv'];
   const ACCEPT = { pdf: '.pdf', docx: '.docx,.doc', txt: '.txt', md: '.md,.markdown', html: '.html,.htm', csv: '.csv,.tsv' };
   const needsFile = FILE_TYPES.includes(sourceType);
+
+  const stop = async () => {
+    if (runId) await api.cancelRun(runId).catch(() => {});
+    abort.current?.abort();
+    setRunId('');
+    setBusy(false);
+  };
 
   const go = async () => {
     if (busy || !slug.trim()) return;
     if (sourceType === 'topic' && !topic.trim()) return;
     if (sourceType !== 'topic' && !needsFile && !source.trim()) return;
     if (needsFile && !file) return;
+    const ac = new AbortController();
+    abort.current = ac;
     setBusy(true);
     setLog([]);
     setPlan(null);
     setDone(null);
     setError('');
-    let fileBase64;
-    let fileName;
-    if (needsFile && file) {
-      fileName = file.name;
-      const buf = await file.arrayBuffer();
-      /* btoa needs a binary string. The chunked conversion keeps a large PDF
-         from blowing the call stack. */
-      const bytes = new Uint8Array(buf);
-      let bin = '';
-      const CHUNK = 0x8000;
-      for (let i = 0; i < bytes.length; i += CHUNK) {
-        bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
-      }
-      fileBase64 = btoa(bin);
-    }
     try {
+      /* The file is read inside the try. Reading it outside is how the panel
+         once wedged itself: a rejected read set busy and never cleared it, and
+         the button stayed dead for the rest of the session. */
+      let fileBase64;
+      let fileName;
+      if (needsFile && file) {
+        fileName = file.name;
+        const buf = await file.arrayBuffer();
+        /* btoa needs a binary string. The chunked conversion keeps a large PDF
+           from blowing the call stack. */
+        const bytes = new Uint8Array(buf);
+        let bin = '';
+        const CHUNK = 0x8000;
+        for (let i = 0; i < bytes.length; i += CHUNK) {
+          bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+        }
+        fileBase64 = btoa(bin);
+      }
       const out = await api.fromSource(
         {
           slug: slug.trim(),
@@ -93,15 +115,30 @@ export default function FromSourcePanel({ onDone }) {
           allowPaid,
         },
         {
+          signal: ac.signal,
+          onStart: (d) => setRunId(d.id),
           onLine: (d) => setLog((l) => [...l, d.text]),
           onPlan: (d) => setPlan(d.plan),
         }
       );
-      setDone(out);
-      onDone?.();
+      setRunId('');
+      /* The server catches its own AbortError and reports it as a done frame
+         with cancelled:true, so a cancelled run resolves rather than throws. */
+      if (out.cancelled) {
+        setDone(null);
+        setError('');
+      } else if (out.error) {
+        setDone(null);
+        setError(out.error);
+      } else {
+        setDone(out);
+        onDone?.();
+      }
     } catch (e) {
-      setError(e.message);
+      /* A cancelled run is a choice, not a failure. */
+      if (e.message !== 'cancelled') setError(e.message);
     } finally {
+      setRunId('');
       setBusy(false);
     }
   };
@@ -172,7 +209,11 @@ export default function FromSourcePanel({ onDone }) {
           <span>provider</span>
           <select
             value={provider}
-            onChange={(e) => { setProvider(e.target.value); const p = providers.find((x) => x.id === e.target.value); if (p) setModel(p.model); }}
+            onChange={(e) => {
+              setProvider(e.target.value);
+              const p = providers.find((x) => x.id === e.target.value);
+              if (p && !modelTouched.current) setModel(p.model);
+            }}
             disabled={busy}
           >
             {available.map((p) => (
@@ -185,7 +226,7 @@ export default function FromSourcePanel({ onDone }) {
         </label>
         <label>
           <span>model</span>
-          <input value={model} onChange={(e) => setModel(e.target.value)} placeholder="default" disabled={busy} />
+          <input value={model} onChange={(e) => { modelTouched.current = true; setModel(e.target.value); }} placeholder="default" disabled={busy} spellCheck={false} autoComplete="off" />
         </label>
         {mode === 'book' ? (
           <label>
@@ -238,9 +279,10 @@ export default function FromSourcePanel({ onDone }) {
         <button className="mini primary" onClick={go} disabled={busy || !slug.trim() || (sourceType === 'topic' ? !topic.trim() : needsFile ? !file : !source.trim())}>
           {busy ? 'making…' : `make ${mode}`}
         </button>
+        <button className="mini" onClick={stop} disabled={!busy}>cancel</button>
       </div>
 
-      {error ? <p className="alert">{error}</p> : null}
+      {error ? <p className="alert" role="alert">{error}</p> : null}
 
       {log.length ? <pre className="draft-out">{log.join('\n')}</pre> : null}
 
@@ -259,11 +301,22 @@ export default function FromSourcePanel({ onDone }) {
       {done ? (
         <div className="draft-report">
           <span className="lbl">RESULT</span>
-          <p className="ok">
-            {done.result?.mode === 'book'
-              ? `book at books/${slug}/ — ${done.result.pages} pages, ${done.result.failed} skipped.`
-              : `paper at books/${slug}/paper/paper.pdf.`}
-          </p>
+          {/* A run that exits non-zero is not a book. And a book run reports no
+              result payload at all — printing "paper at …" in that case was how
+              a finished book claimed to be a paper. */}
+          {done.code !== 0 ? (
+            <p className="warn" role="alert">
+              the run finished with code {done.code} — read the log above.
+            </p>
+          ) : mode === 'paper' ? (
+            <p className="ok">paper at {done.result?.pdfPath || `books/${slug}/paper/paper.pdf`}.</p>
+          ) : (
+            <p className="ok">
+              book at books/{slug}/ — {done.result
+                ? `${done.result.pages} pages, ${done.result.failed} skipped.`
+                : 'finished. See the log above.'}
+            </p>
+          )}
         </div>
       ) : null}
     </div>

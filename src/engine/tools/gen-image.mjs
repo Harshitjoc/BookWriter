@@ -126,7 +126,7 @@ const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.webp'];
 const walkFresh = (root, since) => {
   const hits = [];
   const visit = (d, depth) => {
-    let entries = [];
+    let entries;
     try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
     for (const e of entries) {
       const p = path.join(d, e.name);

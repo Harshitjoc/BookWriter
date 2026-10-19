@@ -3,7 +3,6 @@
    ========================================================================== */
 import fs from 'node:fs';
 import path from 'node:path';
-import http from 'node:http';
 import { group, ok, report, withServer, fakeModel, ROOT } from './harness.mjs';
 import { intake } from '../src/engine/tools/source-intake.mjs';
 import { planFromSource, extractJson, validatePlan } from '../src/engine/tools/plan-from-source.mjs';

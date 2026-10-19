@@ -1,16 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /* The real built book.html, in an iframe, served raw off disk by /preview.
    Nothing here re-renders or re-implements a page: if it looks right here it is
    right, because it is the same bytes export.mjs will turn into the PDF.
 
    Zoom lives HERE, not in App: it is a property of this viewport and nothing
-   else reads it. (It used to be a prop with no setter passed down, which meant
-   dragging the slider threw. If you find yourself wanting to lift something to
-   App, check it is actually read by App.) */
+   else reads it. The slider does two things together, and both are needed:
+   the frame is widened so the desk scales with it (and the outer frame, not
+   the iframe, carries the scrollbar), and `zoom` is set on the document root
+   so the sheet itself scales. Widening alone only shows MORE desk — the paper
+   stayed 176mm and the readout lied. */
 export default function Preview({ book, edition, refreshKey, built }) {
   const [nonce, setNonce] = useState(0);
-  /* Default at 100% for full view; slider still allows zooming (min 0.3, step 0.05). */
   const [zoom, setZoom] = useState(1.0);
   const [trim, setTrim] = useState(null);
   const frame = useRef(null);
@@ -18,6 +19,12 @@ export default function Preview({ book, edition, refreshKey, built }) {
   const target = edition
     ? `/preview/books/${book}/book-${edition}.html?v=${refreshKey}.${nonce}`
     : `/preview/books/${book}/book.html?v=${refreshKey}.${nonce}`;
+
+  const applyZoom = useCallback(() => {
+    const doc = frame.current?.contentDocument;
+    if (!doc?.documentElement) return;
+    doc.documentElement.style.zoom = String(zoom);
+  }, [zoom]);
 
   /* Read the trim off the rendered book instead of hardcoding "176 x 250 mm".
      A book on A5 or 6x9 must not be described here as B5, so ask the page. */
@@ -28,7 +35,12 @@ export default function Preview({ book, edition, refreshKey, built }) {
     const w = cs.getPropertyValue('--page-w').trim();
     const h = cs.getPropertyValue('--page-h').trim();
     setTrim(w && h ? `${w} × ${h}` : null);
+    applyZoom();
   };
+
+  /* The document is replaced on every reload, so the zoom has to be re-applied
+     after each one, not only when the slider moves. */
+  useEffect(() => { applyZoom(); }, [applyZoom, refreshKey, nonce, built]);
 
   useEffect(() => {
     const on = (e) => {
@@ -90,7 +102,7 @@ export default function Preview({ book, edition, refreshKey, built }) {
             title="Book preview"
             src={target}
             onLoad={onLoad}
-            style={{ width: `${zoom * 100}%` }}
+            style={{ width: `${zoom * 100}%`, height: `${zoom * 100}%` }}
           />
         )}
       </div>

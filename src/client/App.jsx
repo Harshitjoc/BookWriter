@@ -45,6 +45,8 @@ export default function App() {
   const [newSlug, setNewSlug] = useState('');
   const [showNew, setShowNew] = useState(false);
   const [notice, setNotice] = useState(null);
+  const [pane, setPane] = useState('edit');
+  const [craftOpen, setCraftOpen] = useState(false);
 
   /* Print-craft switches for build. They feed --gutter/--bleed/--start-recto to
      build-book.mjs, the same flags the command line takes. */
@@ -53,7 +55,11 @@ export default function App() {
   const [bleedMm, setBleedMm] = useState('3');
 
   const book = useMemo(() => books.find((b) => b.slug === slug), [books, slug]);
-  const runIdRef = useRef(null);
+  /* The run in flight, so leaving the cockpit stops listening to it. The child
+     keeps going server-side; the UI just stops caring about a thing unmounted. */
+  const abortRun = useRef(null);
+
+  useEffect(() => () => { abortRun.current?.abort(); }, []);
 
   /* ------------------------------------------------------------------ boot */
   const reloadBooks = useCallback(async (pick) => {
@@ -133,26 +139,30 @@ export default function App() {
   }, [file, slug, dirty, text, autoRun]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   /* -------------------------------------------------------------- run a step */
-  const craftArgs = () => {
+  const craftArgs = useCallback(() => {
     const a = {};
     if (craft.gutter) a.gutter = Number(gutterMm) || 8;
     if (craft.bleed) a.bleed = Number(bleedMm) || 3;
     if (craft.recto) a.startRecto = true;
     return a;
-  };
+  }, [craft, gutterMm, bleedMm]);
 
   const doStep = useCallback(async (tool, { quiet } = {}) => {
     if (!slug || busy) return;
+    const ac = new AbortController();
+    abortRun.current = ac;
     setBusy(tool);
     setNotice(null);
     if (tool === 'check') setTab('check');
     if (tool === 'shot') setTab('shots');
+    if (tool === 'check' || tool === 'shot' || tool === 'export') setPane('out');
     if (!quiet) setLines([]);
 
     try {
       const res = await api.run(tool, slug, {
         edition,
         args: tool === 'build' ? craftArgs() : undefined,
+        signal: ac.signal,
         onStart: (d) => setLines((l) => [...l, { kind: 'sys', tool: tool, text: `$ ${d.label}` }]),
         onLine: (d) => setLines((l) => [...l, { kind: d.kind, tool: tool, text: d.text }]),
       });
@@ -173,12 +183,15 @@ export default function App() {
         setLines((l) => [...l, { kind: 'sys', tool, text: `pdf: /preview/books/${slug}/${edition ? `book-${edition}.pdf` : 'book.pdf'}` }]);
       }
     } catch (e) {
-      setNotice({ kind: 'bad', text: e.message });
-      setLines((l) => [...l, { kind: 'err', tool, text: String(e.message) }]);
+      /* A cancelled run is a choice, not a failure. */
+      if (e.message !== 'cancelled') {
+        setNotice({ kind: 'bad', text: e.message });
+        setLines((l) => [...l, { kind: 'err', tool, text: String(e.message) }]);
+      }
     } finally {
       setBusy('');
     }
-  }, [slug, busy, edition, reloadBooks, refreshShots, craft, gutterMm, bleedMm]);
+  }, [slug, busy, edition, reloadBooks, refreshShots, craftArgs]);
 
   /* keep the gallery live while a shot run is in flight */
   useEffect(() => {
@@ -249,23 +262,49 @@ export default function App() {
     setNotice({ kind: 'ok', text: 'figure added to the editor. Move it into the page it belongs to, then save.' });
   };
 
-  /* Scroll the preview to a sheet, shared by the check table and the board. */
-  const goToSheet = (n) => {
+  /* One way to reach a sheet, used by the check table, the board, the dashboard
+     and the jump box. Manual scrollTop rather than scrollIntoView: the desk
+     inside the iframe is the scroll box, so scrollIntoView lands on the wrong
+     edge here. */
+  const scrollToSheet = useCallback((n) => {
     const doc = document.querySelector('.col-preview iframe')?.contentDocument;
-    doc?.querySelectorAll('.sheet')[n - 1]?.scrollIntoView({ block: 'start' });
-  };
+    if (!doc) return false;
+    const i = Math.max(1, Number(n) || 1) - 1;
+    const sheet = doc.querySelectorAll('.sheet')[i];
+    if (!sheet) return false;
+    const top = sheet.getBoundingClientRect().top - doc.body.getBoundingClientRect().top
+      + (doc.documentElement.scrollTop || doc.body.scrollTop || 0);
+    (doc.scrollingElement || doc.documentElement).scrollTop = top;
+    return true;
+  }, []);
+
+  const goToSheet = (n) => { scrollToSheet(n); };
 
   /* Export, wait, then open. Opening first and exporting after is the race that
      showed a stale or half-written PDF. The window is opened only once the file
      on disk is the one we just wrote. */
   const openPdf = async () => {
     if (busy || !slug) return;
-    const res = await api.run('export', slug, { edition, onLine: (d) => setLines((l) => [...l, { kind: d.kind, tool: 'export', text: d.text }]) });
-    if (res.code !== 0) {
-      setNotice({ kind: 'bad', text: 'export failed, so the PDF was not opened' });
-      return;
+    const ac = new AbortController();
+    abortRun.current = ac;
+    setBusy('export');
+    setNotice(null);
+    try {
+      const res = await api.run('export', slug, {
+        edition,
+        signal: ac.signal,
+        onLine: (d) => setLines((l) => [...l, { kind: d.kind, tool: 'export', text: d.text }]),
+      });
+      if (res.code !== 0) {
+        setNotice({ kind: 'bad', text: 'export failed, so the PDF was not opened' });
+        return;
+      }
+      window.open(`${pdfHref}?t=${Date.now()}`, '_blank', 'noopener');
+    } catch (e) {
+      setNotice({ kind: 'bad', text: e.message === 'cancelled' ? 'export cancelled' : `export failed: ${e.message}` });
+    } finally {
+      setBusy('');
     }
-    window.open(`${pdfHref}?t=${Date.now()}`, '_blank', 'noopener');
   };
 
   /* An edition is a different file on disk (book-<edition>.html), so "is it
@@ -276,14 +315,21 @@ export default function App() {
     : !!book?.hasBookHtml;
 
   return (
-    <div className="app">
+    <div className="app" data-pane={pane}>
       {/* ------------------------------------------------------------ header */}
       <header className="top">
         <div className="brand">
-          <span className="mark" />
+          <span className="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <rect x="4.25" y="3.25" width="15.5" height="17.5" rx="2" stroke="currentColor" strokeWidth="1.6" />
+              <path d="M7.5 8h9M7.5 11.5h9M7.5 15h5.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity=".45" />
+              <circle cx="17" cy="17.5" r="3" stroke="currentColor" strokeWidth="1.6" />
+              <path d="M17 14.6v5.8M14.1 17.5h5.8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+            </svg>
+          </span>
           <div>
-            <strong>Paper Engine</strong>
-            <span className="dim"> One concept per page · B5</span>
+            <span className="brand-name">Proofpress</span>
+            <span className="brand-tag">One concept per page · B5</span>
           </div>
         </div>
 
@@ -358,33 +404,47 @@ export default function App() {
           <span>auto build on save</span>
         </label>
 
-        <span className="sep" />
+        <div className={'toolbar-group craft' + (craftOpen ? ' open' : '')}>
+          <span className="sep" />
 
-        {/* Print-craft switches. Off by default: a plain build is byte-for-byte
-            the same as without the cockpit. */}
-        <label className="toggle craft-ck" title="Extra margin on the bound edge">
-          <input type="checkbox" checked={craft.gutter}
-            onChange={(e) => setCraft((c) => ({ ...c, gutter: e.target.checked }))} />
-          <span>gutter</span>
-        </label>
-        {craft.gutter ? (
-          <input className="mm" value={gutterMm} title="gutter in mm"
-            onChange={(e) => setGutterMm(e.target.value)} />
-        ) : null}
-        <label className="toggle craft-ck" title="Paper colour runs into the trim (this is the one deliberate size change)">
-          <input type="checkbox" checked={craft.bleed}
-            onChange={(e) => setCraft((c) => ({ ...c, bleed: e.target.checked }))} />
-          <span>bleed</span>
-        </label>
-        {craft.bleed ? (
-          <input className="mm" value={bleedMm} title="bleed in mm"
-            onChange={(e) => setBleedMm(e.target.value)} />
-        ) : null}
-        <label className="toggle craft-ck" title="Every part opens on a right-hand (odd) page">
-          <input type="checkbox" checked={craft.recto}
-            onChange={(e) => setCraft((c) => ({ ...c, recto: e.target.checked }))} />
-          <span>recto</span>
-        </label>
+          {/* Print-craft switches. Off by default: a plain build is byte-for-byte
+              the same as without the cockpit. */}
+          <label className="toggle craft-ck" title="Extra margin on the bound edge">
+            <input type="checkbox" checked={craft.gutter}
+              onChange={(e) => setCraft((c) => ({ ...c, gutter: e.target.checked }))} />
+            <span>gutter</span>
+          </label>
+          {craft.gutter ? (
+            <input className="mm" type="number" min="0" max="40" value={gutterMm}
+              title="gutter in mm"
+              onChange={(e) => setGutterMm(e.target.value)} />
+          ) : null}
+          <label className="toggle craft-ck" title="Paper colour runs into the trim (this is the one deliberate size change)">
+            <input type="checkbox" checked={craft.bleed}
+              onChange={(e) => setCraft((c) => ({ ...c, bleed: e.target.checked }))} />
+            <span>bleed</span>
+          </label>
+          {craft.bleed ? (
+            <input className="mm" type="number" min="0" max="20" value={bleedMm}
+              title="bleed in mm"
+              onChange={(e) => setBleedMm(e.target.value)} />
+          ) : null}
+          <label className="toggle craft-ck" title="Every part opens on a right-hand (odd) page">
+            <input type="checkbox" checked={craft.recto}
+              onChange={(e) => setCraft((c) => ({ ...c, recto: e.target.checked }))} />
+            <span>recto</span>
+          </label>
+        </div>
+
+        <button
+          className="mini toolbar-more"
+          type="button"
+          aria-expanded={craftOpen}
+          aria-label="Print-craft switches"
+          onClick={() => setCraftOpen((o) => !o)}
+        >
+          {craftOpen ? 'done' : 'craft'}
+        </button>
 
         <span className="sep" />
 
@@ -411,8 +471,29 @@ export default function App() {
       </div>
 
       {notice ? (
-        <div className={'notice ' + notice.kind} onClick={() => setNotice(null)}>{notice.text}</div>
+        <div className={'notice ' + notice.kind} role="status" onClick={() => setNotice(null)}>
+          {notice.text}
+        </div>
       ) : null}
+
+      {/* One pane at a time below 1100px, where the three columns cannot all
+          fit. Desktop ignores this entirely: all three stay visible. */}
+      <div className="paneswitch" role="group" aria-label="Show pane">
+        {[
+          ['edit', 'source'],
+          ['preview', 'preview'],
+          ['out', 'tools'],
+        ].map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            aria-pressed={pane === id}
+            onClick={() => setPane(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
       {/* -------------------------------------------------------------- main */}
       <main className="grid">
@@ -451,22 +532,23 @@ export default function App() {
         <section className="col col-preview">
           <Preview book={slug} edition={edition} refreshKey={refreshKey} built={isBuilt} />
           <div className="jump">
+            <label htmlFor="jump-sheet">sheet</label>
             <input
+              id="jump-sheet"
               type="number"
               min="1"
-              placeholder="sheet #"
+              placeholder="1"
               value={jump}
               onChange={(e) => setJump(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key !== 'Enter') return;
-                const doc = document.querySelector('.col-preview iframe')?.contentDocument;
-                const sheet = doc?.querySelectorAll('.sheet')[Math.max(1, Number(jump) || 1) - 1];
-                if (!sheet) return;
-                /* offsetTop on the sheet itself: scrollIntoView is unreliable
-                   here because the desk, not the sheet, is the scroll box. */
-                const top = sheet.getBoundingClientRect().top - doc.body.getBoundingClientRect().top
-                  + (doc.documentElement.scrollTop || doc.body.scrollTop || 0);
-                (doc.scrollingElement || doc.documentElement).scrollTop = top;
+                const n = Math.max(1, Number(jump) || 1);
+                if (!scrollToSheet(n)) {
+                  setNotice({
+                    kind: 'bad',
+                    text: `this book has no sheet ${n}. Enter a number between 1 and the page count.`,
+                  });
+                }
               }}
             />
           </div>

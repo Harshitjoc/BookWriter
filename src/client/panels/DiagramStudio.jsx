@@ -12,7 +12,7 @@ import * as api from '../lib/api.js';
 
 const pretty = (o) => JSON.stringify(o, null, 2);
 
-export default function DiagramStudio({ book, onInsert }) {
+export default function DiagramStudio({ onInsert }) {
   const [shapes, setShapes] = useState([]);
   const [kind, setKind] = useState('row');
   const [specText, setSpecText] = useState('');
@@ -20,11 +20,16 @@ export default function DiagramStudio({ book, onInsert }) {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState('');
   const compiled = useRef(0);
+  const copyTimer = useRef(null);
+
+  useEffect(() => () => { clearTimeout(copyTimer.current); }, []);
 
   useEffect(() => {
+    let live = true;
     api.getDiagramShapes()
-      .then((d) => setShapes(d.shapes || []))
-      .catch((e) => setError(e.message));
+      .then((d) => { if (live) setShapes(d.shapes || []); })
+      .catch((e) => { if (live) setError(e.message); });
+    return () => { live = false; };
   }, []);
 
   const loadExample = useCallback(async (k) => {
@@ -48,7 +53,15 @@ export default function DiagramStudio({ book, onInsert }) {
     const t = setTimeout(async () => {
       let spec;
       try { spec = JSON.parse(specText); }
-      catch (e) { setError(`spec is not valid JSON: ${e.message}`); return; }
+      catch (e) {
+        /* A stale diagram under a broken spec is worse than none: it looks
+           like the last edit worked. */
+        if (ticket === compiled.current) {
+          setSvg('');
+          setError(`spec is not valid JSON: ${e.message}`);
+        }
+        return;
+      }
       try {
         const out = await api.compileDiagram(spec);
         if (ticket === compiled.current) { setSvg(out); setError(''); }
@@ -65,7 +78,8 @@ export default function DiagramStudio({ book, onInsert }) {
     const text = what === 'svg' ? svg : snippet;
     try { await navigator.clipboard.writeText(text); setCopied(what); }
     catch { setError('the browser refused clipboard access'); }
-    setTimeout(() => setCopied(''), 1500);
+    clearTimeout(copyTimer.current);
+    copyTimer.current = setTimeout(() => setCopied(''), 1500);
   };
 
   return (
@@ -104,7 +118,7 @@ export default function DiagramStudio({ book, onInsert }) {
         </div>
       </div>
 
-      {error ? <p className="alert">{error}</p> : null}
+      {error ? <p className="alert" role="alert">{error}</p> : null}
 
       <div className="draft-actions">
         <button className="mini" onClick={() => copy('svg')} disabled={!svg}>

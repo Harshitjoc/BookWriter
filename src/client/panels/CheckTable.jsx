@@ -5,6 +5,15 @@
  * The cockpit asks for the deep pass too, so this also renders the lint
  * findings: text on text, an SVG label with no fill, a colour that fails on
  * paper. A page can fit and still be wrong, and those are the two columns. */
+
+/* Clicking a sheet to see it is the main thing this table is for. A row that
+   only answers to a mouse is a row the keyboard will never reach. */
+const jump = (onPickPage, page) => (e) => {
+  if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+  if (e.type === 'keydown') e.preventDefault();
+  onPickPage?.(page);
+};
+
 export default function CheckTable({ result, onPickPage }) {
   if (!result) {
     return (
@@ -42,20 +51,20 @@ export default function CheckTable({ result, onPickPage }) {
       </div>
 
       {unstyled ? (
-        <p className="alert">
+        <p className="alert" role="alert">
           The stylesheet was not applied, which almost always means the book
           folder is not exactly two levels deep. Every page links ../../engine/…
         </p>
       ) : null}
 
       {broken.length ? (
-        <p className="alert">
+        <p className="alert" role="alert">
           Broken images: {broken.map((b) => <code key={b}>{b}</code>)}
         </p>
       ) : null}
 
       {overflowing.length ? (
-        <p className="alert">
+        <p className="alert" role="alert">
           {overflowing.length} page(s) overflow. Cut words. Do not shrink the
           diagram viewBox, which clips the drawing instead of fixing it.
         </p>
@@ -75,6 +84,9 @@ export default function CheckTable({ result, onPickPage }) {
               key={r.page}
               className={r.overMm > 0 ? 'bad' : ''}
               onClick={() => onPickPage?.(r.page)}
+              onKeyDown={jump(onPickPage, r.page)}
+              tabIndex={0}
+              aria-label={`page ${r.page}, ${r.title}: ${r.overMm > 0 ? `${r.overMm} millimetres over` : 'fits'}`}
               title="Show this sheet in the preview"
             >
               <td className="n">{r.page}</td>
@@ -103,6 +115,9 @@ export default function CheckTable({ result, onPickPage }) {
                 key={i}
                 className={f.level === 'error' ? 'bad' : 'warn'}
                 onClick={() => onPickPage?.(f.page)}
+                onKeyDown={jump(onPickPage, f.page)}
+                tabIndex={0}
+                aria-label={`${f.level} on page ${f.page}: ${f.msg}`}
                 title="Show this sheet in the preview"
               >
                 <span className="mark">{f.level === 'error' ? '✗' : '!'}</span>

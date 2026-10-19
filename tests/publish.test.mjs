@@ -8,7 +8,7 @@
    ========================================================================== */
 import fs from 'node:fs';
 import path from 'node:path';
-import { ok, group, report, cli, scratchBook, ROOT } from './harness.mjs';
+import { ok, group, report, cli, scratchBook } from './harness.mjs';
 import { findFacts, scanBook } from '../src/engine/tools/lib/facts.mjs';
 
 /* ---------------------------------------------------------------- ledger */

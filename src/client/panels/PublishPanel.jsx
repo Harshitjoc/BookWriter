@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as api from '../lib/api.js';
 
 /* Publish is the one command that ships a book, and it is a GATE, not a
@@ -12,14 +12,26 @@ export default function PublishPanel({ book, editions, onDone }) {
   const [formats, setFormats] = useState(['pdf', 'epub', 'web']);
   const [edition, setEdition] = useState('');
   const [busy, setBusy] = useState(false);
+  const [runId, setRunId] = useState('');
   const [log, setLog] = useState([]);
   const [error, setError] = useState('');
+  const abort = useRef(null);
+
+  useEffect(() => () => { abort.current?.abort(); }, []);
 
   const toggle = (id) =>
     setFormats((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
 
+  const cancel = async () => {
+    if (runId) await api.cancelRun(runId).catch(() => {});
+    abort.current?.abort();
+    setBusy(false);
+  };
+
   const go = async () => {
     if (busy || !book) return;
+    const ac = new AbortController();
+    abort.current = ac;
     setBusy(true);
     setError('');
     setLog([]);
@@ -27,7 +39,9 @@ export default function PublishPanel({ book, editions, onDone }) {
       const res = await api.run('publish', book, {
         edition: edition || undefined,
         args: { formats },
+        signal: ac.signal,
         onLine: (d) => setLog((l) => [...l, d.text]),
+        onStart: (d) => setRunId(d.id),
       });
       if (res.code !== 0) {
         setError(`publish stopped. Nothing was exported. The gate's own message is above.`);
@@ -35,8 +49,9 @@ export default function PublishPanel({ book, editions, onDone }) {
         onDone?.();
       }
     } catch (e) {
-      setError(e.message);
+      if (e.message !== 'cancelled') setError(e.message);
     } finally {
+      setRunId('');
       setBusy(false);
     }
   };
@@ -70,9 +85,10 @@ export default function PublishPanel({ book, editions, onDone }) {
         <button className="mini primary" onClick={go} disabled={busy || !formats.length}>
           {busy ? 'publishing…' : 'publish'}
         </button>
+        {busy ? <button className="mini" onClick={cancel}>cancel</button> : null}
       </div>
 
-      {error ? <p className="alert">{error}</p> : null}
+      {error ? <p className="alert" role="alert">{error}</p> : null}
       {log.length ? <pre className="draft-out">{log.join('\n')}</pre> : null}
     </div>
   );

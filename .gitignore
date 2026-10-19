@@ -24,3 +24,7 @@ books/**/page*.png
 # A production build of the cockpit (if you ever run `vite build`). The cockpit
 # normally runs from source through Vite in middleware mode and writes no output.
 dist/
+
+# Review screenshots of the cockpit, shot by hand at a few widths. Local only:
+# they are for looking at, not for the repository.
+cockpit-shots/

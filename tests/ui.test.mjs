@@ -134,8 +134,22 @@ await withServer(async (base) => {
       ok('the zoom readout tracks the slider', afterPct === '120%', afterPct);
       ok('no error was thrown while zooming', !errors.some((e) => /setZoom|is not defined/.test(e)),
         errors.filter((e) => /setZoom|is not defined/.test(e)).join(' | '));
+
+      /* A wider iframe is not a zoom. Zooming has to reach the PAPER, or the
+         slider is a viewport resize wearing a zoom label — which is exactly how
+         it used to behave. The iframe keeps its width percentage (so the frame
+         assertions above stay true) and the inner document carries the scale. */
+      const innerZoom = await page.frameLocator('.col-preview iframe').locator('html')
+        .evaluate((h) => h.style.zoom);
+      ok('the zoom reaches the paper itself, not just the frame', innerZoom === '1.2', `html zoom="${innerZoom}"`);
+      const sheetW = () => page.frameLocator('.col-preview iframe').locator('.sheet')
+        .first().evaluate((el) => el.getBoundingClientRect().width);
+      const wide = await sheetW();
       await page.locator('.zoom').fill('0.6');
       await page.waitForTimeout(300);
+      const narrow = await sheetW();
+      ok('the sheet really scales with the slider',
+        wide > narrow * 1.9, `${Math.round(wide)}px at 120% vs ${Math.round(narrow)}px at 60%`);
 
       group('sheet jump  (regression: this also used to throw)');
       const topOf = () => page.frameLocator('.col-preview iframe').locator('body')
@@ -156,6 +170,8 @@ await withServer(async (base) => {
       ok('check shows a verdict', (await page.locator('.verdict').textContent() || '').includes('All pages fit'));
       const rows = await page.locator('.check table.rows tbody tr').count();
       ok('one row per sheet', rows === 6, `${rows} rows`);
+      ok('a check row can be reached from the keyboard',
+        (await page.locator('.check table.rows tbody tr').first().getAttribute('tabindex')) === '0');
       const overs = await page.locator('.check table.rows tbody tr td.num').allTextContents();
       ok('every row reads 0 mm', overs.every((t) => t.trim() === '0'), overs.join(','));
 
@@ -458,6 +474,57 @@ await withServer(async (base) => {
       const meta2 = (await page.locator('.draft-meta').textContent()) || '';
       ok('an identical re-draft replays from the ledger, byte for byte',
         /replayed from the ledger/.test(meta2), meta2.replace(/\s+/g, ' ').slice(0, 80));
+
+      /* ---------------------------------------------------------- a phone.
+         The three columns cannot share 390px, so below 1100px the cockpit
+         shows one at a time behind a switcher. Everything that was reachable
+         on desktop must still be reachable here, and nothing may push the
+         layout sideways. */
+      group('the cockpit on a phone');
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.waitForTimeout(400);
+
+      const sideways = () => page.evaluate(() =>
+        document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      ok('the phone layout does not overflow sideways', (await sideways()) <= 1, `${await sideways()}px over`);
+      ok('the pane switcher appears where the columns cannot fit',
+        await page.locator('.paneswitch').isVisible());
+
+      const visibleCols = async () => {
+        const out = [];
+        for (const n of ['edit', 'preview', 'out']) {
+          if (await page.locator(`.app .col-${n}`).isVisible()) out.push(n);
+        }
+        return out;
+      };
+      ok('exactly one pane is on screen at a time', (await visibleCols()).length === 1,
+        (await visibleCols()).join(','));
+
+      await page.locator('.paneswitch button', { hasText: 'source' }).click();
+      await page.waitForTimeout(250);
+      ok('the switcher brings up the editor', (await visibleCols()).join(',') === 'edit',
+        (await visibleCols()).join(','));
+      ok('the pressed pane is marked for assistive tech',
+        ((await page.locator('.paneswitch button[aria-pressed="true"]').textContent()) || '').trim() === 'source');
+
+      await page.locator('.paneswitch button', { hasText: 'preview' }).click();
+      await page.waitForTimeout(300);
+      ok('the switcher brings up the preview', (await visibleCols()).join(',') === 'preview',
+        (await visibleCols()).join(','));
+      ok('the phone still shows a real page, not a placeholder',
+        await page.locator('.col-preview iframe').count() === 1);
+
+      await page.locator('.paneswitch button', { hasText: 'tools' }).click();
+      await page.waitForTimeout(250);
+      await pickTab('console');
+      ok('the tools pane still reaches a panel on a phone',
+        await page.locator('.console').isVisible());
+      ok('tools stay on the phone layout after opening a panel', (await sideways()) <= 1,
+        `${await sideways()}px over`);
+
+      /* Back to the desktop viewport so the closing assertions read normally. */
+      await page.setViewportSize({ width: 1600, height: 1000 });
+      await page.waitForTimeout(300);
 
       group('nothing errored');
       ok('no console errors', errors.length === 0, errors.slice(0, 4).join(' | '));

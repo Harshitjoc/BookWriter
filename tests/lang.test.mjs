@@ -109,12 +109,12 @@ group('a book that says nothing about language is byte-identical to the starter'
 
 /* -------------------------------------------------------- 4. lang/dir reach <html> */
 group('lang and dir reach <html>, and an explicit dir always wins');
-for (const [slug, patch, tag, must] of [
-  ['langfr', { lang: 'fr' }, '<html dir="ltr" lang="fr" data-size="b5">', true],
-  ['langar', { lang: 'ar' }, '<html dir="rtl" lang="ar" data-size="b5">', true],
-  ['langzh', { lang: 'zh-Hans' }, '<html dir="ltr" lang="zh-Hans" data-size="b5">', true],
-  ['langdir', { dir: 'rtl' }, '<html dir="rtl" lang="en" data-size="b5">', true],
-  ['langmix', { lang: 'he', dir: 'ltr' }, '<html dir="ltr" lang="he" data-size="b5">', true],
+for (const [slug, patch, tag] of [
+  ['langfr', { lang: 'fr' }, '<html dir="ltr" lang="fr" data-size="b5">'],
+  ['langar', { lang: 'ar' }, '<html dir="rtl" lang="ar" data-size="b5">'],
+  ['langzh', { lang: 'zh-Hans' }, '<html dir="ltr" lang="zh-Hans" data-size="b5">'],
+  ['langdir', { dir: 'rtl' }, '<html dir="rtl" lang="en" data-size="b5">'],
+  ['langmix', { lang: 'he', dir: 'ltr' }, '<html dir="ltr" lang="he" data-size="b5">'],
 ]) {
   const b = scratchBook(slug, patch);
   try {

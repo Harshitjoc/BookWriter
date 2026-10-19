@@ -83,7 +83,6 @@ function lintInPage(cfg) {
     return r.width > 1 && r.height > 1;
   };
 
-  const isSvgText = (el) => el.ownerSVGElement != null && el.tagName.toLowerCase() === 'text';
   const skip = (el) => el.closest('.sr, .of-badge');
 
   /* Elements that carry a run of text a reader reads as a block. Inline spans
@@ -138,10 +137,9 @@ function lintInPage(cfg) {
       .sort((a, b) => a.top - b.top);
     if (kids.length < 2) return null;
     let maxGap = 0;
-    let at = null;
     for (let i = 0; i < kids.length - 1; i++) {
       const g = kids[i + 1].top - kids[i].bottom;
-      if (g > maxGap) { maxGap = g; at = kids[i].bottom; }
+      if (g > maxGap) maxGap = g;
     }
     const height = bottom - top;
     if (height > 0 && maxGap / height > cfg.bigGapFraction) {

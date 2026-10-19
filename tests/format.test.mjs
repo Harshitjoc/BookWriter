@@ -9,7 +9,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { group, ok, report, cli, scratchBook, cleanStale, ROOT } from './harness.mjs';
-import { extractSection, validate } from '../src/engine/tools/draft-block.mjs';
+import { extractSection } from '../src/engine/tools/draft-block.mjs';
 
 const DEFAULTS = JSON.parse(fs.readFileSync(path.join(ROOT, 'src', 'engine', 'defaults.json'), 'utf8'));
 cleanStale();

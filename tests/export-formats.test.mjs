@@ -9,7 +9,7 @@
    ========================================================================== */
 import fs from 'node:fs';
 import path from 'node:path';
-import { ok, group, report, cli, scratchBook, ROOT } from './harness.mjs';
+import { ok, group, report, cli, scratchBook } from './harness.mjs';
 import { zipStore, unzipStore } from '../src/engine/tools/lib/zip.mjs';
 import { splitSheets } from '../src/engine/tools/lib/book-html.mjs';
 

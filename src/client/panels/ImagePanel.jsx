@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as api from '../lib/api.js';
 
 /* Generate a photograph with gen-image.mjs, the same script `npm run image` runs.
@@ -11,11 +11,23 @@ export default function ImagePanel({ book, onDone }) {
   const [name, setName] = useState('');
   const [aspect, setAspect] = useState('3:2');
   const [busy, setBusy] = useState(false);
+  const [runId, setRunId] = useState('');
   const [log, setLog] = useState([]);
   const [error, setError] = useState('');
+  const abort = useRef(null);
+
+  useEffect(() => () => { abort.current?.abort(); }, []);
+
+  const cancel = async () => {
+    if (runId) await api.cancelRun(runId).catch(() => {});
+    abort.current?.abort();
+    setBusy(false);
+  };
 
   const go = async () => {
-    if (busy || !prompt.trim()) return;
+    if (busy || !prompt.trim() || !book) return;
+    const ac = new AbortController();
+    abort.current = ac;
     setBusy(true);
     setError('');
     setLog([]);
@@ -25,6 +37,8 @@ export default function ImagePanel({ book, onDone }) {
         book,
         {
           args: { prompt, name: name || undefined, aspect },
+          signal: ac.signal,
+          onStart: (d) => setRunId(d.id),
           onLine: (d) => setLog((l) => [...l, d.text]),
         }
       );
@@ -34,8 +48,10 @@ export default function ImagePanel({ book, onDone }) {
         onDone?.();
       }
     } catch (e) {
-      setError(e.message);
+      /* A cancelled run is a choice, not a failure. */
+      if (e.message !== 'cancelled') setError(e.message);
     } finally {
+      setRunId('');
       setBusy(false);
     }
   };
@@ -76,12 +92,13 @@ export default function ImagePanel({ book, onDone }) {
       </div>
 
       <div className="draft-actions">
-        <button className="mini primary" onClick={go} disabled={busy || !prompt.trim()}>
+        <button className="mini primary" onClick={go} disabled={busy || !prompt.trim() || !book}>
           {busy ? 'generating…' : 'generate'}
         </button>
+        {busy ? <button className="mini" onClick={cancel}>cancel</button> : null}
       </div>
 
-      {error ? <p className="alert">{error}</p> : null}
+      {error ? <p className="alert" role="alert">{error}</p> : null}
       {log.length ? <pre className="draft-out">{log.join('\n')}</pre> : null}
     </div>
   );

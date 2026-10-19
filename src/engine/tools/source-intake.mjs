@@ -138,9 +138,9 @@ export async function intake({ type, value }) {
     throw new Error('intake needs both a source type and a source.');
   }
   value = String(value).trim();
-  let text = '';
+  let text;
   let titleHint = value.slice(0, 120);
-  let note = '';
+  let note;
 
   switch (type) {
     case 'topic':

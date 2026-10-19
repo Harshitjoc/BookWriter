@@ -10,7 +10,7 @@
    ========================================================================== */
 import fs from 'node:fs';
 import path from 'node:path';
-import { ok, group, report, scratchBook, ROOT } from './harness.mjs';
+import { ok, group, report, scratchBook } from './harness.mjs';
 import { resolve, complete } from '../src/engine/tools/llm.mjs';
 import { makeStore, readManifest, ledgerPaths } from '../src/engine/tools/gen-ledger.mjs';
 import { draftBlock } from '../src/engine/tools/draft-block.mjs';

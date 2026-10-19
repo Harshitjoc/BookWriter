@@ -15,9 +15,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { withServer, readSSE, withScratch, fakeModel, ok, group, report, ROOT, SCRATCH } from './harness.mjs';
-import { fileURLToPath } from 'node:url';
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
 const books = (slug) => path.join(ROOT, 'books', slug);
 
 /* /api/run takes tool args at the TOP level (the UI spreads them), and hands

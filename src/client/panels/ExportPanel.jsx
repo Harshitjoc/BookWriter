@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as api from '../lib/api.js';
 
 /* Export files without leaving the editor. Same scripts the command line runs
@@ -19,21 +19,37 @@ export default function ExportPanel({ book, onDone }) {
   const [pageNo, setPageNo] = useState('1');
   const [cardFormat, setCardFormat] = useState('html');
   const [busy, setBusy] = useState('');
+  const [runId, setRunId] = useState('');
   const [log, setLog] = useState([]);
   const [error, setError] = useState('');
+  const abort = useRef(null);
+
+  /* Leaving the tab stops the stream. The child keeps running server-side until
+     it finishes, but the panel must not keep appending into unmounted state. */
+  useEffect(() => () => { abort.current?.abort(); }, []);
 
   const toggle = (id) =>
     setFormats((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
 
+  const cancel = async () => {
+    if (runId) await api.cancelRun(runId).catch(() => {});
+    abort.current?.abort();
+    setBusy('');
+  };
+
   const go = async (tool, payload = {}) => {
     if (!book) return false;
+    const ac = new AbortController();
+    abort.current = ac;
     setBusy(tool);
     setError('');
     setLog([]);
     try {
       const res = await api.run(tool, book, {
         args: payload,
+        signal: ac.signal,
         onLine: (d) => setLog((l) => [...l, d.text]),
+        onStart: (d) => setRunId(d.id),
       });
       if (res.code !== 0) {
         setError(`${tool} failed with exit ${res.code}. Its own message is above.`);
@@ -42,9 +58,10 @@ export default function ExportPanel({ book, onDone }) {
       onDone?.();
       return true;
     } catch (e) {
-      setError(e.message);
+      if (e.message !== 'cancelled') setError(e.message);
       return false;
     } finally {
+      setRunId('');
       setBusy('');
     }
   };
@@ -78,6 +95,7 @@ export default function ExportPanel({ book, onDone }) {
           disabled={!!busy || !formats.length}>
           {busy ? 'exporting…' : `export ${formats.length} file${formats.length === 1 ? '' : 's'}`}
         </button>
+        {busy ? <button className="mini" onClick={cancel}>cancel</button> : null}
       </div>
 
       <div className="draft-form card-form">
@@ -98,7 +116,7 @@ export default function ExportPanel({ book, onDone }) {
         </button>
       </div>
 
-      {error ? <p className="alert">{error}</p> : null}
+      {error ? <p className="alert" role="alert">{error}</p> : null}
       {log.length ? <pre className="draft-out">{log.join('\n')}</pre> : null}
 
       {formats.length && !busy ? (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as api from '../lib/api.js';
 import { loadKeys } from '../../shared/byok.js';
 
@@ -24,11 +24,15 @@ export default function DraftPanel({ book, onInsert }) {
   const [busy, setBusy] = useState(false);
   const [runId, setRunId] = useState('');
   const [error, setError] = useState('');
-  const [storedKeys] = useState(() => loadKeys());
+  const [storedKeys, setStoredKeys] = useState(() => loadKeys());
+  const abort = useRef(null);
+  const modelTouched = useRef(false);
 
   useEffect(() => {
+    let live = true;
     api.getProviders()
       .then(({ providers: list }) => {
+        if (!live) return;
         setProviders(list);
         /* Default to the first LOCAL provider, because that is the one that is
            free, needs no key, and cannot surprise anyone with a bill. A paid
@@ -36,15 +40,20 @@ export default function DraftPanel({ book, onInsert }) {
         const first = list.find((p) => p.cost === 'local' && p.ready) || list.find((p) => p.ready);
         if (first) { setProvider(first.id); setModel(first.model); }
       })
-      .catch((e) => setError(e.message));
+      .catch((e) => { if (live) setError(e.message); });
+    return () => { live = false; };
   }, []);
+
+  /* Switching tabs unmounts this panel, so an in-flight draft must not keep
+     streaming into state that no longer exists. */
+  useEffect(() => () => { abort.current?.abort(); }, []);
 
   /* Changing provider suggests that provider's model, unless you have typed
      your own. Typed-in models are not stomped on. */
   const pick = (id) => {
     setProvider(id);
     const p = providers.find((x) => x.id === id);
-    if (p) setModel(p.model);
+    if (p && !modelTouched.current) setModel(p.model);
     setError('');
   };
 
@@ -61,16 +70,21 @@ export default function DraftPanel({ book, onInsert }) {
 
   const stop = async () => {
     if (runId) await api.cancelRun(runId).catch(() => {});
+    abort.current?.abort();
+    setRunId('');
     setBusy(false);
   };
 
   const go = async () => {
     if (busy || !book) return;
+    const ac = new AbortController();
+    abort.current = ac;
     setBusy(true);
     setError('');
     setSection('');
     setValidation(null);
     setMeta(null);
+    setStoredKeys(loadKeys());
     try {
       const out = await api.draft(
         book,
@@ -83,6 +97,7 @@ export default function DraftPanel({ book, onInsert }) {
           allowPaid,
         },
         {
+          signal: ac.signal,
           onStart: (d) => { setRunId(d.id); setMeta(d); },
           onLine: (d) => setSection((s) => (s ? `${s}\n${d.text}` : d.text)),
         }
@@ -91,11 +106,12 @@ export default function DraftPanel({ book, onInsert }) {
       if (out.section) setSection(out.section);
       setValidation(out.validation);
       setMeta((m) => (out.meta ? { ...m, ...out.meta } : m));
-      if (out.error && !out.cancelled) setError(out.error);
-      if (out.cancelled) setError('cancelled');
+      /* A cancelled run is not a failure and must not be painted like one. */
+      if (out.cancelled) setError('');
+      else if (out.error) setError(out.error);
     } catch (e) {
       setRunId('');
-      setError(e.message);
+      setError(e.message === 'cancelled' ? '' : e.message);
     } finally {
       setBusy(false);
     }
@@ -120,9 +136,11 @@ export default function DraftPanel({ book, onInsert }) {
           <span>model</span>
           <input
             value={model}
-            onChange={(e) => setModel(e.target.value)}
+            onChange={(e) => { modelTouched.current = true; setModel(e.target.value); }}
             placeholder="the provider's default"
             disabled={busy}
+            spellCheck={false}
+            autoComplete="off"
           />
         </label>
 
@@ -151,6 +169,8 @@ export default function DraftPanel({ book, onInsert }) {
           <span>seed (fixes the page)</span>
           <input
             type="number"
+            min={0}
+            step={1}
             value={seed}
             onChange={(e) => setSeed(e.target.value)}
             placeholder="optional"
@@ -180,7 +200,7 @@ export default function DraftPanel({ book, onInsert }) {
         {meta?.cost ? <span className="dim">{meta.label}</span> : null}
       </div>
 
-      {error ? <p className="alert">{error}</p> : null}
+      {error ? <p className="alert" role="alert">{error}</p> : null}
 
       {/* The report is shown whenever there IS a verdict, even with no page.
           A model that returns prose instead of a page produces an empty draft;
@@ -201,7 +221,7 @@ export default function DraftPanel({ book, onInsert }) {
                 {validation.gaps.length ? (
                   <p className="warn">
                     you must fill in {validation.gaps.length} fact(s) yourself:{' '}
-                    {validation.gaps.map((g, i) => `[FACT NEEDED: ${g}]`).join(' ')}
+                    {validation.gaps.map((g) => `[FACT NEEDED: ${g}]`).join(' ')}
                   </p>
                 ) : null}
               </>
@@ -235,14 +255,20 @@ export default function DraftPanel({ book, onInsert }) {
             <button
               className="mini primary"
               onClick={() => section && onInsert(section)}
-              disabled={!section || validation?.errors?.length > 0}
-              title={validation?.errors?.length
-                ? 'fix the errors first, or the page will break the build'
-                : 'append this page to the interior file, then rebuild'}
+              /* Not a gap — gaps are the reader's job and never block. But a page
+                 whose checks have not come back yet is a page you have not read. */
+              disabled={!section || !validation || validation.errors.length > 0}
+              title={!validation
+                ? 'wait for the checks to come back before this page can enter the book'
+                : validation.errors.length
+                  ? 'fix the errors first, or the page will break the build'
+                  : 'append this page to the interior file, then rebuild'}
             >
               add to the book
             </button>
-            {validation?.errors?.length ? (
+            {!validation ? (
+              <span className="dim">add waits for the checks</span>
+            ) : validation.errors.length ? (
               <span className="dim">add is blocked while the checks fail</span>
             ) : null}
           </div>

@@ -372,7 +372,7 @@ function handleFromSource(req, res) {
     if (body.length > 60e6) req.destroy();   // a base64-encoded PDF can be several MB
   });
   req.on('end', async () => {
-    let args = {};
+    let args;
     try { args = JSON.parse(body || '{}'); } catch { args = {}; }
 
     const slug = String(args.slug || '').trim();
@@ -395,7 +395,7 @@ function handleFromSource(req, res) {
 
     /* Language is opt-in and validated here, before any work is spawned, so a
        typo is a plain 400 rather than a half-written book. */
-    let lang = null, direction = null;
+    let lang, direction;
     try {
       lang = normalizeLang(args.lang);
       direction = args.dir == null || String(args.dir).trim() === '' ? null : resolveDirection({ dir: args.dir });
@@ -751,7 +751,7 @@ async function handleApi(req, res, url) {
     const kind = url.searchParams.get('kind') || 'row';
     const spec = exampleSpec(kind);
     if (!spec) return fail(res, 404, `no example for kind "${kind}". Known: ${KINDS.join(', ')}`);
-    let svg = '';
+    let svg;
     try { svg = compileDiagram(spec); } catch (e) { return fail(res, 500, String(e.message || e)); }
     return json(res, 200, { kind, spec, svg });
   }
@@ -838,7 +838,7 @@ async function handleApi(req, res, url) {
 
   /* things the UI cannot fix on its own, but should shout about */
   if (p === '/api/health') {
-    let playwright = 'unknown';
+    let playwright;
     try {
       const pw = await import('playwright');
       const b = await pw.chromium.launch();

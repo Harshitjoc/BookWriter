@@ -135,7 +135,7 @@ export async function makeBook({ slug, plan, theme = 'studio', size = 'b5', book
   }
 
   let buildCode = 0;
-  let buildTail = '';
+  let buildTail;
   try {
     const out = execFileSync(process.execPath, [path.join('src', 'engine', 'tools', 'build-book.mjs'), dir], {
       encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],

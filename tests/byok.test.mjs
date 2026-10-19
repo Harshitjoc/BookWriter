@@ -64,7 +64,7 @@ group('mergeEnv does not poison process.env');
 
 group('storage: session by default, persistent only when ticked');
 {
-  try { local.removeItem('byokKeys'); session.removeItem('byokSessionKeys'); } catch {}
+  try { local.removeItem('byokKeys'); session.removeItem('byokSessionKeys'); } catch { /* no store in this run */ }
   saveKeys({ OPENAI_API_KEY: 'sk-session' }, false);
   ok('session save goes to the session store', JSON.stringify(JSON.parse(session.getItem('byokSessionKeys'))).includes('sk-session'));
   ok('and leaves the persistent store alone', local.getItem('byokKeys') === null);

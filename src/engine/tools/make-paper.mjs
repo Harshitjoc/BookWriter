@@ -47,8 +47,6 @@ Rules:
   it carries an explicit fill. No <img> may point anywhere not on disk.
 - No <script>. No external fonts.`.trim();
 
-const SUBSTANCE = /<html|<!doctype/i;
-
 export function validatePaperHtml(html) {
   const errors = [];
   if (!/<!doctype html>/i.test(html)) errors.push('missing <!doctype html>');

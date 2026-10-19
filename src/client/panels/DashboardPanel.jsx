@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
-import * as api from '../lib/api.js';
+import { useBoard } from '../lib/useBoard.js';
 
 /* The dashboard: one glance at what the book is and what it is missing.
  *
@@ -7,23 +6,21 @@ import * as api from '../lib/api.js';
  * so the numbers are live while you edit — no build required. Facts are the
  * open questions; unlisted pages are pages that will not print. */
 export default function DashboardPanel({ book, onPickPage }) {
-  const [board, setBoard] = useState(null);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const load = useCallback(async () => {
-    if (!book) return;
-    setLoading(true);
-    setError('');
-    try { setBoard(await api.getBoard(book)); }
-    catch (e) { setError(e.message); }
-    finally { setLoading(false); }
-  }, [book]);
-
-  useEffect(() => { load(); }, [load]);
+  const { board, error, loading, reload } = useBoard(book);
 
   if (!book) return <p className="hint">Pick a book to open its dashboard.</p>;
-  if (error) return <p className="alert">{error}</p>;
+
+  if (error) {
+    return (
+      <div className="dash">
+        <p className="alert" role="alert">{error}</p>
+        <div className="draft-actions">
+          <button className="mini primary" onClick={reload}>try again</button>
+        </div>
+      </div>
+    );
+  }
+
   if (!board) return <p className="hint">{loading ? 'reading the book…' : 'no dashboard yet'}</p>;
 
   const t = board.totals;
@@ -37,7 +34,7 @@ export default function DashboardPanel({ book, onPickPage }) {
           <h2>{board.title}</h2>
           <p className="dim">{board.author ? `${board.author} · ` : ''}{board.theme} · {board.size} trim{board.editions.length ? ` · editions: ${board.editions.join(', ')}` : ''}</p>
         </div>
-        <button className="mini" onClick={load} disabled={loading}>{loading ? '…' : 'refresh'}</button>
+        <button className="mini" onClick={reload} disabled={loading}>{loading ? '…' : 'refresh'}</button>
       </div>
 
       <div className="dash-cards">

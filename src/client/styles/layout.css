@@ -82,16 +82,65 @@
 
 .paneswitch { display: none; }
 
+/* Three columns, each side one the reader sized. The side tracks are capped at
+ * 42vw so a layout saved on a wide screen cannot overflow a narrow one; the
+ * middle is the flexible track and takes whatever is left. Below 1100px the
+ * media query further down turns all of this off in favour of one pane. */
 .grid {
   flex: 1 1 auto; min-height: 0;
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) minmax(400px, 1.3fr) minmax(310px, 0.95fr);
+  grid-template-columns:
+    min(var(--edit-w, 320px), 42vw) 6px
+    minmax(0, 1fr)
+    6px min(var(--out-w, 330px), 42vw);
 }
 .col {
   display: flex; flex-direction: column;
   min-width: 0; min-height: 0; background: var(--bg);
 }
 .col + .col { border-left: 1px solid var(--line); }
+
+/* The handle between two columns. It is the divider: a hairline down the middle
+ * that turns accent on hover, with a grip that appears to say "grab here". */
+.splitter {
+  position: relative; touch-action: none; cursor: col-resize; outline: none;
+}
+.splitter::before {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 50%;
+  width: 1px; margin-left: -0.5px; background: var(--line);
+  transition: background var(--dur) var(--ease), width var(--dur) var(--ease);
+}
+.splitter-grip {
+  position: absolute; top: 50%; left: 50%;
+  width: 3px; height: 22px; margin: -11px 0 0 -1.5px;
+  border-radius: 99px; background: var(--border);
+  transition: background var(--dur) var(--ease), height var(--dur) var(--ease);
+}
+.splitter:hover::before, .splitter.active::before { background: var(--accent); }
+.splitter:hover .splitter-grip, .splitter.active .splitter-grip { background: var(--accent-hi); height: 40px; }
+.splitter:focus-visible { box-shadow: inset 0 0 0 2px var(--focus); }
+.splitter:focus-visible .splitter-grip { background: var(--accent-hi); }
+
+/* While dragging, the pointer must not be swallowed by a panel's iframe, and the
+ * cursor has to stay a resize cursor even out over the page. */
+body.col-resizing { cursor: col-resize; user-select: none; }
+body.col-resizing iframe { pointer-events: none; }
+
+/* A collapsed panel leaves this in its place: a click target to bring it back. */
+.rail {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 0; padding: 0; cursor: pointer;
+  background: var(--panel); border: 0; color: var(--subtle);
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.rail:hover { color: var(--ink); background: var(--panel-2); }
+.rail:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.rail-left { border-right: 1px solid var(--line); }
+.rail-right { border-left: 1px solid var(--line); }
+.rail-label {
+  writing-mode: vertical-rl;
+  font-size: var(--fs-xs); letter-spacing: 0.12em; text-transform: uppercase;
+}
 .col-head {
   display: flex; align-items: center; gap: var(--s2);
   padding: var(--s1) var(--s2) var(--s1) var(--s3);
@@ -113,8 +162,23 @@
 .notice.ok { background: var(--ok-soft); color: var(--ok-fg); border-bottom-color: var(--ok-line); }
 .notice.ok::before { background: var(--ok); }
 
-@media (max-width: 1400px) {
-  .grid { grid-template-columns: minmax(270px, 1fr) minmax(340px, 1.2fr) minmax(280px, 0.9fr); }
+/* Collapsing a side removes its track and its column, and puts a rail in its
+   place. Scoped to the desktop width so a collapsed panel still exists in the
+   pane switcher on a phone — there, `data-pane` decides what shows. */
+@media (min-width: 1101px) {
+  .app[data-hide-edit="1"] .grid {
+    grid-template-columns:
+      28px minmax(0, 1fr) 6px min(var(--out-w, 330px), 42vw);
+  }
+  .app[data-hide-out="1"] .grid {
+    grid-template-columns:
+      min(var(--edit-w, 320px), 42vw) 6px minmax(0, 1fr) 28px;
+  }
+  .app[data-hide-edit="1"][data-hide-out="1"] .grid {
+    grid-template-columns: 28px minmax(0, 1fr) 28px;
+  }
+  .app[data-hide-edit="1"] .col-edit,
+  .app[data-hide-out="1"] .col-out { display: none; }
 }
 
 @media (max-width: 1100px) {

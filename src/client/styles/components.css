@@ -245,3 +245,52 @@
   text-transform: uppercase; letter-spacing: 0.07em;
   color: var(--subtle);
 }
+
+/* A square icon button, used to collapse a side panel from its own header. The
+   auto margin pins it to the right of the header whatever else is in there. */
+.iconbtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: var(--h-sm); height: var(--h-sm); flex: 0 0 auto;
+  margin-left: auto;
+  background: transparent; border: 1px solid transparent; border-radius: var(--r-sm);
+  color: var(--subtle); font-size: var(--fs-md); line-height: 1;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.iconbtn:hover { color: var(--ink); background: var(--surface-hi); border-color: var(--border); }
+.iconbtn:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+/* The one control that destroys something. Red on purpose: it is the only
+   action in the cockpit you cannot take back. */
+.mini.danger { color: var(--bad-fg); border-color: var(--bad-line); }
+.mini.danger:hover:not(:disabled) { background: var(--bad-soft); border-color: var(--bad); color: var(--bad-fg); }
+.mini.danger:focus-visible { outline: 2px solid var(--bad-line); outline-offset: 1px; }
+
+/* A modal that asks you to type a name before it will do the irreversible. */
+.modal-scrim {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--s4);
+  background: rgba(4, 5, 9, 0.62);
+}
+.modal {
+  width: min(460px, 100%);
+  display: flex; flex-direction: column; gap: var(--s3);
+  padding: var(--s4);
+  background: var(--panel-2);
+  border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+}
+.modal-title { margin: 0; font-size: var(--fs-lg); font-weight: 600; color: var(--ink); }
+.modal-body { margin: 0; font-size: var(--fs-sm); line-height: 1.6; color: var(--muted); }
+.modal-body strong { color: var(--bad-fg); }
+.modal-title code, .modal-body code, .modal-field code {
+  font-family: var(--mono); font-size: 0.95em; color: var(--ink);
+}
+.modal-field { display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-sm); color: var(--subtle); }
+.modal-field input {
+  height: var(--h-md); padding: 0 var(--s2);
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-md);
+  font-family: var(--mono); color: var(--ink);
+}
+.modal-field input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: var(--s2); }

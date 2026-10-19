@@ -103,6 +103,15 @@ export const newBook = (slug) =>
 
 export const cancelRun = (id) => fetch(`/api/cancel?id=${encodeURIComponent(id)}`);
 
+/* Remove a whole book folder, generated output included. `confirm` must equal
+   the slug: the server refuses a delete the UI did not mean. */
+export const deleteBook = (slug, confirm) =>
+  json('/api/delete-book', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slug, confirm }),
+  });
+
 /* Which providers exist, and which of them would cost money. */
 export const getProviders = () => json('/api/providers');
 

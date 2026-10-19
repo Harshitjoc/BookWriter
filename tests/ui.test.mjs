@@ -475,6 +475,123 @@ await withServer(async (base) => {
       ok('an identical re-draft replays from the ledger, byte for byte',
         /replayed from the ledger/.test(meta2), meta2.replace(/\s+/g, ' ').slice(0, 80));
 
+      /* -------------------------------------------------- panels and deleting.
+         The side panels can be collapsed to hand the middle the whole width,
+         and dragged to a size the reader picks. And a project can be deleted
+         outright — the API is fussy about it and the cockpit makes you type the
+         slug first, because a folder of finished pages has no undo. */
+
+      group('the side panels close, resize and come back');
+      const previewW = () => page.locator('.col-preview').evaluate((el) => el.getBoundingClientRect().width);
+      const editVisible = () => page.locator('.col-edit').isVisible();
+
+      ok('both side panels start open', (await page.locator('.splitter').count()) === 2,
+        `${await page.locator('.splitter').count()} dividers`);
+      const beforeCollapse = await previewW();
+
+      await page.locator('.col-edit .iconbtn').click();
+      await page.waitForTimeout(250);
+      ok('hiding the source panel takes its column away', !(await editVisible()));
+      ok('and leaves a rail to bring it back', await page.locator('.rail-left').isVisible());
+      ok('the middle grows into the space the source panel left',
+        (await previewW()) > beforeCollapse + 100, `${Math.round(beforeCollapse)} -> ${Math.round(await previewW())}`);
+      ok('the editor is hidden, not torn down', (await page.locator('.col-edit .monaco-editor').count()) >= 1);
+
+      await page.locator('.rail-left').click();
+      await page.waitForTimeout(250);
+      ok('the rail brings the source panel back', await editVisible());
+
+      const beforeKey = await previewW();
+      const divider = page.locator('.splitter').first();
+      await divider.focus();
+      await divider.press('ArrowRight');
+      await page.waitForTimeout(200);
+      ok('the keyboard nudges the divider', (await previewW()) < beforeKey - 10,
+        `${Math.round(beforeKey)} -> ${Math.round(await previewW())}`);
+      ok('the divider announces itself to assistive tech',
+        (await divider.getAttribute('role')) === 'separator'
+        && /^\d+$/.test((await divider.getAttribute('aria-valuenow')) || ''));
+
+      await page.locator('.col-out .iconbtn').click();
+      await page.waitForTimeout(250);
+      ok('hiding the tools panel leaves a rail on the right', await page.locator('.rail-right').isVisible());
+      ok('with both sides closed the middle owns the width',
+        (await previewW()) > beforeCollapse + 200, `${Math.round(await previewW())}`);
+      await page.locator('.rail-right').click();
+      await page.waitForTimeout(250);
+      ok('the tools panel comes back too', await page.locator('.col-out').isVisible());
+
+      group('a project can be deleted, and only on purpose');
+      const postJson = async (url, body) => {
+        const r = await fetch(base + url, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+        });
+        return { status: r.status, body: await r.json().catch(() => null) };
+      };
+
+      const made = await postJson('/api/new-book', { slug: 'uitest-del' });
+      ok('a disposable project exists to delete', made.status === 200, JSON.stringify(made.body));
+      const wrongWord = await postJson('/api/delete-book', { slug: 'uitest-del', confirm: 'nope' });
+      ok('a delete that does not type the slug is refused', wrongWord.status === 400, `${wrongWord.status}`);
+      const starterHit = await postJson('/api/delete-book', { slug: 'starter', confirm: 'starter' });
+      ok('the starter template is never deletable', starterHit.status === 403, `${starterHit.status}`);
+      const killed = await postJson('/api/delete-book', { slug: 'uitest-del', confirm: 'uitest-del' });
+      ok('the typed slug deletes the whole folder',
+        killed.status === 200 && killed.body.removed >= 1, JSON.stringify(killed.body));
+      const listed = await (await fetch(base + '/api/books')).json();
+      ok('and it is gone from the list', !listed.books.some((b) => b.slug === 'uitest-del'));
+      const twice = await postJson('/api/delete-book', { slug: 'uitest-del', confirm: 'uitest-del' });
+      ok('deleting it again is a 404, not a second delete', twice.status === 404, `${twice.status}`);
+
+      /* The same delete, but driven from the dialog a person would use. */
+      await postJson('/api/new-book', { slug: 'uitest-ui' });
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForSelector('.monaco-editor', { timeout: 30000 });
+      const bookSelect = page.locator('.top-mid select').first();
+      await bookSelect.selectOption('starter');
+      await page.waitForTimeout(400);
+      ok('the template has no delete button to press',
+        await page.locator('.top-mid .mini.danger').isDisabled());
+      await bookSelect.selectOption('uitest-ui');
+      await page.waitForTimeout(400);
+      await page.locator('.top-mid .mini.danger').click();
+      await page.waitForSelector('.modal', { timeout: 5000 });
+      const armDelete = page.locator('.modal-actions .mini.danger');
+      ok('the dialog will not delete until the slug is typed', await armDelete.isDisabled());
+      await page.locator('.modal-field input').fill('nope');
+      ok('a wrong word leaves it dead', await armDelete.isDisabled());
+      await page.locator('.modal-field input').fill('uitest-ui');
+      ok('the right word arms it', !(await armDelete.isDisabled()));
+      await armDelete.click();
+      await page.waitForSelector('.modal', { state: 'detached', timeout: 15000 });
+      ok('the project is gone from the picker',
+        (await bookSelect.locator('option[value="uitest-ui"]').count()) === 0);
+      ok('and the cockpit says what it did',
+        /deleted books\/uitest-ui/i.test((await page.locator('.notice').textContent()) || ''));
+
+      /* Belt and braces: the scratch cleaner only knows about `uitest`, so make
+         sure the two books these tests made are gone whatever happened above. */
+      for (const leftover of ['uitest-del', 'uitest-ui']) {
+        fs.rmSync(path.join(ROOT, 'books', leftover), { recursive: true, force: true });
+      }
+
+      /* A panel collapsed on desktop must still exist on a phone, where the pane
+         switcher — not the collapse state — decides what is on screen. */
+      await page.locator('.col-edit .iconbtn').click();
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.waitForTimeout(300);
+      await page.locator('.paneswitch button', { hasText: 'source' }).click();
+      await page.waitForTimeout(250);
+      ok('a panel collapsed on desktop is still reachable on a phone',
+        await page.locator('.col-edit').isVisible());
+      await page.setViewportSize({ width: 1600, height: 1000 });
+      await page.waitForTimeout(300);
+      ok('and back on desktop it is still collapsed, with a rail to reopen it',
+        !(await page.locator('.col-edit').isVisible()) && await page.locator('.rail-left').isVisible());
+      await page.locator('.rail-left').click();
+      await page.waitForTimeout(250);
+      ok('the rail reopens it after the trip', await page.locator('.col-edit').isVisible());
+
       /* ---------------------------------------------------------- a phone.
          The three columns cannot share 390px, so below 1100px the cockpit
          shows one at a time behind a switcher. Everything that was reachable

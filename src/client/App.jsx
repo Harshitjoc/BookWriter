@@ -15,6 +15,19 @@ import BoardPanel from './panels/BoardPanel.jsx';
 import DashboardPanel from './panels/DashboardPanel.jsx';
 import ExportPanel from './panels/ExportPanel.jsx';
 import PublishPanel from './panels/PublishPanel.jsx';
+import Splitter from './components/Splitter.jsx';
+import useLayout, { EDIT_MIN, EDIT_MAX, OUT_MIN, OUT_MAX, PREVIEW_MIN } from './lib/useLayout.js';
+import useMediaQuery from './lib/useMediaQuery.js';
+
+/* The tracks a splitter and a rail take, in px. They are here rather than in the
+ * stylesheet because the drag maths in App has to subtract them by hand. */
+const SPLIT_W = 6;
+const RAIL_W = 28;
+const NUDGE = 24;
+
+/* The width the desktop layout draws, and the one CSS draws for the collapse
+ * variants must be the SAME line: 1100px is the widest the mobile rule allows. */
+const WIDE = '(min-width: 1101px)';
 
 const STEPS = [
   { id: 'build', label: 'build', title: 'Wrap your pages into book.html', verb: 'building' },
@@ -48,6 +61,16 @@ export default function App() {
   const [pane, setPane] = useState('edit');
   const [craftOpen, setCraftOpen] = useState(false);
 
+  /* The two side panels: open or closed, and how wide. `wide` is the same
+     breakpoint the stylesheet uses — only on desktop do the collapse handles,
+     the drag handles and the edge rails exist at all. */
+  const { layout, setEditOpen, setOutOpen, setEditW, setOutW } = useLayout();
+  const wide = useMediaQuery(WIDE);
+  const gridRef = useRef(null);
+
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleteWord, setDeleteWord] = useState('');
+
   /* Print-craft switches for build. They feed --gutter/--bleed/--start-recto to
      build-book.mjs, the same flags the command line takes. */
   const [craft, setCraft] = useState({ gutter: false, bleed: false, recto: false });
@@ -62,10 +85,16 @@ export default function App() {
   useEffect(() => () => { abortRun.current?.abort(); }, []);
 
   /* ------------------------------------------------------------------ boot */
-  const reloadBooks = useCallback(async (pick) => {
+  const reloadBooks = useCallback(async (pick, drop) => {
     const { books: list } = await api.getBooks();
     setBooks(list);
-    setSlug((cur) => pick || cur || list[0]?.slug || '');
+    setSlug((cur) => {
+      if (pick) return pick;
+      /* After a delete the slug we held is gone. Falling back to `cur` would
+         leave the cockpit pointed at a book that no longer exists. */
+      if (drop && cur === drop) return list[0]?.slug || '';
+      return cur || list[0]?.slug || '';
+    });
     return list;
   }, []);
 
@@ -215,6 +244,47 @@ export default function App() {
     }
   };
 
+  /* ------------------------------------------------- resize the side panels
+     A splitter reports the pointer's clientX; this turns it into a width for
+     one side, clamped so the middle never drops below what a page needs. The
+     left panel grows from the grid's left edge, the right from its right edge,
+     and the space the middle must keep is the same sum written twice. */
+  const dragEdit = (clientX) => {
+    const el = gridRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const reserved = (layout.outOpen ? layout.outW + SPLIT_W : RAIL_W) + SPLIT_W + PREVIEW_MIN;
+    const cap = Math.min(EDIT_MAX, r.width - reserved);
+    setEditW(Math.max(EDIT_MIN, Math.min(cap, clientX - r.left)));
+  };
+  const dragOut = (clientX) => {
+    const el = gridRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const reserved = (layout.editOpen ? layout.editW + SPLIT_W : RAIL_W) + SPLIT_W + PREVIEW_MIN;
+    const cap = Math.min(OUT_MAX, r.width - reserved);
+    setOutW(Math.max(OUT_MIN, Math.min(cap, r.right - clientX)));
+  };
+
+  /* ------------------------------------------------------- delete a project
+     The whole folder goes: the four source files and everything the engine
+     generated from them. The dialog makes you type the slug, because there is
+     no undo and no trash. */
+  const canDelete = !!slug && slug !== 'starter';
+  const deleteBook = async () => {
+    if (!canDelete || busy) return;
+    const s = slug;
+    try {
+      const { removed } = await api.deleteBook(s, deleteWord.trim());
+      setShowDelete(false);
+      setDeleteWord('');
+      await reloadBooks(undefined, s);
+      setNotice({ kind: 'ok', text: `deleted books/${s} — ${removed} file(s), pages and PDFs included.` });
+    } catch (e) {
+      setNotice({ kind: 'bad', text: e.message });
+    }
+  };
+
   const pdfHref = `/preview/books/${slug}/${edition ? `book-${edition}` : 'book'}.pdf`;
 
   /* Add an approved draft to the interior file.
@@ -315,7 +385,13 @@ export default function App() {
     : !!book?.hasBookHtml;
 
   return (
-    <div className="app" data-pane={pane}>
+    <div
+      className="app"
+      data-pane={pane}
+      data-hide-edit={wide && !layout.editOpen ? '1' : undefined}
+      data-hide-out={wide && !layout.outOpen ? '1' : undefined}
+      style={{ '--edit-w': `${layout.editW}px`, '--out-w': `${layout.outW}px` }}
+    >
       {/* ------------------------------------------------------------ header */}
       <header className="top">
         <div className="brand">
@@ -356,6 +432,16 @@ export default function App() {
           ) : null}
 
           <button className="mini" onClick={() => setShowNew((s) => !s)}>new book</button>
+          <button
+            className="mini danger"
+            onClick={() => { setDeleteWord(''); setShowDelete(true); }}
+            disabled={!canDelete || !!busy}
+            title={slug === 'starter'
+              ? 'books/starter is the template every new book is scaffolded from, so it is not deletable here'
+              : `Delete books/${slug} for good`}
+          >
+            delete book
+          </button>
         </div>
 
         <div className="top-right">
@@ -496,7 +582,18 @@ export default function App() {
       </div>
 
       {/* -------------------------------------------------------------- main */}
-      <main className="grid">
+      <main className="grid" ref={gridRef}>
+        {wide && !layout.editOpen ? (
+          <button
+            className="rail rail-left"
+            onClick={() => setEditOpen(true)}
+            title="Show the source panel"
+            aria-label="Show the source panel"
+          >
+            <span className="rail-label">source</span>
+          </button>
+        ) : null}
+
         <section className="col col-edit">
           <div className="col-head">
             <div className="tabs">
@@ -515,6 +612,16 @@ export default function App() {
             <button className="mini primary" onClick={doSave} disabled={!dirty}>
               {dirty ? 'save' : 'saved'}
             </button>
+            {wide ? (
+              <button
+                className="iconbtn"
+                onClick={() => setEditOpen(false)}
+                title="Hide the source panel"
+                aria-label="Hide the source panel"
+              >
+                <span aria-hidden="true">«</span>
+              </button>
+            ) : null}
           </div>
           <p className="hint">{file?.hint}</p>
           <div className="editor-wrap">
@@ -528,6 +635,17 @@ export default function App() {
           </div>
           {saved ? <p className="saved">{saved} · Ctrl+S</p> : null}
         </section>
+
+        {wide && layout.editOpen ? (
+          <Splitter
+            label="Resize the source panel"
+            value={layout.editW}
+            min={EDIT_MIN}
+            max={EDIT_MAX}
+            onDrag={dragEdit}
+            onNudge={(dir) => setEditW(layout.editW + dir * NUDGE)}
+          />
+        ) : null}
 
         <section className="col col-preview">
           <Preview book={slug} edition={edition} refreshKey={refreshKey} built={isBuilt} />
@@ -554,9 +672,30 @@ export default function App() {
           </div>
         </section>
 
+        {wide && layout.outOpen ? (
+          <Splitter
+            label="Resize the tools panel"
+            value={layout.outW}
+            min={OUT_MIN}
+            max={OUT_MAX}
+            onDrag={dragOut}
+            onNudge={(dir) => setOutW(layout.outW - dir * NUDGE)}
+          />
+        ) : null}
+
         <section className="col col-out">
           <div className="col-head">
             <OutTabs tab={tab} onPick={setTab} shots={shots} lines={lines} checkResult={checkResult} />
+            {wide ? (
+              <button
+                className="iconbtn"
+                onClick={() => setOutOpen(false)}
+                title="Hide the tools panel"
+                aria-label="Hide the tools panel"
+              >
+                <span aria-hidden="true">»</span>
+              </button>
+            ) : null}
           </div>
           <div className="out-body">
             {tab === 'check' ? (
@@ -583,7 +722,57 @@ export default function App() {
             ) : null}
           </div>
         </section>
+
+        {wide && !layout.outOpen ? (
+          <button
+            className="rail rail-right"
+            onClick={() => setOutOpen(true)}
+            title="Show the tools panel"
+            aria-label="Show the tools panel"
+          >
+            <span className="rail-label">tools</span>
+          </button>
+        ) : null}
       </main>
+
+      {/* Deleting a project takes the whole folder with it, so it asks for the
+          slug itself rather than a yes/no: a click cannot be a slip. */}
+      {showDelete ? (
+        <div
+          className="modal-scrim"
+          role="presentation"
+          onMouseDown={(e) => { if (e.target === e.currentTarget) setShowDelete(false); }}
+          onKeyDown={(e) => { if (e.key === 'Escape') setShowDelete(false); }}
+        >
+          <div className="modal" role="dialog" aria-modal="true" aria-labelledby="del-title">
+            <h2 id="del-title" className="modal-title">Delete books/{slug}?</h2>
+            <p className="modal-body">
+              This removes the whole folder: the interior, <code>book.json</code>, VOICE.md and
+              blocks.md, plus everything the engine generated — <code>book.html</code>, every page
+              PNG, the PDFs and the images. <strong>There is no undo and no trash.</strong>
+            </p>
+            <label className="modal-field">
+              <span>Type <code>{slug}</code> to confirm</span>
+              <input
+                autoFocus
+                value={deleteWord}
+                placeholder={slug}
+                onChange={(e) => setDeleteWord(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && deleteWord.trim() === slug) deleteBook();
+                  if (e.key === 'Escape') setShowDelete(false);
+                }}
+              />
+            </label>
+            <div className="modal-actions">
+              <button className="mini" onClick={() => setShowDelete(false)}>cancel</button>
+              <button className="mini danger" onClick={deleteBook} disabled={deleteWord.trim() !== slug}>
+                delete forever
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

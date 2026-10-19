@@ -716,6 +716,45 @@ async function handleApi(req, res, url) {
     return;
   }
 
+  /* Delete a whole book, generated output and all. This is the one endpoint that
+     removes rather than writes, so it is deliberately fussy: it must be a real
+     book, the caller must type the slug back, no run may be in flight, and the
+     starter template every scaffold copies from is never deletable from here. */
+  if (p === '/api/delete-book' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (d) => { body += d; if (body.length > 1e5) req.destroy(); });
+    req.on('end', async () => {
+      let o = {};
+      try { o = JSON.parse(body || '{}'); } catch { /* treated as an absent confirm */ }
+      const slug = typeof o.slug === 'string' ? o.slug : '';
+      const dir = bookDir(slug);
+      if (!dir || !bookFiles(slug)) return fail(res, 404, `no such book: ${slug}`);
+      if (slug === 'starter') {
+        return fail(res, 403, 'books/starter is the template every new book is scaffolded from; it is not deletable here.');
+      }
+      if (String(o.confirm || '').trim() !== slug) {
+        return fail(res, 400, 'type the book slug exactly to confirm the delete');
+      }
+      if ([...running.values()].some((r) => r.slug === slug)) {
+        return fail(res, 409, `a run is still in flight for ${slug}; wait for it to finish before deleting.`);
+      }
+      /* Counted before removal so the cockpit can say what actually went. */
+      let removed = 0;
+      const tally = (d) => {
+        let items;
+        try { items = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
+        for (const e of items) {
+          if (e.isDirectory()) tally(path.join(d, e.name));
+          else removed++;
+        }
+      };
+      tally(dir);
+      await fsp.rm(dir, { recursive: true, force: true });
+      json(res, 200, { ok: true, slug, removed });
+    });
+    return;
+  }
+
   /* ---- Phase 7: diagram studio -----------------------------------------
      The cockpit's DiagramStudio edits a spec and sees the compiled SVG live.
      Compilation happens HERE, in the same module the builder uses, so what the

@@ -155,4 +155,113 @@ group('the paper path writes real files and a real PDF');
   fs.rmSync(path.join(ROOT, 'books', 'uitest'), { recursive: true, force: true });
 }
 
+group('pasted text is a source, kept verbatim');
+{
+  const r = await intake({ type: 'text', value: '  Rest the meat for ten minutes.  ' });
+  ok('pasted text is kept as written', r.text.includes('Rest the meat for ten minutes.'));
+  ok('the note says it was pasted, not fetched', /pasted/i.test(r.note || ''), r.note);
+}
+
+const PAGE = `<section class="sheet bb">
+  <h2 class="sr">A real sentence describing this page.</h2>
+  <div class="tab"></div>
+  <div class="top"><div class="eyebrow"><b>Pages</b> · No. NN</div><span class="pill">Concept</span></div>
+  <h1 class="title">TITLE</h1>
+  <div class="sub">a gloss on the title</div>
+  <hr class="rule">
+  <div class="diagram">
+    <svg width="100%" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="two boxes joined">
+      <rect x="4" y="20" width="80" height="50" rx="8" fill="#EEF2FF" stroke="#6366F1"/>
+      <text x="44" y="49" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12px;fill:#1A1A2E">one</text>
+      <line x1="84" y1="45" x2="116" y2="45" stroke="#94A3B8" stroke-width="1.5"/>
+      <rect x="116" y="20" width="80" height="50" rx="8" fill="#ECFDF5" stroke="#0D9488"/>
+      <text x="156" y="49" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12px;fill:#1A1A2E">two</text>
+    </svg>
+  </div>
+  <hr class="rule">
+  <div class="explain"><p>Short prose about the idea.</p><p class="close">It lands.</p></div>
+  <div class="foot"><span class="brand">x</span><span class="pg"></span><span class="series">Pages</span></div>
+</section>`;
+
+/* One fake answers the page planner and the page drafter differently: the
+   planner is asked to plan, the drafter is handed a page. */
+const pagesModel = (count) => ({ content: (body) => {
+  const sys = (body.messages || []).map((m) => m.content).join('\n');
+  if (/small-press page engine/.test(sys)) {
+    return JSON.stringify({ title: 'Pasted Notes', pages: Array.from({ length: count }, (_, i) => ({
+      title: `Idea ${i + 1}`, topic: `idea ${i + 1}`, archetype: 'standard',
+    })) });
+  }
+  return PAGE.replace('TITLE', `Idea ${count}`);
+} });
+
+group('the pages endpoint writes a pack, not a book, and keeps every format asked for');
+{
+  const fake = await fakeModel(pagesModel(2));
+  let dir;
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/api/from-source`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slug: 'uitest-pages', sourceType: 'text', source: 'rest the meat',
+        mode: 'pages', pages: 2, formats: 'html', provider: 'ollama',
+      }),
+    });
+    const text = await res.text();
+    dir = path.join(ROOT, 'pages', 'uitest-pages');
+    ok('the stream opened and planned', res.ok && /event: start/.test(text) && /event: plan/.test(text));
+    ok('the plan event carries page entries, not book parts',
+      /"pages":\[/.test(text) && /"parts":/.test(text) === false, text.slice(0, 400));
+    const done = text.match(/event: done\ndata: (\{.*\})/)?.[1] || '{}';
+    let result = null;
+    try { result = JSON.parse(done).result; } catch { /* reported below */ }
+    ok('the done event says it is a page pack', result?.mode === 'pages');
+    ok('the done event reports both pages and the ask', result?.pages === 2 && result?.requested === 2, done);
+    ok('the pack folder exists outside books/', fs.existsSync(dir) && !fs.existsSync(path.join(ROOT, 'books', 'uitest-pages')));
+    const html = fs.readFileSync(path.join(dir, 'pages.html'), 'utf8')
+      .replace(/<style[\s\S]*?<\/style>/g, '').replace(/<script[\s\S]*?<\/script>/g, '');
+    ok('the html holds exactly two sheets', (html.match(/<section class="sheet bb"/g) || []).length === 2);
+    ok('no generated book pages were written', !/class="sheet gp/.test(html));
+  }, { OLLAMA_BASE_URL: fake.baseUrl, OLLAMA_MODEL: 'fake-model' });
+  await fake.close();
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
+group('a page count that is not a count is refused before anything runs');
+{
+  let slugDir;
+  await withServer(async (base) => {
+    for (const pages of [0, 41, 2.5, 'many']) {
+      const res = await fetch(`${base}/api/from-source`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: `uitest-bad-${String(pages).replace('.', '-')}`, sourceType: 'topic', source: 'x', mode: 'pages', pages, provider: 'ollama' }),
+      });
+      const body = await res.json().catch(() => ({}));
+      ok(`pages=${JSON.stringify(pages)} is a 400 that names the range`,
+        res.status === 400 && /1 to 40/.test(body.error || ''), `${res.status} ${JSON.stringify(body)}`);
+      slugDir = path.join(ROOT, 'pages', `uitest-bad-${String(pages).replace('.', '-')}`);
+      ok(`pages=${JSON.stringify(pages)} wrote nothing`, !fs.existsSync(slugDir));
+    }
+  }, {});
+}
+
+group('an existing pack is not overwritten');
+{
+  const dir = path.join(ROOT, 'pages', 'uitest-taken');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'keep.txt'), 'mine');
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/api/from-source`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug: 'uitest-taken', sourceType: 'topic', source: 'x', mode: 'pages', pages: 1, provider: 'ollama' }),
+    });
+    ok('a taken slug is a 409', res.status === 409, String(res.status));
+    ok('the existing file survived', fs.existsSync(path.join(dir, 'keep.txt')));
+  }, {});
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
 report('from-source');

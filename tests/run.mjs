@@ -38,6 +38,7 @@ const SUITES = [
   { name: 'lang', file: path.join(HERE, 'lang.test.mjs') },
   { name: 'byok', file: path.join(HERE, 'byok.test.mjs') },
   { name: 'from-source', file: path.join(HERE, 'from-source.test.mjs') },
+  { name: 'pages', file: path.join(HERE, 'pages.test.mjs') },
   { name: 'draft', file: path.join(HERE, 'draft.test.mjs') },
   { name: 'lint', file: path.join(HERE, 'lint.test.mjs') },
   { name: 'visual', file: path.join(HERE, 'visual.test.mjs') },

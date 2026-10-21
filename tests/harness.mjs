@@ -276,14 +276,18 @@ export async function fakeModel({ status = 200, content = 'x', hold = false } = 
     req.on('end', () => {
       if (hold) return;                                  // never answers
       let reply;
+      let parsed = null;
       try {
-        req.lastBody = JSON.parse(body);
+        parsed = req.lastBody = JSON.parse(body);
       } catch { /* malformed is the caller's problem */ }
       if (status !== 200) {
         res.writeHead(status, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ error: { message: 'nope' } }));
       }
-      reply = { choices: [{ message: { content } }] };
+      /* `content` may be a function of the parsed request body, so one fake can
+         answer the planner and the page drafter differently. */
+      const text = typeof content === 'function' ? content(parsed) : content;
+      reply = { choices: [{ message: { content: text } }] };
       res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify(reply));
     });
   });

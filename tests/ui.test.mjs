@@ -632,6 +632,37 @@ await withServer(async (base) => {
       await page.waitForTimeout(400);
       fs.rmSync(path.join(ROOT, 'books', 'uitest-cook'), { recursive: true, force: true });
 
+      group('the from-source panel offers a page pack, a count and pasted text');
+      await pickTab('from source');
+      await page.waitForSelector('.draft-form select', { timeout: 10000 });
+      const outSelect = page.locator('.draft-form select').first();
+      const outs = await outSelect.locator('option').allTextContents();
+      ok('a standalone page set is one of the outputs',
+        outs.some((o) => /pages — a standalone set/.test(o)), outs.join(' | '));
+      ok('the slug field is no longer labelled only for books',
+        /^slug$/.test(((await page.locator('.draft-form label span').first().textContent()) || '').trim()) ||
+        (await page.locator('.draft-form label:has-text("slug")').count()) > 0);
+      const srcSelect = page.locator('.draft-form select').nth(1);
+      await srcSelect.selectOption('text');
+      await page.waitForSelector('.draft-form textarea.paste-source', { timeout: 5000 });
+      ok('a pasted line gets a textarea, not a one-line box',
+        await page.locator('.draft-form textarea.paste-source').isVisible());
+      ok('the page count is a real number field with a floor and a ceiling',
+        (await page.locator('.draft-form input.pages-input').getAttribute('min')) === '1' &&
+        (await page.locator('.draft-form input.pages-input').getAttribute('max')) === '40');
+      ok('the count field is enabled while the mode is a book or a pack',
+        await page.locator('.draft-form input.pages-input').isEnabled());
+      await outSelect.selectOption('paper');
+      await page.waitForTimeout(150);
+      ok('a paper has no page count to set', await page.locator('.draft-form input.pages-input').isDisabled());
+      await outSelect.selectOption('pages');
+      await page.waitForTimeout(150);
+      ok('a page pack reveals the page-shape picker',
+        await page.locator('.draft-form select.archetype-pick').isVisible());
+      ok('the make button names the mode', /make pages/.test((await page.locator('.draft-actions button.mini.primary').textContent()) || ''));
+      await outSelect.selectOption('book');
+      await page.waitForTimeout(150);
+
       /* A panel collapsed on desktop must still exist on a phone, where the pane
          switcher — not the collapse state — decides what is on screen. */
       await page.locator('.col-edit .iconbtn').click();

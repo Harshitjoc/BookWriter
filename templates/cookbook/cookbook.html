@@ -1,0 +1,98 @@
+<!doctype html>
+<!--
+  TEMPLATE — cookbook. Warm, appetite-led. For food, or anything made by hand.
+
+  Look: themes/cookbook.css (terracotta mechanism, basil outcome, a serif title).
+  Size: B5. Shape: data-archetype="recipe" — what goes in as a <ul>, then how it
+  is made as a numbered <ol>, with the amounts in the list and never in the steps.
+
+  The page below is a worked example. Copy its shape for each recipe, then run:
+    node src/engine/tools/build-book.mjs templates/cookbook
+    node src/engine/tools/check.mjs      templates/cookbook/book.html
+-->
+<html lang="en" data-size="b5">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Weeknight Pan</title>
+  <link rel="stylesheet" href="../../src/engine/sheet.css">
+  <link rel="stylesheet" href="../../src/engine/sizes/b5.css">
+  <link rel="stylesheet" href="../../src/engine/themes/cookbook.css">
+</head>
+<body>
+  <main class="deck">
+
+    <section class="sheet bb snug" data-archetype="recipe">
+      <h2 class="sr">Pan-seared steak recipe: salt the steak early, get the pan properly hot, sear without moving it, then rest it so the juice settles back through the meat instead of running onto the board.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The weeknight pan</b> · No. 01</div>
+        <span class="pill">Meat</span>
+      </div>
+      <h1 class="title">Pan-seared steak</h1>
+      <div class="sub">Rest it, and the juice stays inside</div>
+      <hr class="rule">
+      <figure class="photo">
+        <img src="images/resting-meat.jpg" alt="A cooked steak resting on a wooden board, juices gathering underneath, a knife beside it.">
+      </figure>
+      <hr class="rule">
+      <div class="explain">
+        <ul>
+          <li>one steak, about an inch thick</li>
+          <li>salt, more than feels right</li>
+          <li>a heavy pan, properly hot</li>
+        </ul>
+        <ol>
+          <li>Salt the steak and leave it on the counter for 30 minutes.</li>
+          <li>Heat the pan until a drop of water skitters and vanishes.</li>
+          <li>Sear 3 minutes a side. Don't move it while it cooks.</li>
+          <li>Rest it 5 minutes on a warm plate, then cut.</li>
+        </ol>
+        <p class="close">Waiting is part of the cooking.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">COOK IT TONIGHT</span>
+        <p>The hard part is not the sear. It's the five minutes after it comes off the heat.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">The weeknight pan</span></div>
+    </section>
+
+    <section class="sheet bb snug" data-archetype="recipe">
+      <h2 class="sr">The bloom recipe: fresh coffee grounds are full of gas that pushes water away. A small first pour and a thirty second wait lets the gas escape, so the rest of the water can actually reach the coffee.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The weeknight pan</b> · No. 02</div>
+        <span class="pill">Coffee</span>
+      </div>
+      <h1 class="title">The bloom</h1>
+      <div class="sub">The first pour, and why it is small</div>
+      <hr class="rule">
+      <figure class="photo">
+        <img src="images/coffee-bloom.jpg" alt="Hot water poured over fresh coffee grounds in a plain white dripper, the grounds swelling into a domed crust of fine bubbles.">
+      </figure>
+      <hr class="rule">
+      <div class="explain">
+        <ul>
+          <li>18g coffee, ground medium</li>
+          <li>300g water, just off the boil</li>
+          <li>a dripper and a paper filter</li>
+        </ul>
+        <ol>
+          <li>Rinse the paper filter, then add the grounds.</li>
+          <li>Pour 36g of water, twice the coffee's weight, over all of it.</li>
+          <li>Wait 30 seconds. The bed puffs up and the bubbles stop.</li>
+          <li>Pour the rest in slow circles, then let it drain.</li>
+        </ol>
+        <p class="close">Thirty seconds now, and the rest of the pour finally works.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">TRY THIS TOMORROW</span>
+        <p>Pour twice the coffee's weight in water, then wait thirty seconds.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">The weeknight pan</span></div>
+    </section>
+
+  </main>
+  <script src="../../src/engine/sheet-tools.js"></script>
+</body>
+</html>

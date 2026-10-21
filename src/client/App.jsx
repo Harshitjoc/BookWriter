@@ -58,6 +58,8 @@ export default function App() {
   const [jump, setJump] = useState('');
   const [newSlug, setNewSlug] = useState('');
   const [showNew, setShowNew] = useState(false);
+  const [templates, setTemplates] = useState([]);
+  const [tplId, setTplId] = useState('');
   const [notice, setNotice] = useState(null);
   const [pane, setPane] = useState('edit');
   const [craftOpen, setCraftOpen] = useState(false);
@@ -79,6 +81,9 @@ export default function App() {
   const [bleedMm, setBleedMm] = useState('3');
 
   const book = useMemo(() => books.find((b) => b.slug === slug), [books, slug]);
+  /* The scaffold the new-book bar will copy. Looked up here so both the create
+     call and the hint under the bar read the same record. */
+  const chosenTpl = templates.find((t) => t.id === tplId);
   /* The run in flight, so leaving the cockpit stops listening to it. The child
      keeps going server-side; the UI just stops caring about a thing unmounted. */
   const abortRun = useRef(null);
@@ -107,6 +112,14 @@ export default function App() {
   useEffect(() => {
     reloadBooks().catch((e) => setNotice({ kind: 'bad', text: e.message }));
     api.getHealth().then(setHealth).catch(() => {});
+    /* The scaffolds the picker offers. If this fails the bar still works: an
+       empty list falls back to the server's own default template. */
+    api.getTemplates()
+      .then(({ default: def, templates: list }) => {
+        setTemplates(list || []);
+        setTplId((cur) => cur || def || list?.[0]?.id || '');
+      })
+      .catch(() => {});
   }, [reloadBooks]);
 
   /* Remember which project you are on, so a refresh lands back here. */
@@ -245,11 +258,14 @@ export default function App() {
     const s = newSlug.trim();
     if (!s) return;
     try {
-      await api.newBook(s);
+      await api.newBook(s, tplId || undefined);
       setShowNew(false);
       setNewSlug('');
       await reloadBooks(s);
-      setNotice({ kind: 'ok', text: `created books/${s}. Open its interior and start writing.` });
+      setNotice({
+        kind: 'ok',
+        text: `created books/${s} from the ${chosenTpl?.name || 'starter'} template. Open its interior and start writing.`,
+      });
     } catch (e) {
       setNotice({ kind: 'bad', text: e.message });
     }
@@ -467,7 +483,7 @@ export default function App() {
 
       {showNew ? (
         <div className="newbook">
-          <span>Scaffold <code>books/starter</code> into a new book:</span>
+          <span>Start a new book:</span>
           <input
             autoFocus
             placeholder="my-book"
@@ -475,8 +491,22 @@ export default function App() {
             onChange={(e) => setNewSlug(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && createBook()}
           />
+          <select
+            className="tpl-pick"
+            value={tplId}
+            onChange={(e) => setTplId(e.target.value)}
+            title="Which scaffold to copy. The theme, the page size and the voice come with it."
+          >
+            {templates.length === 0 ? <option value="">starter</option> : null}
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name} · {t.theme}/{t.size}
+              </option>
+            ))}
+          </select>
           <button className="mini primary" onClick={createBook}>create</button>
           <button className="mini" onClick={() => setShowNew(false)}>cancel</button>
+          {chosenTpl ? <p className="tpl-note">{chosenTpl.blurb}</p> : null}
         </div>
       ) : null}
 

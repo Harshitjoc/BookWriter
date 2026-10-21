@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { draftBlock } from './draft-block.mjs';
+import { templateById } from './templates.mjs';
 
 /** Final, engine-owned cleanup before a validated page is written.
  *
@@ -43,9 +44,11 @@ export function prepareSection(section, pageNumber) {
   return s;
 }
 
-/** Copies starter's scaffold, writes book.json from the plan, drafts every
- *  planned block, and finally builds. Never invents a page title. */
-export async function makeBook({ slug, plan, theme = 'studio', size = 'b5', bookRoot = 'books',
+/** Copies the chosen template's scaffold, writes book.json from the plan,
+ *  drafts every planned block, and finally builds. Never invents a page title.
+ *  `templateId` names a scaffold in templates.mjs; the default is books/starter. */
+export async function makeBook({ slug, plan, theme = null, size = null, bookRoot = 'books',
+  templateId = 'starter',
   lang = null, direction = null, fonts = null,
   provider, model, allowPaid = false, signal, env, onPage }) {
   if (!/^[a-z0-9][a-z0-9._-]{0,63}$/.test(slug)) {
@@ -54,17 +57,28 @@ export async function makeBook({ slug, plan, theme = 'studio', size = 'b5', book
   const dir = path.join(bookRoot, slug);
   if (fs.existsSync(dir)) throw new Error(`${dir} already exists`);
 
-  fs.cpSync(path.join(bookRoot, 'starter'), dir, { recursive: true });
-  const staleInterior = path.join(dir, 'starter.html');
-  if (fs.existsSync(staleInterior)) fs.renameSync(staleInterior, path.join(dir, `${slug}.html`));
+  const tpl = templateId && templateId !== 'starter' ? templateById(templateId) : null;
+  const srcDir = tpl ? tpl.dir : path.join(bookRoot, 'starter');
+  if (!fs.existsSync(srcDir)) throw new Error(`template "${templateId || 'starter'}" is missing at ${srcDir}`);
+  theme = theme || tpl?.theme || 'studio';
+  size = size || tpl?.size || 'b5';
+
+  fs.cpSync(srcDir, dir, { recursive: true });
+  const srcCfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(srcDir, 'book.json'), 'utf8')); } catch { return {}; } })();
+  const interiorName = srcCfg.interior || `${templateId || 'starter'}.html`;
+  const staleInterior = path.join(dir, interiorName);
+  if (interiorName !== `${slug}.html` && fs.existsSync(staleInterior)) {
+    fs.renameSync(staleInterior, path.join(dir, `${slug}.html`));
+  }
   for (const f of ['book.html', 'book.pdf', 'book-free.html', 'book-free.pdf']) {
     fs.rmSync(path.join(dir, f), { force: true });
   }
 
-  /* Clean interior: the head is starter's (proven by check.mjs on every book
-     that exists), and the body is empty of pages so we are the only hand on it. */
-  const starterHtml = fs.readFileSync(path.join(bookRoot, 'starter', 'starter.html'), 'utf8');
-  const head = starterHtml.slice(0, starterHtml.indexOf('<body>'));
+  /* Clean interior: the head is the template's own (proven by check.mjs on every
+     book that exists), and the body is emptied of pages so we are the only hand
+     on it. Any example pages the template ships are dropped, not kept. */
+  const scaffoldHtml = fs.readFileSync(path.join(dir, `${slug}.html`), 'utf8');
+  const head = scaffoldHtml.slice(0, scaffoldHtml.indexOf('<body>'));
   const themeFile = theme.endsWith('.css') ? theme : `${theme}.css`;
   const headThemed = head.replace(/themes\/[a-z-]+\.css/, `themes/${themeFile}`);
   const interiorPath = path.join(dir, `${slug}.html`);

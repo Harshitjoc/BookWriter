@@ -1,0 +1,45 @@
+{
+  "title": "The Backyard Field Guide",
+  "subtitle": "What you're looking at, and why it's there.",
+  "author": "Your Name",
+
+  "series": "The backyard field guide",
+  "brand": "yoursite.com",
+  "editionLabel": "Edition 1.0",
+  "unit": "entries",
+
+  "numbered": true,
+  "contents": true,
+  "index": true,
+
+  "theme": "studio",
+  "size": "b5",
+  "archetype": "standard",
+
+  "cover": {
+    "kicker": "A Proofpress field guide",
+    "note": "A picture first, an explanation second, one thing to try third."
+  },
+  "copyright": {
+    "year": 2026,
+    "rights": "© 2026 Your Name. All rights reserved.",
+    "lines": [
+      "Set in Inter, Space Grotesk and JetBrains Mono, self-hosted and licensed under the SIL Open Font License.",
+      "Photographs in this book are public domain (CC0). The cartoon cast is original to this book.",
+      "Built with Proofpress: github.com/Harshitjoc/BookWriter"
+    ]
+  },
+
+  "parts": [
+    {
+      "name": "In the bed",
+      "eyebrow": "What you'll actually see",
+      "why": "Recognition pages: a photograph, the name, and the one detail that settles it.",
+      "blocks": ["Tomato and basil", "Pip the guide"]
+    }
+  ],
+
+  "editions": {
+    "free": ["Tomato and basil"]
+  }
+}

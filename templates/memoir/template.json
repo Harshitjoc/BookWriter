@@ -1,0 +1,10 @@
+{
+  "id": "memoir",
+  "name": "Memoir",
+  "blurb": "Narrative non-fiction. Short essays with a photo and one true turn, six-by-nine, a serif body meant to be read slowly.",
+  "theme": "reference",
+  "size": "six-by-nine",
+  "archetype": "standard",
+  "voice": "a quiet narrator trusting the reader, one scene, one turn, one line to keep.",
+  "tags": ["memoir", "essay", "narrative", "six-by-nine"]
+}

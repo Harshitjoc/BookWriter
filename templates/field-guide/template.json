@@ -1,0 +1,10 @@
+{
+  "id": "field-guide",
+  "name": "Field guide",
+  "blurb": "Photo-led recognition with an original cartoon cast. A picture, the name, the one detail that settles it, and something to try.",
+  "theme": "studio",
+  "size": "b5",
+  "archetype": "standard",
+  "voice": "a patient guide beside you, pointing at the clue, never lecturing.",
+  "tags": ["field guide", "photos", "recognition", "cast"]
+}

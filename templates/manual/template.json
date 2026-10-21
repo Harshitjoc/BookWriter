@@ -1,0 +1,10 @@
+{
+  "id": "manual",
+  "name": "Manual",
+  "blurb": "Plain and procedural. Handbooks and runbooks: the title is a verb, the steps are numbered, the last step proves it worked.",
+  "theme": "manual",
+  "size": "a4",
+  "archetype": "procedure",
+  "voice": "a calm operator, one step at a time, nothing to prove.",
+  "tags": ["manual", "runbook", "procedure", "a4"]
+}

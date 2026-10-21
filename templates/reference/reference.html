@@ -1,0 +1,61 @@
+<!doctype html>
+<!--
+  TEMPLATE — reference. A book you open to find one thing, then close again.
+
+  Look: themes/reference.css (calm, dense, serif body, one hairline per entry).
+  Size: six-by-nine, the trade paperback trim. Entries stay short on purpose.
+  Shape: data-archetype="reference" — the answer comes first, a <table class="ref">
+  carries the detail, and at most two paragraphs of caveat follow.
+
+  The page below is a worked example. Copy its shape for each entry, then run:
+    node src/engine/tools/build-book.mjs templates/reference
+    node src/engine/tools/check.mjs      templates/reference/book.html
+  A scaffold copied into books/<slug>/ keeps this look; just make it yours.
+-->
+<html lang="en" data-size="six-by-nine">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Pocket Reference</title>
+  <link rel="stylesheet" href="../../src/engine/sheet.css">
+  <link rel="stylesheet" href="../../src/engine/sizes/six-by-nine.css">
+  <link rel="stylesheet" href="../../src/engine/themes/reference.css">
+</head>
+<body>
+  <main class="deck">
+
+    <section class="sheet bb" data-archetype="reference">
+      <h2 class="sr">HTTP status codes reference: the first digit is the whole story. 4xx means the request was wrong, 5xx means the server was wrong. A short table of the codes you actually meet and what each one asks you to do.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The pocket reference</b> · No. 01</div>
+        <span class="pill">HTTP</span>
+      </div>
+      <h1 class="title">HTTP status codes</h1>
+      <div class="sub">The ones you actually meet</div>
+      <hr class="rule">
+      <div class="explain">
+        <table class="ref">
+          <caption>4xx is the request, 5xx is the server. The codes you actually meet:</caption>
+          <tr><th>Code</th><th>Means, and what you do</th></tr>
+          <tr><td><code>400</code></td><td>Bad request. Fix what you sent.</td></tr>
+          <tr><td><code>401</code></td><td>Not signed in. Sign in again.</td></tr>
+          <tr><td><code>403</code></td><td>Signed in, not allowed. Get access.</td></tr>
+          <tr><td><code>404</code></td><td>Nothing there. Check the path.</td></tr>
+          <tr><td><code>429</code></td><td>Too many requests. Wait, don't retry fast.</td></tr>
+          <tr><td><code>503</code></td><td>Down or overloaded. Wait.</td></tr>
+        </table>
+        <p>The gotcha: <span class="bad">401 and 403 are not the same</span>. 401 is "I don't know you". 403 is "I know you, and no".</p>
+        <p class="close">Read the first digit. Everything else is detail.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">REMEMBER</span>
+        <p>Before you debug a failing call, read its first digit. A 4xx is your bug, a 5xx is theirs, and a 429 is just time.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">The pocket reference</span></div>
+    </section>
+
+  </main>
+  <script src="../../src/engine/sheet-tools.js"></script>
+</body>
+</html>

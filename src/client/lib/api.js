@@ -94,12 +94,15 @@ export const saveFile = (book, name, text) =>
 
 export const getShots = (book) => json(`/api/shots?book=${encodeURIComponent(book)}`);
 
-export const newBook = (slug) =>
+export const newBook = (slug, template) =>
   json('/api/new-book', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ slug }),
+    body: JSON.stringify({ slug, ...(template ? { template } : {}) }),
   });
+
+/* The scaffolds the new-book picker may offer, in catalog order. */
+export const getTemplates = () => json('/api/templates');
 
 export const cancelRun = (id) => fetch(`/api/cancel?id=${encodeURIComponent(id)}`);
 

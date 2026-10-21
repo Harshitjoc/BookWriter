@@ -1,0 +1,97 @@
+<!doctype html>
+<!--
+  TEMPLATE — field guide. Photo-led recognition, with an original cartoon cast.
+
+  Look: themes/studio.css. Size: B5. Shape: data-archetype="standard" — one idea,
+  one band, one action. The band is a PHOTOGRAPH when the subject is physical, and
+  the cast (src/engine/tools/cast.mjs) when the point is the guide itself.
+
+  The cast is drawn inline as SVG. It is ORIGINAL: never swap in a cartoon that
+  already exists, because a recognizable character you do not own is a legal
+  problem, not a style. `node src/engine/tools/cast.mjs --sheet` writes a look sheet.
+
+  Copy a page's shape per entry, then run:
+    node src/engine/tools/build-book.mjs templates/field-guide
+    node src/engine/tools/check.mjs      templates/field-guide/book.html
+-->
+<html lang="en" data-size="b5">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Backyard Field Guide</title>
+  <link rel="stylesheet" href="../../src/engine/sheet.css">
+  <link rel="stylesheet" href="../../src/engine/sizes/b5.css">
+  <link rel="stylesheet" href="../../src/engine/themes/studio.css">
+</head>
+<body>
+  <main class="deck">
+
+    <section class="sheet bb snug">
+      <h2 class="sr">Tomato and basil recognition page: basil grown close around the base of a tomato and marigolds nearby pull pests away, so the crop you want is left alone. The clue is the pairing, not either plant on its own.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The backyard field guide</b> · No. 01</div>
+        <span class="pill">In the bed</span>
+      </div>
+      <h1 class="title">Tomato and basil</h1>
+      <div class="sub">A pairing, not two plants</div>
+      <hr class="rule">
+      <figure class="photo">
+        <img src="images/companion-planting.jpg" alt="A young tomato plant with basil growing close around its base and marigolds nearby in dark garden soil.">
+      </figure>
+      <hr class="rule">
+      <div class="explain">
+        <p>You're looking at a tomato with basil crowded right up against its stem. <span class="bad">That's a mistake most people make</span>: basil likes a little room, and planting it as a companion means keeping it near, not on top.</p>
+        <p>Grown this way, the basil's smell <span class="hl">confuses what's hunting the tomato</span>, and the marigolds at the row's end pull pests toward the flowers instead. <span class="good">You keep the tomatoes.</span></p>
+        <p class="close">Some plants are just easier to grow next to each other.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">THIS WEEKEND</span>
+        <p>Basil at the base of each tomato, marigolds at both ends of the bed. Keep the basil about a hand's width out, never touching the stem.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">The backyard field guide</span></div>
+    </section>
+
+    <section class="sheet bb snug">
+      <h2 class="sr">Pip the guide page: an original cartoon fox who appears on the entries worth slowing down for. When you see Pip, the sentence next to him is the one detail that settles the identification.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>The backyard field guide</b> · No. 02</div>
+        <span class="pill">Reading this book</span>
+      </div>
+      <h1 class="title">Pip the guide</h1>
+      <div class="sub">Who points at the thing worth noticing</div>
+      <hr class="rule">
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cartoon drawing of Pip, a small original fox wearing an indigo scarf, used across the book to point at the one detail that settles an identification.">
+          <path d="M62 156 C18 150 18 104 52 100 C74 97 84 122 74 144 Z" fill="#FCD34D" stroke="#B45309" stroke-width="2.5" stroke-linejoin="round"/>
+          <ellipse cx="120" cy="152" rx="58" ry="46" fill="#FBBF24" stroke="#B45309" stroke-width="2.5"/>
+          <ellipse cx="120" cy="162" rx="33" ry="26" fill="#FEF3C7"/>
+          <path d="M126 116 L164 116 L145 150 Z" fill="#6366F1" stroke="#4F46E5" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="150" cy="90" r="40" fill="#FBBF24" stroke="#B45309" stroke-width="2.5"/>
+          <path d="M124 64 L118 32 L150 58 Z" fill="#FBBF24" stroke="#B45309" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M176 64 L186 34 L156 56 Z" fill="#FBBF24" stroke="#B45309" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M150 100 q24 4 38 12 q-16 14 -38 8 Z" fill="#FEF3C7" stroke="#B45309" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="140" cy="86" r="4.5" fill="#1F2937"/>
+          <circle cx="166" cy="86" r="4.5" fill="#1F2937"/>
+          <circle cx="188" cy="112" r="5.5" fill="#1F2937"/>
+          <text x="110" y="212" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:13px;fill:#5B6472">Pip, who is always pointing at the clue</text>
+        </svg>
+      </div>
+      <hr class="rule">
+      <div class="explain">
+        <p>Pip shows up on the entries that are easy to get wrong. He isn't decoration. <span class="hl">When Pip is on the page, the line beside him is the giveaway</span>, the one detail that tells this thing apart from the one it looks like.</p>
+        <p>Every entry still works without him. Skip the fox if you're in a hurry, read the photograph, read the name. <span class="good">Think of him as a nudge, never a rule you have to follow.</span></p>
+        <p class="close">Look once. Then look at the one thing he's pointing at.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">HOW TO READ THIS</span>
+        <p>Start at the picture, not the text. If you can't name it from the picture, the title is the next guess, and the entry tells you the rest.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">The backyard field guide</span></div>
+    </section>
+
+  </main>
+  <script src="../../src/engine/sheet-tools.js"></script>
+</body>
+</html>

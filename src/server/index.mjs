@@ -35,6 +35,7 @@ import { mergeEnv } from '../shared/byok.js';
 import { intake } from '../engine/tools/source-intake.mjs';
 import { planFromSource } from '../engine/tools/plan-from-source.mjs';
 import { makeBook } from '../engine/tools/make-book.mjs';
+import { listTemplates, templateById, DEFAULT_TEMPLATE_ID } from '../engine/tools/templates.mjs';
 import { makePaper } from '../engine/tools/make-paper.mjs';
 /* Phase 7: the cockpit can compile a diagram and read a book's ledger without
    leaving the browser. Same modules the CLI uses, imported, not re-implemented. */
@@ -463,7 +464,8 @@ function handleFromSource(req, res) {
       send('plan', { plan, validation });
 
       const res2 = await makeBook({
-        slug, plan, theme: args.theme || 'studio', size: args.size || 'b5',
+        slug, plan, theme: args.theme || null, size: args.size || null,
+        templateId: args.template || DEFAULT_TEMPLATE_ID,
         lang, direction, fonts,
         provider: resolved.id, model: resolved.model, allowPaid: !!args.allowPaid,
         signal: controller.signal, env: serverEnv,
@@ -692,7 +694,12 @@ async function handleApi(req, res, url) {
     return json(res, 200, { shots: files });
   }
 
-  /* scaffold a new book from books/starter */
+  /* the scaffold picker: every template a new book may be copied from */
+  if (p === '/api/templates') {
+    return json(res, 200, { default: DEFAULT_TEMPLATE_ID, templates: listTemplates() });
+  }
+
+  /* scaffold a new book from a chosen template (default books/starter) */
   if (p === '/api/new-book' && req.method === 'POST') {
     let body = '';
     req.on('data', (d) => { body += d; });
@@ -703,15 +710,26 @@ async function handleApi(req, res, url) {
       if (!/^[a-z0-9][a-z0-9-]{0,63}$/.test(slug)) return fail(res, 400, 'slug must be lowercase letters, digits and dashes');
       const dir = path.join(BOOKS, slug);
       if (fs.existsSync(dir)) return fail(res, 409, `${slug} already exists`);
-      const src = path.join(BOOKS, 'starter');
-      if (!fs.existsSync(src)) return fail(res, 500, 'books/starter is missing');
-      await fsp.cp(src, dir, { recursive: true });
-      /* starter ships starter.html; the book is called <slug>.html. Either rename
-         it or name it in book.json. Renaming keeps the default lookup working. */
-      const old = path.join(dir, 'starter.html');
-      if (fs.existsSync(old)) await fsp.rename(old, path.join(dir, `${slug}.html`));
-      await fsp.rm(path.join(dir, 'book.html'), { force: true });   // generated; stale copy
-      json(res, 200, { ok: true, slug });
+      /* Unknown template is a refusal, never a silent fall back to starter: a
+         typo should not quietly produce the wrong kind of book. */
+      const templateId = String(o.template || DEFAULT_TEMPLATE_ID).trim() || DEFAULT_TEMPLATE_ID;
+      const tpl = templateById(templateId);
+      if (!tpl) return fail(res, 400, `unknown template "${templateId}"`);
+      if (!tpl.exists) return fail(res, 500, `template "${templateId}" is missing at ${tpl.relDir}`);
+      await fsp.cp(tpl.dir, dir, { recursive: true });
+      /* The template ships <id>.html (starter ships starter.html); the book is
+         called <slug>.html. Rename it, or name it in book.json, so the default
+         lookup keeps working. */
+      const srcCfg = readJson(path.join(tpl.dir, 'book.json')) || {};
+      const interior = srcCfg.interior || `${templateId}.html`;
+      const old = path.join(dir, interior);
+      if (interior !== `${slug}.html` && fs.existsSync(old)) {
+        await fsp.rename(old, path.join(dir, `${slug}.html`));
+      }
+      /* Nothing generated should ride along with the scaffold. */
+      await fsp.rm(path.join(dir, 'book.html'), { force: true });
+      await fsp.rm(path.join(dir, 'book.pdf'), { force: true });
+      json(res, 200, { ok: true, slug, template: templateId });
     });
     return;
   }

@@ -1,0 +1,10 @@
+{
+  "id": "cookbook",
+  "name": "Cookbook",
+  "blurb": "Warm and appetite-led. Recipes and anything made by hand: what goes in, how it is made, the mistake to avoid.",
+  "theme": "cookbook",
+  "size": "b5",
+  "archetype": "recipe",
+  "voice": "one cook to another, concrete amounts, the mistake said out loud.",
+  "tags": ["food", "recipe", "photo"]
+}

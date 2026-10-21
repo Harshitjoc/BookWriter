@@ -1,0 +1,58 @@
+<!doctype html>
+<!--
+  TEMPLATE — memoir. Narrative non-fiction: storytelling on a page, one turn each.
+
+  Look: themes/reference.css (a serif body, calm, an entry-like hairline). Size:
+  six-by-nine, the trade paperback trim. Shape: data-archetype="standard" — but the
+  band carries a photograph and the explainer carries an ESSAY, not a how-to.
+
+  The band stays lean here. Memoir is where words do the work, so the page is one
+  scene, one turn, one line to keep. The example below is a SCENARIO, framed as one,
+  not a claimed true event: never print a personal story as fact that did not happen.
+
+  Copy a page's shape per essay, then run:
+    node src/engine/tools/build-book.mjs templates/memoir
+    node src/engine/tools/check.mjs      templates/memoir/book.html
+-->
+<html lang="en" data-size="six-by-nine">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One More Winter</title>
+  <link rel="stylesheet" href="../../src/engine/sheet.css">
+  <link rel="stylesheet" href="../../src/engine/sizes/six-by-nine.css">
+  <link rel="stylesheet" href="../../src/engine/themes/reference.css">
+</head>
+<body>
+  <main class="deck">
+
+    <section class="sheet bb snug">
+      <h2 class="sr">Packing light essay: when we pack for a trip we pack for the fear, not the weather, bringing three imaginary lives in one bag. The essay is about noticing which bag you are actually carrying.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>One more winter</b> · No. 01</div>
+        <span class="pill">Leaving</span>
+      </div>
+      <h1 class="title">Packing light</h1>
+      <div class="sub">What we bring when we're afraid</div>
+      <hr class="rule">
+      <figure class="photo">
+        <img src="images/packing-cubes.jpg" alt="An open carry-on suitcase seen from above, filled with four neat fabric packing cubes in muted colours.">
+      </figure>
+      <hr class="rule">
+      <div class="explain">
+        <p>Say you're going away for a week and you've packed for three. <span class="hl">You packed for the person you're afraid of being</span>, not the one you are.</p>
+        <p>It's the instinct behind a drawer of cables.</p>
+        <p class="close">Packing light isn't about less. It's about trusting the person who arrives.</p>
+      </div>
+      <div class="ask">
+        <span class="lbl">TRY THIS NEXT TRIP</span>
+        <p>Take one thing out the night before and leave it home.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">One more winter</span></div>
+    </section>
+
+  </main>
+  <script src="../../src/engine/sheet-tools.js"></script>
+</body>
+</html>

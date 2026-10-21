@@ -1,0 +1,10 @@
+{
+  "id": "reference",
+  "name": "Pocket reference",
+  "blurb": "Dense, calm, answer-first. A book you open to one entry and close again: codes, specs, cheat sheets.",
+  "theme": "reference",
+  "size": "six-by-nine",
+  "archetype": "reference",
+  "voice": "answer in the first sentence, detail in a table, end on the gotcha.",
+  "tags": ["reference", "lookup", "six-by-nine"]
+}

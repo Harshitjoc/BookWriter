@@ -1,0 +1,78 @@
+<!doctype html>
+<!--
+  TEMPLATE — manual. Plain, procedural, legible under bad light. Handbooks and runbooks.
+
+  Look: themes/manual.css (white page, monospace eyebrow, a left bar on the rule).
+  Size: A4, the size for something that lives on a desk. Shape:
+  data-archetype="procedure" — the title is a verb, the explainer is a numbered
+  <ol> in the order you do it, and the last step is the proof it worked.
+
+  The page below is a worked example. Copy its shape for each procedure, then run:
+    node src/engine/tools/build-book.mjs templates/manual
+    node src/engine/tools/check.mjs      templates/manual/book.html
+-->
+<html lang="en" data-size="a4">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Set Up Your Server</title>
+  <link rel="stylesheet" href="../../src/engine/sheet.css">
+  <link rel="stylesheet" href="../../src/engine/sizes/a4.css">
+  <link rel="stylesheet" href="../../src/engine/themes/manual.css">
+</head>
+<body>
+  <main class="deck">
+
+    <section class="sheet bb" data-archetype="procedure">
+      <h2 class="sr">Add a webhook procedure: create the endpoint, verify the signature before you trust the payload, handle the event, and confirm with a test delivery that the provider marks as succeeded.</h2>
+      <div class="tab"></div>
+      <div class="top">
+        <div class="eyebrow"><b>Set up your server</b> · No. 01</div>
+        <span class="pill">Integration</span>
+      </div>
+      <h1 class="title">Add a webhook</h1>
+      <div class="sub">Receive events the moment they happen</div>
+      <hr class="rule">
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 592 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: a provider sends an event to your endpoint, your endpoint verifies the signature, handles the event, and replies 200; the reply is coloured teal because it is the outcome that stops the retry.">
+          <defs>
+            <marker id="ar1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            <filter id="cs1" x="-20%" y="-25%" width="140%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0F172A" flood-opacity="0.07"/></filter>
+          </defs>
+          <rect x="1" y="60" width="150" height="60" rx="13" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" filter="url(#cs1)"/>
+          <text x="76" y="85" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#0F172A">Provider</text>
+          <text x="76" y="103" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11px;fill:#64748B">sends an event</text>
+          <rect x="221" y="60" width="150" height="60" rx="13" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" filter="url(#cs1)"/>
+          <text x="296" y="85" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#0F172A">Verify</text>
+          <text x="296" y="103" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11px;fill:#64748B">check the signature</text>
+          <rect x="441" y="60" width="150" height="60" rx="13" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" filter="url(#cs1)"/>
+          <text x="516" y="85" text-anchor="middle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;fill:#047857">Reply 200</text>
+          <text x="516" y="103" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:11px;fill:#64748B">no retry</text>
+          <line x1="151" y1="90" x2="221" y2="90" stroke="#94A3B8" stroke-width="1.75" marker-end="url(#ar1)"/>
+          <line x1="371" y1="90" x2="441" y2="90" stroke="#94A3B8" stroke-width="1.75" marker-end="url(#ar1)"/>
+          <circle cx="186" cy="90" r="11" fill="#1D4ED8"/><text x="186" y="90" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">1</text>
+          <circle cx="406" cy="90" r="11" fill="#1D4ED8"/><text x="406" y="90" text-anchor="middle" dominant-baseline="central" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;fill:#FFFFFF">2</text>
+          <text x="296" y="150" text-anchor="middle" style="font-family:'Inter',sans-serif;font-size:12.5px;fill:#64748B">Verify before you trust the body. A 200 stops the provider retrying.</text>
+        </svg>
+      </div>
+      <hr class="rule">
+      <div class="explain">
+        <ol>
+          <li>Pick a URL on your server for the provider to call, something like <code>/hooks/provider</code>.</li>
+          <li>Read the signing secret from the provider's dashboard and keep it in an environment variable, not in the code.</li>
+          <li>On every request, compute the signature over the raw body and compare it to the header. Reject the request if they differ.</li>
+          <li>Only after the signature checks out, parse the body and do the work the event asks for.</li>
+          <li>Reply 200 once the work is done. Check the provider's test delivery shows <span class="good">succeeded</span>.</li>
+        </ol>
+      </div>
+      <div class="ask">
+        <span class="lbl">DO THIS FIRST</span>
+        <p>Verify the signature before you parse the body. An unverified webhook is an open door to anyone who finds the URL.</p>
+      </div>
+      <div class="foot"><span class="brand">yoursite.com</span><span class="pg"></span><span class="series">Set up your server</span></div>
+    </section>
+
+  </main>
+  <script src="../../src/engine/sheet-tools.js"></script>
+</body>
+</html>

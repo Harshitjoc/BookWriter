@@ -1,0 +1,45 @@
+{
+  "title": "One More Winter",
+  "subtitle": "Essays on leaving, and staying.",
+  "author": "Your Name",
+
+  "series": "One more winter",
+  "brand": "yoursite.com",
+  "editionLabel": "Edition 1.0",
+  "unit": "essays",
+
+  "numbered": true,
+  "contents": true,
+  "index": true,
+
+  "theme": "reference",
+  "size": "six-by-nine",
+  "archetype": "standard",
+
+  "cover": {
+    "kicker": "A Proofpress memoir",
+    "note": "Short essays that each turn on one small, true thing."
+  },
+  "copyright": {
+    "year": 2026,
+    "rights": "© 2026 Your Name. All rights reserved.",
+    "lines": [
+      "Set in Inter and Space Grotesk, self-hosted and licensed under the SIL Open Font License.",
+      "The photograph in this book is public domain (CC0).",
+      "Built with Proofpress: github.com/Harshitjoc/BookWriter"
+    ]
+  },
+
+  "parts": [
+    {
+      "name": "Leaving",
+      "eyebrow": "What we carry out the door",
+      "why": "Essays about the small decisions that turn out to have been the big ones.",
+      "blocks": ["Packing light"]
+    }
+  ],
+
+  "editions": {
+    "free": ["Packing light"]
+  }
+}

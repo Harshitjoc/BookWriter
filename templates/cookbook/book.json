@@ -1,0 +1,45 @@
+{
+  "title": "The Weeknight Pan",
+  "subtitle": "Good food, not much time.",
+  "author": "Your Name",
+
+  "series": "The weeknight pan",
+  "brand": "yoursite.com",
+  "editionLabel": "Edition 1.0",
+  "unit": "recipes",
+
+  "numbered": true,
+  "contents": true,
+  "index": true,
+
+  "theme": "cookbook",
+  "size": "b5",
+  "archetype": "recipe",
+
+  "cover": {
+    "kicker": "A Proofpress cookbook",
+    "note": "Written to be cooked from, not read at."
+  },
+  "copyright": {
+    "year": 2026,
+    "rights": "© 2026 Your Name. All rights reserved.",
+    "lines": [
+      "Set in Inter, Space Grotesk and JetBrains Mono, self-hosted and licensed under the SIL Open Font License.",
+      "Photographs in this book are public domain (CC0).",
+      "Built with Proofpress: github.com/Harshitjoc/BookWriter"
+    ]
+  },
+
+  "parts": [
+    {
+      "name": "Heat and patience",
+      "eyebrow": "The pan does most of it",
+      "why": "Two things worth getting right before anything else you cook.",
+      "blocks": ["Pan-seared steak", "The bloom"]
+    }
+  ],
+
+  "editions": {
+    "free": ["Pan-seared steak"]
+  }
+}

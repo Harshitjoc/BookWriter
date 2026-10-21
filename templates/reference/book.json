@@ -1,0 +1,44 @@
+{
+  "title": "The Pocket Reference",
+  "subtitle": "One thing, found fast.",
+  "author": "Your Name",
+
+  "series": "The pocket reference",
+  "brand": "yoursite.com",
+  "editionLabel": "Edition 1.0",
+  "unit": "entries",
+
+  "numbered": true,
+  "contents": true,
+  "index": true,
+
+  "theme": "reference",
+  "size": "six-by-nine",
+  "archetype": "reference",
+
+  "cover": {
+    "kicker": "A Proofpress reference",
+    "note": "Built to be opened at one page, not read from the front."
+  },
+  "copyright": {
+    "year": 2026,
+    "rights": "© 2026 Your Name. All rights reserved.",
+    "lines": [
+      "Set in Inter and Space Grotesk, self-hosted and licensed under the SIL Open Font License.",
+      "Built with Proofpress: github.com/Harshitjoc/BookWriter"
+    ]
+  },
+
+  "parts": [
+    {
+      "name": "Codes and status",
+      "eyebrow": "Open, look, close",
+      "why": "The lookups you reach for the moment something breaks, kept short on purpose.",
+      "blocks": ["HTTP status codes"]
+    }
+  ],
+
+  "editions": {
+    "free": ["HTTP status codes"]
+  }
+}

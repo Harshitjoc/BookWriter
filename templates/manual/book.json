@@ -1,0 +1,44 @@
+{
+  "title": "Set Up Your Server",
+  "subtitle": "Steps you can follow in the dark.",
+  "author": "Your Name",
+
+  "series": "Set up your server",
+  "brand": "yoursite.com",
+  "editionLabel": "Edition 1.0",
+  "unit": "steps",
+
+  "numbered": true,
+  "contents": true,
+  "index": true,
+
+  "theme": "manual",
+  "size": "a4",
+  "archetype": "procedure",
+
+  "cover": {
+    "kicker": "A Proofpress manual",
+    "note": "One procedure per page, in the order you do them."
+  },
+  "copyright": {
+    "year": 2026,
+    "rights": "© 2026 Your Name. All rights reserved.",
+    "lines": [
+      "Set in Inter and JetBrains Mono, self-hosted and licensed under the SIL Open Font License.",
+      "Built with Proofpress: github.com/Harshitjoc/BookWriter"
+    ]
+  },
+
+  "parts": [
+    {
+      "name": "Wire it up",
+      "eyebrow": "One step at a time",
+      "why": "The procedures you run once, carefully, and then never think about again.",
+      "blocks": ["Add a webhook"]
+    }
+  ],
+
+  "editions": {
+    "free": ["Add a webhook"]
+  }
+}

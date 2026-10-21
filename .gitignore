@@ -32,3 +32,9 @@ dist/
 # Review screenshots of the cockpit, shot by hand at a few widths. Local only:
 # they are for looking at, not for the repository.
 cockpit-shots/
+
+# The kit sheets (cast.mjs --sheet, gen-figure.mjs --sheet) and figure renders.
+# Written to look at, never part of a book or the build.
+cast-sheet.html
+figures-sheet.html
+figure-shots/

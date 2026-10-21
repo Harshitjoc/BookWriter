@@ -165,6 +165,8 @@ bottom of the drawing instead of fixing anything.
   `VOICE.md` overrides it.
 - `references/diagram-system.md` — the SVG vocabulary, the colour roles, copy-paste
   parts, and the shape catalogue.
+- `references/design-kit.md` — isometric scenes and stick figures, and when a page wants
+  a thing with volume or a body doing something, instead of a flow.
 - `references/design-rules.md` — accumulated corrections. Newest wins.
 - `references/photo-blocks.md` — when a photo beats a diagram, and how to prompt for one.
 - `references/cast.md` — the original cartoon cast (inline SVG), and the rule that it is

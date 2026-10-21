@@ -4,21 +4,27 @@
    check.mjs measures one thing: does the content run past the bottom of the
    box. It says nothing about the ways a page that FITS can still be wrong:
 
-     overlap        two text blocks sitting on top of each other
-     contrast       a text colour that fails against its own background, which
+      overlap        two text blocks sitting on top of each other
+      contrast       a text colour that fails against its own background, which
                     on paper is the same as invisible text
-     safe-zone      a block crossing the page's print margin
-     ink-floor      an SVG label below the 11px floor the skill sets
-     no-fill        an SVG <text> with no explicit fill, so it can inherit its
+      safe-zone      a block crossing the page's print margin
+      ink-floor      an SVG label below the 11px floor the skill sets
+      no-fill        an SVG <text> with no explicit fill, so it can inherit its
                     way to invisible (hard rule 3)
-     font           a named family that silently fell back to a system font
-     runt           a paragraph whose last line is one or two words
-     gap            a page that is far too empty (a 40%-full page is as wrong
+      font           a named family that silently fell back to a system font
+      runt           a paragraph whose last line is one or two words
+      gap            a page that is far too empty (a 40%-full page is as wrong
                     as one that is 5mm over)
+      voice          prose that reads as machine-written: an em dash, a stripped
+                    contraction, "delve", three sentences of one length. Always a
+                    warning, never a failure — see voice.mjs.
 
-   It is deliberately conservative: a warning is a question, not a verdict, and
-   only the error-level findings can fail a build.
-   ========================================================================== */
+    It is deliberately conservative: a warning is a question, not a verdict, and
+    only the error-level findings can fail a build.
+    ========================================================================== */
+
+import { scanVoice } from '../voice.mjs';
+
 
 const INK_FLOOR_SVG = 11;   // px; below this an SVG label turns to mush in print
 const INK_FLOOR_TEXT = 10;  // px; below this even body text is suspect
@@ -253,7 +259,22 @@ export async function lintBook(page, overrides = {}) {
     brandFonts: ['Space Grotesk', 'Inter', 'JetBrains Mono'],
     ...overrides,
   };
-  return page.evaluate(lintInPage, cfg);
+  const out = await page.evaluate(lintInPage, cfg);
+
+  /* Voice is a text question, not a geometry one, so it runs here in Node over
+     the prose the page actually shows. Every finding is a warning: prose is a
+     judgement call and this pass must never fail a build. The page order matches
+     lintInPage's (both walk .sheet in document order). */
+  try {
+    const texts = await page.evaluate(() => [...document.querySelectorAll('.sheet')].map((s) =>
+      [...s.querySelectorAll('.explain p, .explain li, .ask p, .sub')]
+        .map((e) => (e.textContent || '').replace(/\s+/g, ' ').trim()).join(' ')));
+    out.pages.forEach((p, i) => {
+      for (const v of scanVoice(texts[i] || '')) p.findings.push({ level: 'warn', rule: v.rule, msg: v.msg });
+    });
+  } catch { /* geometry is the gate; a failed text pass must not sink it */ }
+
+  return out;
 }
 
 /** Count findings by level across a lint result. */

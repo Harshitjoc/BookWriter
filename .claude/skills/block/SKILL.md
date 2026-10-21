@@ -167,5 +167,7 @@ bottom of the drawing instead of fixing anything.
   parts, and the shape catalogue.
 - `references/design-rules.md` — accumulated corrections. Newest wins.
 - `references/photo-blocks.md` — when a photo beats a diagram, and how to prompt for one.
+- `references/cast.md` — the original cartoon cast (inline SVG), and the rule that it is
+  never a character someone else owns.
 - `references/page-template.md` — the design tokens and the page anatomy.
 - `references/example-page.html` — a complete working page. Copy this.

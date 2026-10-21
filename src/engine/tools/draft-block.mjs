@@ -184,6 +184,21 @@ THE BOOK
 THE VOICE OF THIS BOOK (this is the most important input. Obey it over your own habits)
 ${ctx.voice}
 
+${(book.tone || book.arc || book.thesis) ? `THE SHAPE OF THIS BOOK
+${book.tone ? `  tone    ${book.tone}\n` : ''}${book.arc ? `  arc     ${book.arc}\n` : ''}${book.thesis ? `  thesis  ${book.thesis}\n` : ''}` : ''}HOW NOT TO SOUND LIKE A MACHINE
+
+A reader hears "a robot wrote this" from a handful of tells. Do none of them:
+  - No em dashes. Use a comma or a full stop. This is the loudest tell of all.
+  - Use contractions: it's, you're, don't, isn't. Stripping them reads as machine text.
+  - Never these words: delve, leverage, utilise/utilize, seamless, robust, game-changer,
+    unlock, journey, tapestry, "in today's world", "it's worth noting", "in conclusion".
+  - No "not only ... but also". No hedge stacks ("it could perhaps be argued").
+  - Uneven rhythm: follow a long sentence with a very short one. Never three sentences
+    of about the same length in a row.
+  - Never start two sentences in a row with the same word.
+  - Build the page from ONE concrete thing (a real address, a real command, a real
+    object), never from abstractions.
+
 ${book.lang ? `THE LANGUAGE OF THIS BOOK
   The book is written in: ${book.lang}${book.dir ? ` (${book.dir})` : ''}.
   Write every word of the prose AND every label inside the SVG in that language.

@@ -129,7 +129,7 @@ function fromCsv(file) {
 
 /**
  * Main entry.
- *   type:  'topic' | 'youtube' | 'url' | 'pdf' | 'docx' | 'txt' | 'md' | 'html' | 'csv'
+ *   type:  'topic' | 'text' | 'youtube' | 'url' | 'pdf' | 'docx' | 'txt' | 'md' | 'html' | 'csv'
  *   value: the raw string (a line, or a URL), OR an absolute path for files.
  * For files, pass the path straight through.
  */
@@ -146,6 +146,12 @@ export async function intake({ type, value }) {
     case 'topic':
       text = value;
       note = 'the user described the topic in their own words';
+      break;
+    case 'text':
+      /* A line or a paragraph pasted straight in, not a file and not a URL.
+         Kept verbatim: the planner needs the actual words to explain them. */
+      text = value;
+      note = 'text the user pasted';
       break;
     case 'youtube': {
       const r = await fromYouTube(value);
@@ -199,7 +205,7 @@ export async function intake({ type, value }) {
       break;
     }
     default:
-      throw new Error(`unknown source type "${type}". Known: topic, youtube, url, pdf, docx, txt, md, html, csv.`);
+      throw new Error(`unknown source type "${type}". Known: topic, text, youtube, url, pdf, docx, txt, md, html, csv.`);
   }
 
   let truncated = false;

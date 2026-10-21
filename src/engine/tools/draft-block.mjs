@@ -160,6 +160,29 @@ export function readBook(bookDir) {
   };
 }
 
+/** Build a page context without a book. A standalone page still needs the same
+ *  inputs a book page gets (a title, a series name, a voice), so this is that
+ *  shape with no folder behind it. `draftBlock` accepts it as `context`. */
+export function pageContext({
+  title = 'Pages', series = null, brand = '', category = 'General',
+  archetype = undefined, voice = '', lang = null, dir = null,
+  tone = null, arc = null, thesis = null, parts = [{ name: 'Pages', blocks: [] }],
+} = {}) {
+  return {
+    dir: null,
+    slug: 'pages',
+    interior: '',
+    interiorPath: null,
+    voice: voice || '(no VOICE.md yet)',
+    book: {
+      title, series: series || title, brand, category, archetype,
+      ...(lang ? { lang } : {}), ...(dir ? { dir } : {}),
+      ...(tone ? { tone } : {}), ...(arc ? { arc } : {}), ...(thesis ? { thesis } : {}),
+      parts,
+    },
+  };
+}
+
 /* ------------------------------------------------------------------ prompting */
 
 export function buildPrompt({ ctx, topic, part, archetype }) {
@@ -457,6 +480,7 @@ export function validate(section, archetype) {
  */
 export async function draftBlock({
   bookDir,
+  context = null,
   topic,
   part,
   archetype,
@@ -473,14 +497,15 @@ export async function draftBlock({
 }) {
   if (!topic || !String(topic).trim()) throw new Error('A topic is required. --topic "..."');
 
-  const ctx = readBook(bookDir);
+  const ctx = context || readBook(bookDir);
   const r = resolveProvider({ provider, model, allowPaid, env });
   const arch = resolveArchetype(archetype ?? ctx.book.archetype ?? undefined);
 
   /* A ledger is opt-in: recording is a deliberate act, and an explicit `cache`
      (used by the tests) wins over making one. replay implies a ledger, because
-     there is nothing to replay from otherwise. */
-  const store = cache ?? ((ledger || replay || seed != null) ? makeStore(bookDir, { replay }) : null);
+     there is nothing to replay from otherwise. A page with no book has no
+     ledger to record into. */
+  const store = cache ?? (((ledger || replay || seed != null) && ctx.dir) ? makeStore(ctx.dir, { replay }) : null);
 
   const text = await complete(
     r,
@@ -512,7 +537,7 @@ export async function draftBlock({
       model: r.model,
       cost: r.cost,
       archetype: arch.id,
-      book: path.basename(ctx.dir),
+      book: ctx.dir ? path.basename(ctx.dir) : (ctx.slug || 'pages'),
       title: ctx.book.title,
       seed,
       requestKey: store?.last ?? null,

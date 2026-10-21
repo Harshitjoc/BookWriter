@@ -599,6 +599,39 @@ await withServer(async (base) => {
         fs.rmSync(path.join(ROOT, 'books', leftover), { recursive: true, force: true });
       }
 
+      group('the new-book picker copies the template you choose');
+      const newBtn = page.locator('.top-mid .mini', { hasText: 'new book' });
+      if ((await page.locator('.newbook').count()) === 0) await newBtn.click();
+      await page.waitForSelector('.newbook', { timeout: 5000 });
+      const pick = page.locator('.newbook select.tpl-pick');
+      await pick.waitFor({ timeout: 5000 });
+      const labels = await pick.locator('option').allTextContents();
+      ok('the picker offers a template per scaffold', labels.length >= 6, labels.join(' | '));
+      ok('the default is the explainer starter', (await pick.inputValue()) === 'starter',
+        await pick.inputValue());
+      ok('each option names its theme and size',
+        labels.some((l) => /cookbook\/b5/.test(l)) && labels.some((l) => /six-by-nine/.test(l)),
+        labels.join(' | '));
+      await pick.selectOption('cookbook');
+      ok('choosing one explains what it is for',
+        ((await page.locator('.newbook .tpl-note').textContent()) || '').trim().length > 0);
+      await page.locator('.newbook input').fill('uitest-cook');
+      await page.locator('.newbook button.primary').click();
+      await page.waitForSelector('.newbook', { state: 'detached', timeout: 15000 });
+      await page.waitForTimeout(400);
+      ok('the cockpit says which template it used',
+        /cookbook/i.test((await page.locator('.notice').textContent()) || ''));
+      ok('and lands on the new book',
+        (await page.locator('.top-mid select').first().inputValue()) === 'uitest-cook',
+        await page.locator('.top-mid select').first().inputValue());
+      ok('the scaffold on disk is the book, interior renamed to match',
+        fs.existsSync(path.join(ROOT, 'books', 'uitest-cook', 'uitest-cook.html')));
+      /* Move off the new book before removing it, so the preview never points at
+         a folder that is gone (a 404 there would trip the closing assertion). */
+      await page.locator('.top-mid select').first().selectOption('starter');
+      await page.waitForTimeout(400);
+      fs.rmSync(path.join(ROOT, 'books', 'uitest-cook'), { recursive: true, force: true });
+
       /* A panel collapsed on desktop must still exist on a phone, where the pane
          switcher — not the collapse state — decides what is on screen. */
       await page.locator('.col-edit .iconbtn').click();

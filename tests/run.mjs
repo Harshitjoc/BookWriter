@@ -10,6 +10,8 @@
  *                    that must never move when a book says nothing about those
  *   draft.test.mjs   the page contract and the drafter, against a fake local model
  *   api.test.mjs     the HTTP surface, run against a real server on a free port
+ *   templates.test.mjs  the scaffold catalog: every template copies, builds and
+ *                    reads 0 mm through the same path the picker uses
  *   studio.test.mjs  the diagram studio and the board endpoints
  *   ship.test.mjs    the publish gate, exporters and print-craft flags
  *   ui.test.mjs      the cockpit in a real browser, against a real built book
@@ -45,6 +47,7 @@ const SUITES = [
   { name: 'publish', file: path.join(HERE, 'publish.test.mjs') },
   { name: 'print', file: path.join(HERE, 'print.test.mjs') },
   { name: 'api', file: path.join(HERE, 'api.test.mjs') },
+  { name: 'templates', file: path.join(HERE, 'templates.test.mjs') },
   { name: 'studio', file: path.join(HERE, 'studio.test.mjs') },
   { name: 'ship', file: path.join(HERE, 'ship.test.mjs') },
   { name: 'ui', file: path.join(HERE, 'ui.test.mjs') },

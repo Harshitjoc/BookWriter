@@ -1,0 +1,9 @@
+{
+  "$comment": "Motion packs. A book names one or more in book.json \"motion\": [\"fade\",\"draw\"]; build injects motion.css and motion.js, and the page runs on screen only. Every pack animates transform and opacity — never width, height, margin or padding — so the sheet's measured box never moves and check.mjs still reads 0 mm. All motion is frozen at its first frame under @media print and prefers-reduced-motion, so paper, PDF and EPUB get the still pose. A book that names no pack takes the untouched build path and produces byte-identical output.",
+
+  "fade": { "label": "Fade in", "note": "each page and band settles in as it enters view. The gentlest pack; safe on any book." },
+  "draw": { "label": "Draw on", "note": "SVG strokes draw themselves once the diagram is in view. For mechanism diagrams." },
+  "isometric": { "label": "Isometric", "note": "cards and diagrams tilt into a soft 3D pose and lift on hover. For stacks, systems and architecture." },
+  "stick": { "label": "Stick cast", "note": "original stick figures walk, wave and gesture in a loop. For stories and explainers with a reader in them." },
+  "scroll": { "label": "Scroll reveal", "note": "the explainer lines and the action box rise in one after another as the reader scrolls. For long explanatory pages." }
+}

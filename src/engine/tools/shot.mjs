@@ -15,6 +15,7 @@ import { chromium } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { hasMotion } from './lib/render.mjs';
 
 const input = process.argv[2];
 if (!input) {
@@ -28,8 +29,17 @@ fs.mkdirSync(outdir, { recursive: true });
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ deviceScaleFactor: 2 });   // retina: readable 11px labels
+  /* A moving page is shot at its still pose, so the PNG you look at is the page
+     paper will get. A book with no motion is untouched. */
+  const frozen = hasMotion(abs);
+  if (frozen) await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(pathToFileURL(abs).href, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
+  if (frozen) {
+    await page.evaluate(() => {
+      if (typeof window.__proofpressFreeze === 'function') window.__proofpressFreeze();
+    });
+  }
 
   // Size the viewport to the actual page so element screenshots never clip.
   const box = await page.evaluate(() => {

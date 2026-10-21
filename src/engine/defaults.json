@@ -4,6 +4,8 @@
   "size": "b5",
   "theme": "studio",
   "archetype": "standard",
+  "motion": [],
+  "$motionNote": "Opt-in motion packs (see src/engine/motion/). Empty means a book gets no motion and builds byte-identical to before motion existed. A book names packs in book.json \"motion\": [\"fade\",\"draw\"].",
 
   "sizes": {
     "b5": { "label": "B5", "file": "b5.css", "w": 176, "h": 250, "unit": "mm", "note": "ISO B5, the trim this engine was built for" },

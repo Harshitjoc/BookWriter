@@ -26,7 +26,7 @@
    diagram that says the wrong thing. Those still only show in the PNGs.
    ========================================================================== */
 import path from 'node:path';
-import { launch, open, measureSheets } from './lib/render.mjs';
+import { launch, open, measureSheets, hasMotion } from './lib/render.mjs';
 import { lintBook } from './lib/lint.mjs';
 
 const input = process.argv[2];
@@ -41,7 +41,9 @@ const abs = path.resolve(input);
 const browser = await launch();
 let result;
 try {
-  const page = await open(browser, abs);
+  /* A book with motion is measured at its still pose, which is what paper gets.
+     A book without motion opens exactly as it always did. */
+  const page = await open(browser, abs, { frozen: hasMotion(abs) });
   const { rows, broken, unstyled, trim } = await measureSheets(page);
 
   const over = rows.filter((r) => r.overMm > 0);

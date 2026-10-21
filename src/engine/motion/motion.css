@@ -1,0 +1,135 @@
+/* ==========================================================================
+   motion.css  -  screen-only motion for a book that asks for it.
+   --------------------------------------------------------------------------
+   This file is linked by build-book.mjs ONLY when book.json names a motion
+   pack. A book with no motion never sees it, produces byte-identical output,
+   and is never affected by anything below.
+
+   THE ONE RULE. Every animation here moves `transform` and `opacity`, and
+   nothing else. It never animates width, height, margin, padding or font-size,
+   because the sheet is a rigid box measured by check.mjs: a page that grew and
+   shrank would make "0 mm" depend on when you looked. Transform and opacity are
+   compositor-only, so the measured box is exactly the same mid-animation as it
+   is at rest. That is what lets a moving page still read 0 mm.
+
+   THE OTHER HALF OF THE RULE. Print and reduced-motion must show the still
+   pose, never a blank or half-drawn frame. So the frozen state is the FIRST
+   keyframe of every animation (the element at rest, fully opaque and untransformed),
+   and @media print / prefers-reduced-motion simply stop the animation there.
+   That is also how check.mjs measures: it opens the page with reduced-motion
+   emulated, so it sees exactly what paper will.
+
+   Scoped to [data-motion] so it cannot leak into a book that did not ask for
+   it, and cannot touch any theme's layout.
+   ========================================================================== */
+
+/* The frozen pose is always frame 0. Define it once, clearly: at rest an
+   animated element is fully opaque and carries its identity transform. Any pack
+   below only ever animates FROM this TO somewhere and back. */
+[data-motion] .m-anim {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------------------------------------------------------------- reveal
+   The shared enter animation. Uses a single class the runtime adds when the
+   element scrolls into view; with JS off, or frozen, the element is simply
+   already at rest and visible. */
+@keyframes m-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes m-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+[data-motion~="fade"] .m-anim.m-in { animation: m-fade .5s ease both; }
+[data-motion~="scroll"] .m-anim.m-in { animation: m-rise .5s ease both; }
+
+/* ---------------------------------------------------------------- draw on
+   An SVG stroke draws itself. Works on any path, line, polyline or circle that
+   got the m-draw class from the runtime. pathLength is normalised by the runtime
+   so the dash maths is the same for every shape length. */
+@keyframes m-draw {
+  from { stroke-dashoffset: var(--m-len, 1000); }
+  to   { stroke-dashoffset: 0; }
+}
+[data-motion~="draw"] svg .m-draw.m-in {
+  stroke-dasharray: var(--m-len, 1000);
+  animation: m-draw 1s ease both;
+}
+
+/* ---------------------------------------------------------------- isometric
+   Cards tilt into a soft 3D pose. Perspective lives on the band, the tilt on
+   each card. Hover lifts the card toward the reader. Transform only. */
+[data-motion~="isometric"] .diagram { perspective: 900px; }
+[data-motion~="isometric"] .m-iso {
+  transform: rotateX(0deg) rotateY(0deg) translateZ(0);
+  transition: transform .35s ease;
+  transform-style: preserve-3d;
+}
+[data-motion~="isometric"] .m-iso.m-in { animation: m-tilt .7s ease both; }
+@keyframes m-tilt {
+  from { opacity: 0; transform: rotateX(22deg) rotateY(-16deg) translateZ(-24px); }
+  to   { opacity: 1; transform: rotateX(0deg) rotateY(0deg) translateZ(0); }
+}
+@media (hover: hover) {
+  [data-motion~="isometric"] .m-iso:hover {
+    transform: rotateX(0deg) rotateY(0deg) translateZ(16px);
+  }
+}
+
+/* ------------------------------------------------------------ stick figures
+   Original stick cast. Limbs and body are separate SVG shapes the runtime
+   tagged; the loop is transform-only on rotation about a joint, so nothing
+   reflows. Poses are authored in the SVG; this only plays them. */
+@keyframes m-wave {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-28deg); }
+}
+@keyframes m-step {
+  0%, 100% { transform: rotate(9deg); }
+  50%      { transform: rotate(-9deg); }
+}
+@keyframes m-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+[data-motion~="stick"] .m-arm { transform-box: fill-box; transform-origin: top center; animation: m-wave 1.6s ease-in-out infinite; }
+[data-motion~="stick"] .m-leg { transform-box: fill-box; transform-origin: top center; animation: m-step 1s ease-in-out infinite; }
+[data-motion~="stick"] .m-body { transform-box: fill-box; animation: m-bob 1s ease-in-out infinite; }
+
+/* ------------------------------------------------- the frozen pose, always.
+   Order matters: this block is last, so it wins over every pack above. Print
+   and reduced-motion land on frame 0 — the element at rest — and stay there.
+   Nothing here changes a size, a font or an image: it only stops motion. */
+@media print {
+  [data-motion] .m-anim,
+  [data-motion] .m-iso,
+  [data-motion] svg .m-draw,
+  [data-motion] .m-arm,
+  [data-motion] .m-leg,
+  [data-motion] .m-body {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    stroke-dashoffset: 0 !important;
+    stroke-dasharray: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-motion] .m-anim,
+  [data-motion] .m-iso,
+  [data-motion] svg .m-draw,
+  [data-motion] .m-arm,
+  [data-motion] .m-leg,
+  [data-motion] .m-body {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    stroke-dashoffset: 0 !important;
+    stroke-dasharray: none !important;
+  }
+}

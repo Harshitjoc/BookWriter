@@ -12,6 +12,7 @@
 import { chromium } from 'playwright';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
+import fs from 'node:fs';
 
 export const PX_PER_MM = 96 / 25.4;
 export const mm = (px) => px / PX_PER_MM;
@@ -25,12 +26,33 @@ export function launch() {
 /**
  * Open an HTML file and wait until it is stable enough to measure: the network
  * is idle and the web fonts are done, because fonts change text height.
+ *
+ * `frozen` puts an animated book at its still pose before anything looks at it.
+ * It emulates prefers-reduced-motion (which motion.css already honours) and then
+ * calls the runtime's own window.__proofpressFreeze() if the page has one. A
+ * book with no motion is unaffected: the emulation changes nothing on a page
+ * whose CSS has no animations, and there is no freeze hook to call. This is what
+ * lets check.mjs read the same 0 mm on a moving page that paper will get.
  */
-export async function open(browser, file, { deviceScaleFactor } = {}) {
+export async function open(browser, file, { deviceScaleFactor, frozen = false } = {}) {
   const page = await browser.newPage(deviceScaleFactor ? { deviceScaleFactor } : undefined);
+  if (frozen) await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(pathToFileURL(path.resolve(file)).href, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
+  if (frozen) {
+    await page.evaluate(() => {
+      if (typeof window.__proofpressFreeze === 'function') window.__proofpressFreeze();
+    });
+  }
   return page;
+}
+
+/** Whether a built book carries motion, read straight off the file. Cheap, so a
+ *  caller can decide to freeze without opening the page first. */
+export function hasMotion(file) {
+  try {
+    return /data-motion=/.test(fs.readFileSync(file, 'utf8'));
+  } catch { return false; }
 }
 
 /**

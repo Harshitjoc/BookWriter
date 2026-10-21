@@ -24,6 +24,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeLang, resolveDirection } from './lib/locale.mjs';
+import { normalizePacks, MOTION_CSS, MOTION_JS } from './motion.mjs';
 
 const ENGINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -96,6 +97,16 @@ for (const id of fontPacks) {
     die(`unknown font pack "${id}".\nKnown: ${Object.keys(PACKS).filter((k) => !k.startsWith('$')).join(', ')}`);
   }
 }
+
+/* ---- motion. Also opt-in and additive. A book that names no pack takes the
+   untouched path, so the committed books build to the same bytes. A book that
+   names one gets motion.css and motion.js injected; the CSS animates transform
+   and opacity only, and freezes under print and reduced-motion, so the measured
+   box never moves and paper gets the still pose. ---- */
+let motionPacks = [];
+try {
+  motionPacks = normalizePacks(book.motion);
+} catch (e) { die(e.message); }
 
 const outPath = path.resolve(flag('out') ||
   path.join(dir, editionName ? `book-${editionName}.html` : 'book.html'));
@@ -609,12 +620,42 @@ function applyLook(headHtml) {
     h = h.replace('</head>', `${links}\n</head>`);
   }
 
+  /* ---- motion. Only when the book asked. The pack ids ride on data-motion on
+     <html>, so motion.css can scope to exactly the packs in use and nothing
+     else. The <link> goes last in the head, after the theme, so it can only
+     ever add motion and never override a theme's look. A book with no packs
+     skips this whole branch and keeps its bytes. ---- */
+  if (motionPacks.length) {
+    h = h.replace(/<html\b[^>]*>/, (tag) => {
+      const withAttr = /\bdata-motion=/.test(tag)
+        ? tag.replace(/\bdata-motion="[^"]*"/, `data-motion="${motionPacks.join(' ')}"`)
+        : tag.replace('<html', `<html data-motion="${motionPacks.join(' ')}"`);
+      return withAttr;
+    });
+    h = h.replace('</head>',
+      `  <link rel="stylesheet" href="../../src/engine/motion/${MOTION_CSS}">\n</head>`);
+  }
+
   return h;
 }
 
 const injectedHead = applyLook(head).replace('</head>', `  <style>\n${genCss}\n  </style>\n</head>`);
 const bookTitle = editionName ? `${B.title} — ${editionName} edition` : B.title;
-const merged = (injectedHead + out.join('\n\n') + '\n' + tail)
+
+/* Motion runtime. Injected into the tail only when the book asked for motion,
+   right after the engine's own sheet-tools.js so it runs in the same place a
+   book script always has. The drafter is still forbidden from writing any
+   script; this one is the engine's, exactly like sheet-tools.js. A book with no
+   motion keeps its tail untouched, byte for byte. */
+let bookTail = tail;
+if (motionPacks.length) {
+  const tag = `  <script src="../../src/engine/motion/${MOTION_JS}"></script>`;
+  bookTail = /<script\s+src="[^"]*sheet-tools\.js"><\/script>/.test(tail)
+    ? tail.replace(/(<script\s+src="[^"]*sheet-tools\.js"><\/script>)/, `$1\n${tag}`)
+    : `${tag}\n${tail}`;
+}
+
+const merged = (injectedHead + out.join('\n\n') + '\n' + bookTail)
   .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(bookTitle)}</title>`)
   .split('{{COUNT}}').join(String(allTitles.length));
 

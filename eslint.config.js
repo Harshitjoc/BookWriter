@@ -76,6 +76,7 @@ export default [
       'src/engine/**/*.js',
       'src/engine/tools/**/*.mjs',
       'tests/ui.test.mjs',
+      'tests/motion.test.mjs',
     ],
     languageOptions: { globals: { ...NODE, ...BROWSER } },
   },

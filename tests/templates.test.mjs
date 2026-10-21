@@ -20,7 +20,7 @@ import { group, ok, report, withServer, runTool, cleanStale, ROOT } from './harn
 import { listTemplates, templateById, DEFAULT_TEMPLATE_ID } from '../src/engine/tools/templates.mjs';
 import { renderCast, renderCastRow, CAST_IDS } from '../src/engine/tools/cast.mjs';
 
-const IDS = ['starter', 'cookbook', 'manual', 'reference', 'field-guide', 'memoir'];
+const IDS = ['starter', 'cookbook', 'manual', 'reference', 'field-guide', 'memoir', 'essay'];
 const SCAFFOLDS = IDS.map((id) => `tpl-${id}`);
 
 /* A crashed run must not leave a scaffolded book in the next run's listing. */

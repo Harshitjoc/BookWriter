@@ -1,0 +1,37 @@
+{
+  "title": "A Short Essay",
+  "subtitle": "One idea per page.",
+  "author": "Your Name",
+
+  "series": "A Short Essay",
+  "brand": "yoursite.com",
+  "editionLabel": "Edition 1.0",
+  "unit": "pages",
+
+  "numbered": true,
+  "contents": true,
+  "index": true,
+
+  "theme": "atelier",
+  "size": "b5",
+  "archetype": "standard",
+
+  "parts": [
+    {
+      "name": "Beginning",
+      "eyebrow": "First things",
+      "why": "One idea to start with.",
+      "blocks": ["A single idea"]
+    }
+  ],
+
+  "cover": {
+    "kicker": "An essay",
+    "lede": "Slow reading, one idea per page."
+  },
+
+  "copyright": {
+    "notice": "Copyright © 2026 Your Name. All rights reserved.",
+    "imprint": "Printed with Proofpress"
+  }
+}

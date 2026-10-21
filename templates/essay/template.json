@@ -1,0 +1,10 @@
+{
+  "id": "essay",
+  "name": "Essay",
+  "blurb": "Slow reading. One idea per page, plain prose, the action is to think or write.",
+  "theme": "atelier",
+  "size": "b5",
+  "archetype": "standard",
+  "voice": "calm, precise, patient. Say one thing. Do not overstate.",
+  "tags": ["essay", "notes", "standard"]
+}

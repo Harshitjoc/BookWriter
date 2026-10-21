@@ -1,0 +1,44 @@
+/* ==========================================================================
+   THEME — Ink
+   High-contrast, print-friendly black-and-white. For zines, field notes,
+   and anything that wants to read clean on the cheapest paper.
+
+   Reuses studio.css's anatomy unchanged. The colour roles survive in
+   structure; only tones shift. A theme changes how the page FEELS, not the fit.
+   ========================================================================== */
+@import url('./studio.css');
+
+.sheet.bb{
+  --surface:#FFFFFF;
+  --card:#FFFFFF;
+  --ink:#111111;
+  --muted:#4A4A4A;
+  --line:#D0D0D0;
+  --accent:#111111;
+  --accent-strong:#000000;
+  --signal:#111111;
+  --danger:#000000;
+  --warn:#333333;
+
+  background:var(--surface);
+  color:var(--ink);
+  font-family:"Inter",system-ui,sans-serif;
+}
+
+.sheet.bb .title{
+  font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
+  font-weight:600;
+  letter-spacing:-0.01em;
+}
+
+.sheet.bb .tab{ background:var(--ink); }
+.sheet.bb .pill{ background:#F6F6F6; color:#111111; border-color:var(--line); }
+.sheet.bb .rule{ background:var(--line); }
+.sheet.bb .eyebrow b{ color:var(--ink); }
+.sheet.bb .explain .hl{ color:var(--accent-strong); }
+.sheet.bb .explain .good{ color:var(--ink); }
+.sheet.bb .explain .bad{ color:var(--ink); }
+.sheet.bb .ask{ background:#F6F6F6; border-color:var(--line); }
+.sheet.bb .ask .lbl{ color:var(--ink); }
+.sheet.bb .foot{ color:var(--muted); }
+.sheet.bb .diagram svg{ filter:none; }

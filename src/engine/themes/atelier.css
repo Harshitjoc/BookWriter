@@ -1,0 +1,41 @@
+/* ==========================================================================
+   THEME — Atelier
+   Warm editorial. Soft paper, serif title, restrained accent. For essays,
+   notes, and books meant to be read slowly.
+
+   Reuses studio.css's anatomy unchanged and changes only the tokens and a
+   couple of type touches. Layout is the engine's job; a theme changes how the
+   page FEELS, not the fit.
+   ========================================================================== */
+@import url('./studio.css');
+
+.sheet.bb{
+  --surface:#FBF7F2;
+  --card:#FFFFFF;
+  --ink:#1F1A17;
+  --muted:#6B5F55;
+  --line:#E6DED6;
+  --accent:#8B7355;
+  --accent-strong:#6B5A42;
+  --signal:#3F7C57;
+  --danger:#9B3B2A;
+  --warn:#7A5A1C;
+
+  background:var(--surface);
+  color:var(--ink);
+  font-family:"Inter",system-ui,sans-serif;
+}
+
+.sheet.bb .title{
+  font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
+  font-weight:600;
+  letter-spacing:-0.01em;
+}
+
+.sheet.bb .sub{ color:var(--muted); }
+.sheet.bb .pill{ background:#F3ECE4; color:#6B5A42; border-color:#E6DED6; }
+.sheet.bb .rule{ background:var(--line); }
+.sheet.bb .explain .hl{ color:var(--accent-strong); }
+.sheet.bb .ask{ background:#F3ECE4; border-color:#E6DED6; }
+.sheet.bb .ask .lbl{ color:#6B5A42; }
+.sheet.bb .foot{ color:var(--muted); }

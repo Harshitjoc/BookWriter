@@ -38,6 +38,7 @@ const CATALOG = [
   { id: 'reference', dir: 'templates/reference' },
   { id: 'field-guide', dir: 'templates/field-guide' },
   { id: 'memoir', dir: 'templates/memoir' },
+  { id: 'essay', dir: 'templates/essay' },
 ];
 
 export const DEFAULT_TEMPLATE_ID = CATALOG.find((t) => t.isDefault)?.id || CATALOG[0].id;

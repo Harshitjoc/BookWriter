@@ -19,7 +19,9 @@
     "studio": { "label": "Studio", "file": "studio.css", "note": "the default. Neutral, technical, one idea per page." },
     "cookbook": { "label": "Cookbook", "file": "cookbook.css", "note": "warm, appetite-led. Ingredients and method." },
     "manual": { "label": "Manual", "file": "manual.css", "note": "plain and procedural. Numbered steps you can follow." },
-    "reference": { "label": "Reference", "file": "reference.css", "note": "dense and calm. For looking things up, not reading through." }
+    "reference": { "label": "Reference", "file": "reference.css", "note": "dense and calm. For looking things up, not reading through." },
+    "atelier": { "label": "Atelier", "file": "atelier.css", "note": "warm editorial, serif title. For essays and slow reading." },
+    "ink": { "label": "Ink", "file": "ink.css", "note": "high-contrast black-and-white, print-friendly." }
   },
 
   "fontPacks": {

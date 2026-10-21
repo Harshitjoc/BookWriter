@@ -35,6 +35,7 @@ import { mergeEnv } from '../shared/byok.js';
 import { intake } from '../engine/tools/source-intake.mjs';
 import { planFromSource } from '../engine/tools/plan-from-source.mjs';
 import { makeBook } from '../engine/tools/make-book.mjs';
+import { makePages } from '../engine/tools/make-pages.mjs';
 import { listTemplates, templateById, DEFAULT_TEMPLATE_ID } from '../engine/tools/templates.mjs';
 import { makePaper } from '../engine/tools/make-paper.mjs';
 /* Phase 7: the cockpit can compile a diagram and read a book's ledger without
@@ -380,15 +381,29 @@ function handleFromSource(req, res) {
     if (!/^[a-z0-9][a-z0-9._-]{0,63}$/.test(slug)) {
       return fail(res, 400, 'bad slug. Use lowercase letters, digits, dashes, dots and underscores.');
     }
-    if (fs.existsSync(path.join(BOOKS, slug))) return fail(res, 409, `${slug} already exists`);
-
-    const mode = args.mode === 'paper' ? 'paper' : 'book';
+    const mode = args.mode === 'paper' ? 'paper' : args.mode === 'pages' ? 'pages' : 'book';
     const sourceType = String(args.sourceType || 'topic');
     const topic = String(args.topic || '').trim();
     const keys = args.keys;
 
-    if (args.sourceType && !['topic', 'youtube', 'url', 'pdf', 'docx', 'txt', 'md', 'html', 'csv'].includes(sourceType)) {
-      return fail(res, 400, `sourceType must be topic, youtube, url, pdf, docx, txt, md, html or csv`);
+    /* A page pack lives in pages/<slug>/, never in books/. A clash with either
+       is refused here so an existing folder is never overwritten. */
+    const targetRoot = mode === 'pages' ? path.join(ROOT, 'pages') : BOOKS;
+    if (fs.existsSync(path.join(targetRoot, slug))) return fail(res, 409, `${slug} already exists`);
+
+    /* The page count is a request, not a promise: it steers the planner and a
+       shortfall is reported. Refuse a value that is not a page count at all. */
+    let wantedPages = null;
+    if (args.pages != null && String(args.pages).trim() !== '') {
+      const n = Number(args.pages);
+      if (!Number.isInteger(n) || n < 1 || n > 40) {
+        return fail(res, 400, 'pages must be a whole number from 1 to 40');
+      }
+      wantedPages = n;
+    }
+
+    if (args.sourceType && !['topic', 'text', 'youtube', 'url', 'pdf', 'docx', 'txt', 'md', 'html', 'csv'].includes(sourceType)) {
+      return fail(res, 400, `sourceType must be topic, text, youtube, url, pdf, docx, txt, md, html or csv`);
     }
     if (sourceType !== 'topic' && !args.source && !args.fileBase64) {
       return fail(res, 400, 'a source (or an uploaded file) is required');
@@ -454,11 +469,47 @@ function handleFromSource(req, res) {
         return;
       }
 
+      if (mode === 'pages') {
+        send('line', { kind: 'sys', text: `planning ${wantedPages ?? 1} page(s)...` });
+        const pack = await makePages({
+          slug, source: src.text, topic,
+          pages: wantedPages ?? 1,
+          size: args.size || 'b5',
+          theme: args.theme || 'studio',
+          archetype: args.archetype || 'standard',
+          outDir: path.join(ROOT, 'pages', slug),
+          formats: args.formats || 'all',
+          provider: resolved.id, model: resolved.model,
+          allowPaid: !!args.allowPaid, signal: controller.signal, env: serverEnv,
+          onPage: (p) => send('line', {
+            kind: p.ok ? 'ok' : 'err',
+            text: `page ${p.index}/${p.total}: ${p.title}${p.ok ? '' : ` — ${p.error || 'failed'}`}`,
+          }),
+        });
+        send('plan', { plan: pack.plan, validation: pack.validation });
+        const rel = (f) => path.relative(ROOT, f).replace(/\\/g, '/');
+        send('done', {
+          code: pack.failures.length ? 2 : 0,
+          result: {
+            mode: 'pages',
+            dir: rel(pack.dir),
+            htmlPath: rel(pack.htmlPath),
+            pdfPath: pack.pdfPath ? rel(pack.pdfPath) : null,
+            pngs: pack.pngs.map(rel),
+            mds: pack.mds.map(rel),
+            pages: pack.count,
+            requested: pack.requested,
+            failed: pack.failures.length,
+          },
+        });
+        return;
+      }
+
       send('line', { kind: 'sys', text: 'planning with the provider...' });
       const { plan, validation } = await planFromSource({
         source: src.text, topic, provider: resolved.id, model: resolved.model,
         allowPaid: !!args.allowPaid, signal: controller.signal, env: serverEnv,
-        lang, dir: direction,
+        lang, dir: direction, pages: wantedPages,
       });
       send('line', { kind: 'sys', text: `plan: "${plan.title}", ${plan.parts.length} part(s)` });
       send('plan', { plan, validation });

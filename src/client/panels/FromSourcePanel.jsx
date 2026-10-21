@@ -17,6 +17,8 @@ export default function FromSourcePanel({ onDone }) {
   const [source, setSource] = useState('');
   const [file, setFile] = useState(null);
   const [topic, setTopic] = useState('');
+  const [pages, setPages] = useState(1);
+  const [archetype, setArchetype] = useState('standard');
   const [theme, setTheme] = useState('studio');
   const [size, setSize] = useState('b5');
   const [lang, setLang] = useState('');
@@ -57,6 +59,7 @@ export default function FromSourcePanel({ onDone }) {
   const FILE_TYPES = ['pdf', 'docx', 'txt', 'md', 'html', 'csv'];
   const ACCEPT = { pdf: '.pdf', docx: '.docx,.doc', txt: '.txt', md: '.md,.markdown', html: '.html,.htm', csv: '.csv,.tsv' };
   const needsFile = FILE_TYPES.includes(sourceType);
+  const isPages = mode === 'pages';
 
   const stop = async () => {
     if (runId) await api.cancelRun(runId).catch(() => {});
@@ -105,6 +108,8 @@ export default function FromSourcePanel({ onDone }) {
           fileBase64,
           fileName,
           topic,
+          pages: Number(pages) || 1,
+          ...(isPages ? { archetype, formats: 'all' } : {}),
           theme,
           size,
           lang: lang.trim() || undefined,
@@ -154,8 +159,9 @@ export default function FromSourcePanel({ onDone }) {
   return (
     <div className="draft">
       <p className="hint">
-        One run from source to print. Book or paper, real planner first. The model reads
-        the whole source you give it — never invented numbers, no placeholders accepted.
+        One run from source to print. A book, a paper, or a set of pages with no book around
+        them. A real planner goes first and the model reads the whole source — never invented
+        numbers, no placeholders accepted.
       </p>
 
       <div className="draft-form">
@@ -163,17 +169,19 @@ export default function FromSourcePanel({ onDone }) {
           <span>output</span>
           <select value={mode} onChange={(e) => setMode(e.target.value)} disabled={busy}>
             <option value="book">book — pages in engine format</option>
+            <option value="pages">pages — a standalone set, no book</option>
             <option value="paper">research paper — long-form HTML → PDF</option>
           </select>
         </label>
         <label>
-          <span>new book slug</span>
-          <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="my-book" disabled={busy} />
+          <span>slug</span>
+          <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={isPages ? 'cdn-notes' : 'my-book'} disabled={busy} />
         </label>
         <label>
           <span>source</span>
           <select value={sourceType} onChange={(e) => setSourceType(e.target.value)} disabled={busy}>
             <option value="topic">a topic, in my own words</option>
+            <option value="text">a line or paragraph, pasted</option>
             <option value="youtube">a YouTube link</option>
             <option value="url">a web page</option>
             <option value="pdf">a PDF file</option>
@@ -194,6 +202,18 @@ export default function FromSourcePanel({ onDone }) {
               onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
           </label>
+        ) : sourceType === 'text' ? (
+          <label className="grow">
+            <span>paste the line or paragraph</span>
+            <textarea
+              className="paste-source"
+              rows={4}
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+              placeholder="the exact words you want explained"
+              disabled={busy}
+            />
+          </label>
         ) : (
           <label className="grow">
             <span>{sourceType === 'topic' ? 'what is it about?' : sourceType === 'youtube' ? 'youtube url' : sourceType === 'url' ? 'page url' : 'source'}</span>
@@ -205,6 +225,18 @@ export default function FromSourcePanel({ onDone }) {
             />
           </label>
         )}
+        <label>
+          <span>pages</span>
+          <input
+            className="pages-input"
+            type="number"
+            min={1}
+            max={40}
+            value={pages}
+            onChange={(e) => setPages(e.target.value)}
+            disabled={busy || mode === 'paper'}
+          />
+        </label>
         <label>
           <span>provider</span>
           <select
@@ -228,7 +260,7 @@ export default function FromSourcePanel({ onDone }) {
           <span>model</span>
           <input value={model} onChange={(e) => { modelTouched.current = true; setModel(e.target.value); }} placeholder="default" disabled={busy} spellCheck={false} autoComplete="off" />
         </label>
-        {mode === 'book' ? (
+        {mode !== 'paper' ? (
           <label>
             <span>theme</span>
             <select value={theme} onChange={(e) => setTheme(e.target.value)} disabled={busy}>
@@ -236,11 +268,19 @@ export default function FromSourcePanel({ onDone }) {
             </select>
           </label>
         ) : null}
-        {mode === 'book' ? (
+        {mode !== 'paper' ? (
           <label>
             <span>size</span>
             <select value={size} onChange={(e) => setSize(e.target.value)} disabled={busy}>
               {['b5', 'b5-landscape', 'a5', 'a4', 'six-by-nine'].map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </label>
+        ) : null}
+        {isPages ? (
+          <label>
+            <span>page shape</span>
+            <select className="archetype-pick" value={archetype} onChange={(e) => setArchetype(e.target.value)} disabled={busy}>
+              {['standard', 'procedure', 'recipe', 'exercise', 'reference'].map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </label>
         ) : null}
@@ -289,25 +329,48 @@ export default function FromSourcePanel({ onDone }) {
       {plan ? (
         <div className="draft-report">
           <span className="lbl">PLAN</span>
-          <p><strong>{plan.title}</strong> — {plan.subtitle}</p>
-          {plan.parts.map((p) => (
-            <p key={p.name} className="dim" style={{ marginTop: 6 }}>
-              <strong>{p.name}</strong>: {p.blocks.map((b) => `${b.title} [${b.archetype}]`).join(' · ')}
-            </p>
-          ))}
+          <p><strong>{plan.title}</strong>{plan.subtitle ? ` — ${plan.subtitle}` : ''}</p>
+          {plan.parts
+            ? plan.parts.map((p) => (
+              <p key={p.name} className="dim" style={{ marginTop: 6 }}>
+                <strong>{p.name}</strong>: {p.blocks.map((b) => `${b.title} [${b.archetype}]`).join(' · ')}
+              </p>
+            ))
+            : (plan.pages || []).map((p) => (
+              <p key={p.title} className="dim" style={{ marginTop: 6 }}>
+                <strong>{p.title}</strong> [{p.archetype}]
+              </p>
+            ))}
         </div>
       ) : null}
 
       {done ? (
         <div className="draft-report">
           <span className="lbl">RESULT</span>
-          {/* A run that exits non-zero is not a book. And a book run reports no
-              result payload at all — printing "paper at …" in that case was how
-              a finished book claimed to be a paper. */}
+          {/* A run that exits non-zero is not a finished job. And a book run
+              reports no result payload at all — printing "paper at …" in that
+              case was how a finished book claimed to be a paper. */}
           {done.code !== 0 ? (
             <p className="warn" role="alert">
               the run finished with code {done.code} — read the log above.
             </p>
+          ) : done.result?.mode === 'pages' ? (
+            <div className="ok">
+              <p>
+                {done.result.pages} page(s) at pages/{slug}/ (asked for {done.result.requested}
+                {done.result.failed ? `, ${done.result.failed} skipped` : ''}).
+              </p>
+              <p className="page-links">
+                <a className="chip-link" href={`/preview/${done.result.htmlPath}`} target="_blank" rel="noreferrer">html</a>
+                {done.result.pdfPath ? <a className="chip-link" href={`/preview/${done.result.pdfPath}`} target="_blank" rel="noreferrer">pdf</a> : null}
+                {(done.result.pngs || []).map((p, i) => (
+                  <a key={p} className="chip-link" href={`/preview/${p}`} target="_blank" rel="noreferrer">png {i + 1}</a>
+                ))}
+                {(done.result.mds || []).map((p, i) => (
+                  <a key={p} className="chip-link" href={`/preview/${p}`} target="_blank" rel="noreferrer">md {i + 1}</a>
+                ))}
+              </p>
+            </div>
           ) : mode === 'paper' ? (
             <p className="ok">paper at {done.result?.pdfPath || `books/${slug}/paper/paper.pdf`}.</p>
           ) : (

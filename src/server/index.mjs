@@ -44,6 +44,8 @@ import { compileDiagram, exampleSpec, SHAPES, ROLES, KINDS, VIEW_W } from '../en
 import { scanBookDir, findFacts } from '../engine/tools/lib/facts.mjs';
 import { splitSheets, readBookHtml } from '../engine/tools/lib/book-html.mjs';
 import { normalizeLang, resolveDirection } from '../engine/tools/lib/locale.mjs';
+import { planStoryboard, clampScenes } from '../engine/tools/plan-storyboard.mjs';
+import { validateStoryboard, estimateDurationMs } from '../shared/storyboard.js';
 
 const __dir = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dir, '../..');          // the repo root
@@ -107,6 +109,22 @@ function bookFiles(slug) {
       { name: 'blocks.md', label: 'blocks.md', role: 'blocks', lang: 'markdown', hint: 'The backlog. One entry per page you mean to write.' },
     ],
   };
+}
+
+/* How many sheets the video can point at. A storyboard's "page" visual is a
+   sheet in the built book.html, front matter included, because that is what
+   the video tool will photograph. Before the first build there is no book.html
+   to count, so fall back to the authored interior: a conservative count that
+   can only under-promise. A broken interior is null, not zero. */
+function bookPageCount(b) {
+  const built = path.join(b.dir, 'book.html');
+  if (fs.existsSync(built)) {
+    try { return splitSheets(readBookHtml(built)).length; }
+    catch { /* fall through to the source */ }
+  }
+  const interior = b.files.find((f) => f.role === 'interior')?.name;
+  try { return splitSheets(readBookHtml(path.join(b.dir, interior))).length; }
+  catch { return null; }
 }
 
 /* ------------------------------------------------------------- static /preview */
@@ -348,6 +366,120 @@ function handleDraft(req, res) {
         send('line', { kind: 'out', text: line });
       }
       send('done', { code: 0, meta: out.meta, validation: out.validation, section: out.section });
+    } catch (e) {
+      const cancelled = e.name === 'AbortError';
+      send('done', {
+        code: cancelled ? 130 : 1,
+        cancelled,
+        error: cancelled ? 'cancelled' : String(e.message || e),
+      });
+    } finally {
+      running.delete(id);
+      if (!res.writableEnded) res.end();
+    }
+  });
+}
+
+/* POST /api/storyboard/plan  — one planning call, streamed like a draft.
+ *
+ * The planner returns a storyboard and nothing else. It is not saved here:
+ * saving is a separate, explicit PUT, so a model can never leave a half-baked
+ * video plan on disk that someone later mistakes for a decision. */
+function handleStoryboardPlan(req, res) {
+  let body = '';
+  req.on('data', (d) => {
+    body += d;
+    if (body.length > 4e6) req.destroy();
+  });
+  req.on('end', async () => {
+    let args = {};
+    try { args = JSON.parse(body || '{}'); } catch { /* treat as none */ }
+
+    const topic = String(args.topic || '').trim();
+    const source = String(args.source || '').trim();
+    if (!topic && !source) return fail(res, 400, 'a topic or a source is required');
+
+    const b = args.book ? bookFiles(args.book) : null;
+    if (args.book && !b) return fail(res, 404, `no such book: ${args.book}`);
+
+    const pages = b ? bookPageCount(b) : null;
+    const bookTitle = b ? (b.config.title || args.book) : '';
+
+    const serverEnv = mergeEnv(process.env, args.keys);
+    let resolved;
+    try {
+      resolved = resolveProvider({
+        provider: args.provider,
+        model: args.model,
+        allowPaid: !!args.allowPaid,
+        env: serverEnv,
+      });
+    } catch (e) {
+      return fail(res, 400, e.message);
+    }
+
+    const controller = new AbortController();
+    const id = `storyboard-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    running.set(id, { controller, slug: args.book || null, tool: 'storyboard' });
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+    const send = (event, data) => {
+      if (!res.writableEnded) res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+    send('start', {
+      id,
+      tool: 'storyboard',
+      book: args.book || null,
+      label: `storyboard via ${resolved.label} (${resolved.model})`,
+      provider: resolved.id,
+      model: resolved.model,
+      cost: resolved.cost,
+      scenes: clampScenes(args.scenes ?? 8),
+      pages,
+      aspect: args.aspect || '16:9',
+    });
+
+    try {
+      const out = await planStoryboard({
+        topic,
+        source,
+        title: args.title || bookTitle || topic,
+        voice: args.voice || 'auto',
+        scenes: args.scenes ?? 8,
+        aspect: args.aspect || '16:9',
+        pages,
+        provider: resolved.id,
+        model: resolved.model,
+        allowPaid: !!args.allowPaid,
+        signal: controller.signal,
+        env: serverEnv,
+        lang: args.lang || null,
+        dir: args.dir || null,
+        extraBrief: String(args.extraBrief || ''),
+      });
+      const seconds = Math.round(estimateDurationMs(out.storyboard) / 1000);
+      send('line', {
+        kind: 'out',
+        text: `${out.storyboard.scenes.length} scenes, about ${seconds}s of video before the voice is timed.`,
+      });
+      send('done', {
+        code: 0,
+        storyboard: out.storyboard,
+        validation: out.validation,
+        meta: {
+          provider: resolved.id,
+          model: resolved.model,
+          label: resolved.label,
+          cost: resolved.cost,
+          pages,
+          scenes: out.storyboard.scenes.length,
+        },
+      });
     } catch (e) {
       const cancelled = e.name === 'AbortError';
       send('done', {
@@ -691,6 +823,76 @@ async function handleApi(req, res, url) {
     }
     return fail(res, 405, 'GET or PUT only');
   }
+
+  /* GET/PUT /api/storyboard?book=slug — the saved video plan.
+     Deliberately not one of /api/file's four source files: a storyboard is a
+     generated plan, not an editable source document, and its shape is checked
+     here instead of trusted. */
+  if (p === '/api/storyboard') {
+    const querySlug = url.searchParams.get('book');
+
+    if (req.method === 'GET') {
+      const b = bookFiles(querySlug);
+      if (!b) return fail(res, 404, `no such book: ${querySlug}`);
+      const file = path.join(b.dir, 'storyboard.json');
+      const pages = bookPageCount(b);
+      let raw;
+      try { raw = await fsp.readFile(file, 'utf8'); }
+      catch (e) {
+        if (e.code === 'ENOENT') {
+          return json(res, 200, { book: querySlug, storyboard: null, validation: null, pages });
+        }
+        return fail(res, 500, `could not read storyboard.json: ${e.message}`);
+      }
+      let board;
+      try { board = JSON.parse(raw); }
+      catch (e) { return fail(res, 500, `storyboard.json is not valid JSON: ${e.message}`); }
+      return json(res, 200, {
+        book: querySlug,
+        storyboard: board,
+        validation: validateStoryboard(board, { bookPages: pages }),
+        pages,
+      });
+    }
+
+    if (req.method === 'PUT') {
+      let body = '';
+      req.on('data', (d) => {
+        body += d;
+        if (body.length > 8e6) req.destroy();
+      });
+      req.on('end', async () => {
+        let payload;
+        try { payload = JSON.parse(body || '{}'); }
+        catch (e) { return fail(res, 400, `storyboard is not valid JSON: ${e.message}`); }
+
+        /* The book travels in the body for a save, because the body is the
+           thing being validated. Accepting either place keeps GET and PUT
+           callers from having to know about the other's convention. */
+        const slug = payload.book || querySlug;
+        const b = bookFiles(slug);
+        if (!b) return fail(res, 404, `no such book: ${slug}`);
+        const pages = bookPageCount(b);
+
+        const board = payload.storyboard || payload;
+        const check = validateStoryboard(board, { bookPages: pages });
+        if (!check.ok) {
+          return fail(res, 400, `the storyboard did not validate: ${check.errors.join('; ')}`);
+        }
+        const text = JSON.stringify(board, null, 2) + '\n';
+        await fsp.mkdir(b.dir, { recursive: true });
+        await fsp.writeFile(path.join(b.dir, 'storyboard.json'), text, 'utf8');
+        return json(res, 200, {
+          ok: true, book: slug, bytes: Buffer.byteLength(text), validation: check, pages,
+        });
+      });
+      return;
+    }
+
+    return fail(res, 405, 'GET or PUT only');
+  }
+
+  if (p === '/api/storyboard/plan' && req.method === 'POST') return handleStoryboardPlan(req, res);
 
   if (p === '/api/run' && req.method === 'POST') return handleRun(req, res, url);
 

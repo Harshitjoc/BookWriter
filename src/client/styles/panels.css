@@ -248,6 +248,36 @@
 .draft-meta .key { font: var(--fs-xs) var(--mono); margin-left: auto; }
 .draft-meta .ok { color: var(--ok-fg); }
 
+/* The storyboard keeps the draft panel's form furniture and adds only the two
+   things a draft does not have: pasted source, and a list of scenes. */
+.storyboard-source-label { display: flex; flex-direction: column; gap: 3px; }
+.storyboard-source-label > span {
+  font-size: var(--fs-xs); font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.07em; color: var(--subtle);
+}
+.storyboard-source {
+  width: 100%; min-height: 72px; resize: vertical;
+  background: var(--panel-2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: var(--s2) var(--s3);
+  color: var(--ink); font-size: var(--fs-sm); line-height: 1.5;
+}
+.storyboard-source:focus { border-color: var(--accent); outline: none; }
+
+.storyboard-scenes {
+  display: flex; flex-direction: column; gap: var(--s2);
+  max-height: 38vh; overflow: auto;
+}
+.storyboard-scene {
+  display: grid; grid-template-columns: 2.2ch 1fr; gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+.storyboard-n { font: var(--fs-xs) var(--mono); color: var(--subtle); padding-top: 2px; }
+.storyboard-cap { font-weight: 600; font-size: var(--fs-sm); }
+.storyboard-nar { color: var(--ink-2); font-size: var(--fs-sm); line-height: 1.45; margin-top: 2px; }
+.storyboard-vis { color: var(--subtle); font: var(--fs-xs) var(--mono); margin-top: 4px; }
+
 .studio { height: 100%; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: var(--s3); padding: var(--s3); }
 .studio-use { align-self: center; font-size: var(--fs-xs); color: var(--subtle); }
 .studio-split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); align-items: start; }

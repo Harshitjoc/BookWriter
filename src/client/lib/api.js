@@ -160,6 +160,24 @@ export function fromSource(payload, { onLine, onStart, onPlan, signal } = {}) {
   return stream('/api/from-source', { keys: loadKeys(), ...payload }, { onLine, onStart, onPlan }, signal);
 }
 
+/* The saved plan for a book's video, or null when none has been saved. */
+export const getStoryboard = (book) => json(`/api/storyboard?book=${encodeURIComponent(book)}`);
+
+/* Save a storyboard only after the server's own validator accepts it. A bad
+ * plan is a plain HTTP error with the reasons, not a file on disk. */
+export const saveStoryboard = (book, storyboard) =>
+  json('/api/storyboard', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ book, storyboard }),
+  });
+
+/* Plan a video with a model. Same start/done shape as draft(). Nothing is
+ * written; the browser gets the storyboard and a person decides what to save. */
+export function storyboardPlan(payload, { onLine, onStart, signal } = {}) {
+  return stream('/api/storyboard/plan', { keys: loadKeys(), ...payload }, { onLine, onStart }, signal);
+}
+
 /* Runs a tool and streams its output back through onLine as it arrives, so the
    console fills in live rather than appearing all at once when it finishes.
    Resolves with { code, result }. */

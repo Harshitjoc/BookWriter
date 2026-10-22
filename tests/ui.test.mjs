@@ -89,6 +89,7 @@ await withServer(async (base) => {
         dashboard: ['measure', 'dashboard'], shots: ['measure', 'shots'],
         diagram: ['make', 'diagram'], draft: ['make', 'draft'],
         photo: ['make', 'assets'], 'from source': ['make', 'source'],
+        storyboard: ['film', 'storyboard'],
         export: ['ship', 'export'], publish: ['ship', 'publish'],
         console: ['system', 'console'], keys: ['system', 'keys'],
       };
@@ -474,6 +475,16 @@ await withServer(async (base) => {
       const meta2 = (await page.locator('.draft-meta').textContent()) || '';
       ok('an identical re-draft replays from the ledger, byte for byte',
         /replayed from the ledger/.test(meta2), meta2.replace(/\s+/g, ' ').slice(0, 80));
+
+      group('the storyboard panel plans before it films');
+      await pickTab('storyboard');
+      await page.waitForSelector('.storyboard .draft-form', { timeout: 15000 });
+      ok('the film group opens a real storyboard form',
+        await page.locator('.storyboard .draft-form select').count() >= 2);
+      ok('a source textarea sits under it',
+        await page.locator('.storyboard .storyboard-source').isVisible());
+      ok('nothing is planned or saved until a person asks',
+        /plan the video/.test(await page.locator('.storyboard .draft-actions button.mini.primary').first().textContent() || ''));
 
       /* -------------------------------------------------- panels and deleting.
          The side panels can be collapsed to hand the middle the whole width,

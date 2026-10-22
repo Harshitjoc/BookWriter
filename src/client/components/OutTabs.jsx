@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from 'react';
 const GROUPS = [
   { id: 'measure', label: 'measure', tools: ['check', 'board', 'dashboard', 'shots'] },
   { id: 'make', label: 'make', tools: ['diagram', 'draft', 'assets', 'source'] },
+  { id: 'film', label: 'film', tools: ['storyboard'] },
   { id: 'ship', label: 'ship', tools: ['export', 'publish'] },
   { id: 'system', label: 'system', tools: ['console', 'keys'] },
 ];
@@ -19,6 +20,7 @@ const GROUPS = [
 const LABEL = {
   check: 'check', board: 'board', dashboard: 'dashboard', shots: 'shots',
   diagram: 'diagram', draft: 'draft', assets: 'photo', source: 'from source',
+  storyboard: 'storyboard',
   export: 'export', publish: 'publish', console: 'console', keys: 'keys',
 };
 

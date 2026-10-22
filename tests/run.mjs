@@ -39,6 +39,7 @@ const SUITES = [
   { name: 'byok', file: path.join(HERE, 'byok.test.mjs') },
   { name: 'from-source', file: path.join(HERE, 'from-source.test.mjs') },
   { name: 'pages', file: path.join(HERE, 'pages.test.mjs') },
+  { name: 'storyboard', file: path.join(HERE, 'storyboard.test.mjs') },
   { name: 'draft', file: path.join(HERE, 'draft.test.mjs') },
   { name: 'motion', file: path.join(HERE, 'motion.test.mjs') },
   { name: 'figures', file: path.join(HERE, 'figures.test.mjs') },

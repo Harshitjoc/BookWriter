@@ -13,6 +13,7 @@
  *   templates.test.mjs  the scaffold catalog: every template copies, builds and
  *                    reads 0 mm through the same path the picker uses
  *   studio.test.mjs  the diagram studio and the board endpoints
+ *   video.test.mjs   a storyboard becomes an mp4 without touching the book
  *   ship.test.mjs    the publish gate, exporters and print-craft flags
  *   ui.test.mjs      the cockpit in a real browser, against a real built book
  *   regress.mjs      rebuild every committed book and compare book.html hashes
@@ -53,6 +54,7 @@ const SUITES = [
   { name: 'api', file: path.join(HERE, 'api.test.mjs') },
   { name: 'templates', file: path.join(HERE, 'templates.test.mjs') },
   { name: 'studio', file: path.join(HERE, 'studio.test.mjs') },
+  { name: 'video', file: path.join(HERE, 'video.test.mjs') },
   { name: 'ship', file: path.join(HERE, 'ship.test.mjs') },
   { name: 'ui', file: path.join(HERE, 'ui.test.mjs') },
   { name: 'regress', file: path.join(ROOT, 'src', 'engine', 'tools', 'regress.mjs') },

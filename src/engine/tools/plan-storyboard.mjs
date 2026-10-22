@@ -52,6 +52,9 @@ Visual kinds, and what each one needs:
   - "figure"    an engine-drawn figure. "figure": one of ${FIGURE_KINDS.join(', ')}.
   - "diagram"   an engine-drawn mechanism. "shape": one of ${DIAGRAM_KINDS.join(', ')}.
 
+A figure or diagram is drawn from its shape alone: the video does not put invented
+labels on it. When the exact words matter, use a "page" scene instead.
+
 Rules:
 - Open on a "title" scene. Close on the action or the point, not on a summary.
 - One idea per scene. Four to twelve scenes is a good video.

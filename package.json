@@ -8,6 +8,7 @@
     "build": "node src/engine/tools/build-book.mjs",
     "check": "node src/engine/tools/check.mjs",
     "shot": "node src/engine/tools/shot.mjs",
+    "video": "node src/engine/tools/make-video.mjs",
     "export": "node src/engine/tools/export.mjs",
     "image": "node src/engine/tools/gen-image.mjs",
     "ui": "node src/server/index.mjs",

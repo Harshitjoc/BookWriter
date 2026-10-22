@@ -1,6 +1,6 @@
 # src/engine/tools
 
-Five commands. Every one takes paths relative to the repo root, and every one carries a
+The commands. Every one takes paths relative to the repo root, and every one carries a
 full usage block at the top of its own file.
 
 One-time setup:
@@ -74,6 +74,21 @@ text: editable one word at a time, sharp at any size, free, and never spelled wr
 
 The prompt rules, and the shared style sentence that makes one book's photos look like
 one book, are in `.claude/skills/block/references/photo-blocks.md`.
+
+## Video
+
+| Tool | What it does | Run it |
+|---|---|---|
+| `make-video.mjs` | Reads `books/<slug>/storyboard.json` and makes an mp4: the title card, real book pages, and engine-drawn figures/diagrams; the local Windows voice reads the narration; the caption is burned in and written to `captions.srt`; ffmpeg joins the scenes. Writes only into `books/<slug>/video/` (gitignored) and never edits a page. | `node src/engine/tools/make-video.mjs books/<slug> [--out talk.mp4]` |
+
+`--silent` skips the voice and paces scenes from the word count, which is how the tests run.
+`--width 640` renders a quick look. `--no-captions` turns off both the burned line and the
+SRT. `--sfx` adds a generated transition sound under the voice (off by default: a book
+video should not make noise unless asked). The tool needs `ffmpeg` on `PATH`; the default
+voice is Windows SAPI, so use `--silent` elsewhere.
+
+An unlabelled figure or diagram is drawn from its shape alone. When the exact labels
+matter, use a `page` scene: the book page already has the right words on it.
 
 ## Flags worth knowing
 

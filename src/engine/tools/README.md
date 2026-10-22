@@ -90,6 +90,10 @@ voice is Windows SAPI, so use `--silent` elsewhere.
 An unlabelled figure or diagram is drawn from its shape alone. When the exact labels
 matter, use a `page` scene: the book page already has the right words on it.
 
+The cockpit's **film** tab runs this same tool against the saved plan. It shows the log
+scene by scene, serves the finished mp4 from the book's `video/` folder, and can cancel the
+render without leaving a browser or an encoder behind.
+
 ## Flags worth knowing
 
 ```

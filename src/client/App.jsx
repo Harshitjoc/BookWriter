@@ -12,6 +12,7 @@ import KeysPanel from './panels/KeysPanel.jsx';
 import FromSourcePanel from './panels/FromSourcePanel.jsx';
 import DiagramStudio from './panels/DiagramStudio.jsx';
 import StoryboardPanel from './panels/StoryboardPanel.jsx';
+import VideoPanel from './panels/VideoPanel.jsx';
 import BoardPanel from './panels/BoardPanel.jsx';
 import DashboardPanel from './panels/DashboardPanel.jsx';
 import ExportPanel from './panels/ExportPanel.jsx';
@@ -757,6 +758,9 @@ export default function App() {
             {tab === 'source' ? <FromSourcePanel onDone={() => reloadBooks()} /> : null}
             {tab === 'diagram' ? <DiagramStudio book={slug} onInsert={insertDiagram} /> : null}
             {tab === 'storyboard' ? <StoryboardPanel key={slug} book={slug} /> : null}
+            {tab === 'video' ? (
+              <VideoPanel key={slug} book={slug} onStoryboard={() => setTab('storyboard')} />
+            ) : null}
             {tab === 'board' ? <BoardPanel book={slug} onPickPage={goToSheet} /> : null}
             {tab === 'dashboard' ? <DashboardPanel book={slug} onPickPage={goToSheet} /> : null}
             {tab === 'export' ? <ExportPanel book={slug} onDone={reloadBooks} /> : null}

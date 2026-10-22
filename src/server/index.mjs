@@ -67,8 +67,9 @@ const MIME = {
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
   '.webp': 'image/webp', '.woff2': 'font/woff2', '.pdf': 'application/pdf',
-  '.epub': 'application/epub+zip',
+  '.epub': 'application/epub+zip', '.mp4': 'video/mp4',
   '.txt': 'text/plain; charset=utf-8', '.md': 'text/markdown; charset=utf-8',
+  '.srt': 'text/plain; charset=utf-8',
 };
 
 const json = (res, code, body) => {
@@ -145,11 +146,40 @@ async function serveRaw(req, res, urlPath) {
   try {
     const st = await fsp.stat(abs);
     if (st.isDirectory()) { res.writeHead(404).end('not found'); return; }
-    res.writeHead(200, {
-      'Content-Type': MIME[path.extname(abs).toLowerCase()] || 'application/octet-stream',
-      'Content-Length': st.size,
+    const type = MIME[path.extname(abs).toLowerCase()] || 'application/octet-stream';
+    const headers = {
+      'Content-Type': type,
       'Cache-Control': 'no-store',      // a rebuild must show up on reload
-    });
+      'Accept-Ranges': 'bytes',
+    };
+
+    /* A <video> asks for a byte range before it will seek. Without a 206 the
+       browser either downloads the whole film before starting or refuses to
+       scrub it, which makes the cockpit's own preview worse than the file. */
+    const range = req.headers.range;
+    if (range) {
+      const m = /^bytes=(\d*)-(\d*)$/.exec(range);
+      if (!m || (m[1] === '' && m[2] === '')) {
+        res.writeHead(416, { ...headers, 'Content-Range': `bytes */${st.size}` }).end();
+        return;
+      }
+      let start = m[1] === '' ? Math.max(0, st.size - Number(m[2])) : Number(m[1]);
+      let end = m[1] === '' || m[2] === '' ? st.size - 1 : Number(m[2]);
+      if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || start > end || start >= st.size) {
+        res.writeHead(416, { ...headers, 'Content-Range': `bytes */${st.size}` }).end();
+        return;
+      }
+      end = Math.min(end, st.size - 1);
+      res.writeHead(206, {
+        ...headers,
+        'Content-Length': end - start + 1,
+        'Content-Range': `bytes ${start}-${end}/${st.size}`,
+      });
+      fs.createReadStream(abs, { start, end }).pipe(res);
+      return;
+    }
+
+    res.writeHead(200, { ...headers, 'Content-Length': st.size });
     fs.createReadStream(abs).pipe(res);
   } catch {
     res.writeHead(404, { 'Content-Type': 'text/plain' }).end('not found: ' + rel);
@@ -237,6 +267,40 @@ function toolFor(name, book, args) {
     case 'shot': {
       const target = args?.edition ? path.join(dir, `book-${args.edition}.html`) : bookHtml;
       return { a: ['shot.mjs', target], cwd: ROOT, label: `shot ${path.relative(ROOT, target)}` };
+    }
+    /* The film tool reads the saved plan and writes only into the book's
+       gitignored video/ folder. The cockpit never passes a path: the output
+       is always books/<slug>/video/<slug>.mp4, so a request cannot ask the
+       child to write anywhere else. Numbers are checked here so a typo is a
+       400 with a reason, not a Playwright timeout halfway through a render. */
+    case 'video': {
+      const a = ['make-video.mjs', dir];
+      if (args?.silent) a.push('--silent');
+      if (args?.captions === false) a.push('--no-captions');
+      if (args?.sfx) a.push('--sfx');
+      if (args?.width != null && args.width !== '') {
+        const w = Number(args.width);
+        if (!Number.isInteger(w) || w < 160 || w > 3840) {
+          return { error: 'width must be a whole number from 160 to 3840' };
+        }
+        a.push('--width', String(w));
+      }
+      if (args?.fps != null && args.fps !== '') {
+        const f = Number(args.fps);
+        if (!Number.isInteger(f) || f < 1 || f > 60) {
+          return { error: 'fps must be a whole number from 1 to 60' };
+        }
+        a.push('--fps', String(f));
+      }
+      if (args?.voice != null && String(args.voice).trim()) {
+        const v = String(args.voice).trim();
+        if (v.length > 80 || /[\r\n]/.test(v)) return { error: 'voice must be a single voice name' };
+        a.push('--voice', v);
+      }
+      return {
+        a, cwd: ROOT,
+        label: `video ${book}${args?.silent ? ' --silent' : ''}`,
+      };
     }
     case 'export': {
       const target = args?.edition ? path.join(dir, `book-${args.edition}.html`) : bookHtml;
@@ -694,7 +758,6 @@ function handleRun(req, res, url) {
       'X-Accel-Buffering': 'no',
     });
     const send = (event, data) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
-    send('start', { label: spec.label, tool: args.tool, book: slug });
 
     const child = spawn(process.execPath, [path.join(TOOLS, spec.a[0]), ...spec.a.slice(1)], {
       cwd: spec.cwd,
@@ -706,6 +769,10 @@ function handleRun(req, res, url) {
     });
     const id = String(child.pid);
     running.set(id, { child, slug, tool: args.tool });
+    /* The id has to reach the browser: without it the cancel button had
+       nothing to name, so cancelling a long film only stopped listening while
+       the render kept going. Spawn first, then announce. */
+    send('start', { id, label: spec.label, tool: args.tool, book: slug });
 
     let out = '';
     const pump = (stream, kind) => {
@@ -924,7 +991,18 @@ async function handleApi(req, res, url) {
     const r = running.get(id);
     if (!r) return json(res, 200, { ok: false });
     r.controller?.abort();
-    if (r.child) r.child.kill();
+    if (r.child) {
+      /* A film is node -> playwright/ffmpeg. Killing only the node child leaves
+         the browser or the encoder running, so on Windows take the tree. */
+      if (process.platform === 'win32' && r.child.pid) {
+        const k = spawn('taskkill', ['/pid', String(r.child.pid), '/T', '/F'], {
+          windowsHide: true, stdio: 'ignore',
+        });
+        k.on('error', () => { try { r.child.kill(); } catch { /* already gone */ } });
+      } else {
+        r.child.kill();
+      }
+    }
     running.delete(id);
     return json(res, 200, { ok: true });
   }

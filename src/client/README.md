@@ -119,13 +119,18 @@ folders deep" rule intact: `/preview/books/showcase/book.html` resolves `../../s
 `/preview/src/engine/`, which is on disk exactly as authored.
 
 `/api/run` is a POST returning `text/event-stream`. Events are `start`, `line` and `done`;
-`done` carries the exit code and, for `check`, the parsed `--json` result. It drives every
-tool the cockpit runs: `build` (with the craft flags), `check`, `shot`, `export`, `epub`,
-`web`, `card` and `publish`.
+`start` carries the child's pid so the cancel button has something to stop, `done` carries
+the exit code and, for `check`, the parsed `--json` result. It drives every tool the
+cockpit runs: `build` (with the craft flags), `check`, `shot`, `export`, `epub`, `web`,
+`card`, `publish` and `video`.
+
+`/preview/*` honors a single byte range. A `<video>` needs a 206 before it will seek, so
+the film panel can scrub the mp4 it just made instead of downloading it whole.
 
 The read side is plain JSON: `/api/books`, `/api/file`, `/api/providers`, `/api/health`,
 plus the cockpit's `/api/board` (the page map + dashboard totals + artifact flags),
-`/api/facts` (the open-fact ledger), `/api/diagram` and `/api/diagram/example` (the studio).
+`/api/facts` (the open-fact ledger), `/api/diagram` and `/api/diagram/example` (the studio),
+and `/api/storyboard` (the saved video plan, validated against the built page count).
 
 ## Safety
 

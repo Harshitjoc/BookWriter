@@ -126,6 +126,28 @@ await withServer(async (base) => {
     !!box && Math.abs(mm(box[1]) - 176) < TOL && Math.abs(mm(box[2]) - 250) < TOL,
     box ? `${box[1]} x ${box[2]} pt = ${mm(box[1]).toFixed(1)} x ${mm(box[2]).toFixed(1)} mm` : 'no MediaBox found');
 
+  group('the video tool is fenced and wired');
+  const badWidth = await readSSE(base, '/api/run', {
+    tool: 'video', book: 'uitest', width: 9,
+  });
+  ok('an absurd width is a plain 400', badWidth.status === 400 && /width/.test(badWidth.error || ''),
+    badWidth.error);
+
+  /* No storyboard has been saved for this scratch book, so the child must say
+     that and stop. It must not leave a half-written film behind. */
+  const noPlan = await readSSE(base, '/api/run', {
+    tool: 'video', book: 'uitest', silent: true, width: 320,
+  });
+  const videoStart = noPlan.events.find((e) => e.event === 'start');
+  const videoDone = noPlan.events.find((e) => e.event === 'done');
+  const videoLines = noPlan.events.filter((e) => e.event === 'line').map((e) => e.data.text).join('\n');
+  ok('a film without a plan is a failed run, not a crash',
+    noPlan.status === 200 && videoDone?.data.code !== 0, `exit ${videoDone?.data.code}`);
+  ok('the run announces an id the browser can cancel', !!videoStart?.data.id);
+  ok('the failure says a plan is needed', /storyboard|plan/i.test(videoLines),
+    videoLines.replace(/\s+/g, ' ').slice(0, 90));
+  ok('no film was written', !fs.existsSync(path.join(ROOT, 'books', 'uitest', 'video', 'uitest.mp4')));
+
   group('editions');
   const free = await runTool(base, 'build', 'showcase', 'free');
   ok('edition build exits 0', free.code === 0, free.lines[0]);

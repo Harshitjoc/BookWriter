@@ -89,7 +89,7 @@ await withServer(async (base) => {
         dashboard: ['measure', 'dashboard'], shots: ['measure', 'shots'],
         diagram: ['make', 'diagram'], draft: ['make', 'draft'],
         photo: ['make', 'assets'], 'from source': ['make', 'source'],
-        storyboard: ['film', 'storyboard'],
+        storyboard: ['film', 'storyboard'], video: ['film', 'video'],
         export: ['ship', 'export'], publish: ['ship', 'publish'],
         console: ['system', 'console'], keys: ['system', 'keys'],
       };
@@ -485,6 +485,72 @@ await withServer(async (base) => {
         await page.locator('.storyboard .storyboard-source').isVisible());
       ok('nothing is planned or saved until a person asks',
         /plan the video/.test(await page.locator('.storyboard .draft-actions button.mini.primary').first().textContent() || ''));
+
+      group('the video panel films a saved plan');
+      /* Seeded directly on disk: the planner is tested in storyboard.test, and
+         the film panel's job is to consume a saved plan, not to write one. */
+      fs.writeFileSync(path.join(ROOT, 'books', 'uitest', 'storyboard.json'),
+        JSON.stringify({
+          title: 'A short test film',
+          aspect: '16:9', fps: 30, voice: 'auto', music: 'none',
+          scenes: [
+            { id: 'open', narration: 'This is how a short book film opens on the page.', caption: 'A short book film.', visual: { kind: 'title' }, holdMs: 300, transition: 'cut' },
+            { id: 'page', narration: 'The book page is photographed exactly as it prints.', caption: 'The real page.', visual: { kind: 'page', page: 5 }, holdMs: 300, transition: 'fade' },
+            { id: 'close', narration: 'And the film ends on a title card, not a stock clip.', caption: 'The end.', visual: { kind: 'title' }, holdMs: 300, transition: 'cut' },
+          ],
+        }, null, 2) + '\n');
+
+      const interiorBeforeFilm = fs.readFileSync(path.join(ROOT, 'books', 'uitest', 'uitest.html'), 'utf8');
+      await pickTab('video');
+      await page.waitForSelector('.video .draft-actions button.mini.primary', { timeout: 15000 });
+      ok('the panel reads the saved plan',
+        /A short test film/.test(await page.locator('.video .draft-report').textContent() || ''));
+      ok('nothing is filmed until a person asks', (await page.locator('.video .video-out').count()) === 0);
+      ok('the voice is on by default', await page.locator('.video-opts input').first().isChecked());
+
+      await page.locator('.video-opts .chip-ck').filter({ hasText: 'voice' }).locator('input').uncheck();
+      await page.locator('.video-width select').selectOption('320');
+      await page.locator('.video .draft-actions button.mini.primary').click();
+      await page.waitForSelector('.video .video-out', { timeout: 180000 });
+
+      const filmFile = path.join(ROOT, 'books', 'uitest', 'video', 'uitest.mp4');
+      ok('the mp4 is on disk', fs.existsSync(filmFile) && fs.statSync(filmFile).size > 1000,
+        fs.existsSync(filmFile) ? `${fs.statSync(filmFile).size} bytes` : 'missing');
+      ok('filming did not edit the book',
+        fs.readFileSync(path.join(ROOT, 'books', 'uitest', 'uitest.html'), 'utf8') === interiorBeforeFilm);
+
+      const media = await page.evaluate(async () => {
+        const r = await fetch('/preview/books/uitest/video/uitest.mp4', { headers: { Range: 'bytes=0-99' } });
+        const buf = await r.arrayBuffer();
+        return {
+          status: r.status,
+          type: r.headers.get('content-type'),
+          range: r.headers.get('content-range'),
+          bytes: buf.byteLength,
+        };
+      });
+      ok('the cockpit serves the film as video', media.status === 206 && media.type === 'video/mp4',
+        `${media.status} ${media.type}`);
+      ok('the film can seek', /^bytes 0-99\//.test(media.range || '') && media.bytes === 100,
+        `${media.range} (${media.bytes} bytes)`);
+
+      const srt = await page.evaluate(async () => {
+        const r = await fetch('/preview/books/uitest/video/captions.srt');
+        return { status: r.status, type: r.headers.get('content-type'), text: await r.text() };
+      });
+      ok('the captions sit next to the film', srt.status === 200 && /A short book film\./.test(srt.text),
+        `${srt.status} ${srt.type}`);
+
+      const filmLog = await page.locator('.video .video-log').textContent() || '';
+      ok('the log names every scene', /scene 3/.test(filmLog),
+        filmLog.replace(/\s+/g, ' ').slice(-80));
+      const duration = await page.locator('.video .video-out').evaluate((v) => new Promise((res) => {
+        if (v.readyState >= 1) return res(v.duration);
+        v.addEventListener('loadedmetadata', () => res(v.duration), { once: true });
+        v.addEventListener('error', () => res(0), { once: true });
+        setTimeout(() => res(0), 10000);
+      }));
+      ok('the browser reads a real duration', duration > 1, `${Number(duration).toFixed(1)}s`);
 
       /* -------------------------------------------------- panels and deleting.
          The side panels can be collapsed to hand the middle the whole width,

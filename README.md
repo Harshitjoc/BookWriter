@@ -126,7 +126,7 @@ One window with the source files on the left and the **real built book** on the
 right, a button each for build / check / shot / export, the check table, the shot gallery,
 and the tool's own output as it runs. It can also scaffold a new book for you.
 
-Two more tabs in the same window:
+The other tabs cover the rest of the work:
 
 - **Draft.** Ask a model for one page, in your book's voice, and watch it arrive. It
   chooses the provider, streams the page, and then checks it against the real contract
@@ -134,11 +134,33 @@ Two more tabs in the same window:
   click, and adding the page's title to a part stays a human edit in `book.json`.
 - **Photo.** Generate the photograph for a page that wants one, via the same
   `gen-image.mjs` the command line uses.
+- **Diagram.** Compile one of the engine's own shapes and insert it as inline SVG.
+- **Storyboard.** Plan a video scene by scene: what is shown, what is spoken, and which
+  page, figure or diagram is behind it.
+- **Video.** Film the saved plan with the local voice and burned-in captions. It writes
+  only to the book's gitignored `video/` folder.
+- **Measure and ship.** Check, shots, the board, the dashboard, export and publish run
+  the same tools as the command line.
 
 It is not a different engine. Every button runs the same `npm run` script you would have
 typed, the preview is the actual `book.html` served off disk, and nothing in
 `src/engine/tools/` knows the UI exists. If you delete `src/client/`, you lose the window, not
 the book. Details in [`src/client/`](src/client/).
+
+## A film from the same pages
+
+A book can also become a short film. Plan it once in `books/<slug>/storyboard.json` (the
+cockpit's **storyboard** tab can draft and save one), then:
+
+```bash
+node src/engine/tools/make-video.mjs books/<slug>
+```
+
+The tool photographs the real pages, draws engine figures and diagrams, reads the
+narration with the local Windows voice, burns in the captions, and writes
+`books/<slug>/video/<slug>.mp4` plus `captions.srt`. It never edits a page. Use `--silent`
+on macOS or Linux, or whenever you want the film paced by the words instead of a voice.
+`ffmpeg` must be on `PATH`; `--width 640` is a quick preview.
 
 ## From source, one command
 
@@ -195,10 +217,11 @@ a silently wrong sentence. `--archetype` picks the page's shape: `standard`,
 npm test
 ```
 
-Runs six suites: the provider layer, formats and themes, the page contract and drafter,
-the HTTP surface, a real-browser suite, and a regression gate that rebuilds every
-committed book and compares `sha256(book.html)` against `src/engine/tools/baseline.json`. If a
-hash moves, you changed the books that already exist — review it, then
+Runs the full suite: providers, formats and themes, the page contract and drafter,
+storyboards and video, motion, figures, print craft, export, publish, templates, the HTTP
+surface, a real-browser suite, and a regression gate that rebuilds every committed book
+and compares `sha256(book.html)` against `src/engine/tools/baseline.json`. If a hash moves,
+you changed the books that already exist. Review it, then
 `node src/engine/tools/regress.mjs --update`.
 
 ---

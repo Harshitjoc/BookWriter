@@ -57,6 +57,9 @@ export default function VideoPanel({ book, onStoryboard }) {
         setBoard(saved?.storyboard || null);
         setValidation(saved?.validation || null);
         setPages(saved?.pages ?? null);
+        if (saved?.video?.bytes) {
+          setOut({ at: saved.video.at, captions: !!saved.video.captions });
+        }
       })
       .catch((e) => { if (live) setLoadError(e.message); });
     return () => { live = false; };

@@ -263,8 +263,10 @@ are cheap and tell you the truth about looking right. Only then is the PDF worth
 
 ## The cockpit
 
-`npm run ui` gives you the same five steps as buttons, plus the four source files in an
+`npm run ui` gives you the same steps as buttons, plus the four source files in an
 editor, a live preview of the real built book, the check table, and the shot gallery.
+Draft, photo, diagram, storyboard, video, board, dashboard, export and publish all run
+the same engine tools. The video panel can film a saved plan and play the mp4 it makes.
 
 It is not a second engine. Every button runs the `npm run` script above, the preview is the
 actual `book.html` served off disk, and `book.html` is still generated-only — the UI refuses

@@ -552,6 +552,16 @@ await withServer(async (base) => {
       }));
       ok('the browser reads a real duration', duration > 1, `${Number(duration).toFixed(1)}s`);
 
+      const filmOnDisk = await page.evaluate(async () => (await fetch('/api/storyboard?book=uitest')).json());
+      ok('the plan reports the film and its captions on disk',
+        filmOnDisk.video?.bytes > 1000 && filmOnDisk.video?.captions === true,
+        JSON.stringify(filmOnDisk.video));
+      await pickTab('check');
+      await pickTab('video');
+      await page.waitForSelector('.video .video-out', { timeout: 15000 });
+      ok('reopening the panel keeps the film on screen',
+        (await page.locator('.video .video-out').count()) === 1);
+
       /* -------------------------------------------------- panels and deleting.
          The side panels can be collapsed to hand the middle the whole width,
          and dragged to a size the reader picks. And a project can be deleted

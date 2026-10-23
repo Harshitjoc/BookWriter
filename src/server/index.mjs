@@ -736,6 +736,32 @@ function handleFromSource(req, res) {
   });
 }
 
+/* A tool can be a tree: make-video runs ffmpeg and a browser, shot runs a
+ * browser. Killing only the node child leaves those grandchildren writing into
+ * the book after the cockpit says "cancelled". On Windows taskkill owns the
+ * tree; elsewhere the child is its own process group, so the group is the
+ * tree. The SIGKILL fallback covers an encoder that ignores SIGTERM. */
+function stopTree(child) {
+  if (!child?.pid) return;
+  if (process.platform === 'win32') {
+    const k = spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], {
+      windowsHide: true, stdio: 'ignore',
+    });
+    k.on('error', () => { try { child.kill(); } catch { /* already gone */ } });
+    return;
+  }
+  try {
+    process.kill(-child.pid, 'SIGTERM');
+  } catch {
+    try { child.kill(); } catch { /* already gone */ }
+    return;
+  }
+  const hard = setTimeout(() => {
+    try { process.kill(-child.pid, 'SIGKILL'); } catch { /* already gone */ }
+  }, 2000);
+  hard.unref?.();
+}
+
 function handleRun(req, res, url) {
   let body = '';
   req.on('data', (d) => {
@@ -766,6 +792,9 @@ function handleRun(req, res, url) {
          other or the rest of the process. */
       env: mergeEnv(process.env, args.keys),
       windowsHide: true,
+      /* POSIX only: a new process group is what makes stopTree able to reach
+         ffmpeg and the browser. Windows uses taskkill instead. */
+      detached: process.platform !== 'win32',
     });
     const id = String(child.pid);
     running.set(id, { child, slug, tool: args.tool });
@@ -903,11 +932,24 @@ async function handleApi(req, res, url) {
       if (!b) return fail(res, 404, `no such book: ${querySlug}`);
       const file = path.join(b.dir, 'storyboard.json');
       const pages = bookPageCount(b);
+
+      /* A film is made output, not source. Reporting it here lets the panel
+         show the film that is already on disk after a reload, instead of
+         pretending the reader has to render it again to see it. */
+      let video = null;
+      try {
+        const film = path.join(b.dir, 'video', `${querySlug}.mp4`);
+        const st = await fsp.stat(film);
+        let captions = false;
+        try { await fsp.stat(path.join(b.dir, 'video', 'captions.srt')); captions = true; } catch { /* none */ }
+        video = { bytes: st.size, at: Math.round(st.mtimeMs), captions };
+      } catch { /* no film yet */ }
+
       let raw;
       try { raw = await fsp.readFile(file, 'utf8'); }
       catch (e) {
         if (e.code === 'ENOENT') {
-          return json(res, 200, { book: querySlug, storyboard: null, validation: null, pages });
+          return json(res, 200, { book: querySlug, storyboard: null, validation: null, pages, video });
         }
         return fail(res, 500, `could not read storyboard.json: ${e.message}`);
       }
@@ -919,6 +961,7 @@ async function handleApi(req, res, url) {
         storyboard: board,
         validation: validateStoryboard(board, { bookPages: pages }),
         pages,
+        video,
       });
     }
 
@@ -991,18 +1034,7 @@ async function handleApi(req, res, url) {
     const r = running.get(id);
     if (!r) return json(res, 200, { ok: false });
     r.controller?.abort();
-    if (r.child) {
-      /* A film is node -> playwright/ffmpeg. Killing only the node child leaves
-         the browser or the encoder running, so on Windows take the tree. */
-      if (process.platform === 'win32' && r.child.pid) {
-        const k = spawn('taskkill', ['/pid', String(r.child.pid), '/T', '/F'], {
-          windowsHide: true, stdio: 'ignore',
-        });
-        k.on('error', () => { try { r.child.kill(); } catch { /* already gone */ } });
-      } else {
-        r.child.kill();
-      }
-    }
+    if (r.child) stopTree(r.child);
     running.delete(id);
     return json(res, 200, { ok: true });
   }
@@ -1297,7 +1329,7 @@ server.listen(PORT, HOST, () => {
 
 for (const sig of ['SIGINT', 'SIGTERM']) {
   process.on(sig, async () => {
-    for (const { child } of running.values()) child.kill();
+    for (const { child } of running.values()) if (child) stopTree(child);
     await vite.close();
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(0), 1500);

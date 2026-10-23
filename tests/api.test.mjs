@@ -127,6 +127,9 @@ await withServer(async (base) => {
     box ? `${box[1]} x ${box[2]} pt = ${mm(box[1]).toFixed(1)} x ${mm(box[2]).toFixed(1)} mm` : 'no MediaBox found');
 
   group('the video tool is fenced and wired');
+  const noFilm = await (await fetch(`${base}/api/storyboard?book=uitest`)).json();
+  ok('the plan reports no film before one is made', noFilm.video === null);
+
   const badWidth = await readSSE(base, '/api/run', {
     tool: 'video', book: 'uitest', width: 9,
   });
